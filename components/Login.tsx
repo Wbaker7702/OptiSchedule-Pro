@@ -41,7 +41,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div className="inline-flex items-center justify-center p-4 bg-slate-800 rounded-2xl mb-6 shadow-xl border border-slate-700">
             <Activity className="w-10 h-10 text-blue-500" />
           </div>
-          <h1 className="text-xl font-black text-white mb-2 tracking-[0.1em] uppercase">OptiSchedule Pro</h1>
+          <h1 className="text-xl font-black text-white mb-2 tracking-[0.1em] uppercase">{BRAND_NAME}</h1>
           <p className="text-slate-400 text-xs font-mono uppercase tracking-widest">Workforce Management v3.1</p>
         </div>
 
@@ -111,9 +111,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </form>
 
           <div className="mt-8 pt-6 border-t border-slate-800">
-            <div className="flex items-center justify-center gap-2 text-[10px] text-slate-600 font-mono font-bold uppercase tracking-widest">
-              <ShieldAlert className="w-3 h-3" />
-              <span>Sentinel Security Standard • {APP_VERSION}</span>
+            <div className="flex flex-col items-center justify-center gap-2 text-[10px] text-slate-600 font-mono font-bold uppercase tracking-widest">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-3 h-3" />
+                <span>Sentinel Security Standard • {APP_VERSION}</span>
+              </div>
+              <span className="text-[8px] text-slate-700 mt-1">© 2026 {BRAND_NAME} All Rights Reserved</span>
             </div>
           </div>
         </div>

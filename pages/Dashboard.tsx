@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="flex-1 bg-slate-950 overflow-auto">
-      <Header title="Strategic Command Oversight" subtitle={`OptiSchedule Pro ${APP_VERSION} • Sentinel Protected`} />
+      <Header title="Strategic Command Oversight" subtitle={`${BRAND_NAME} ${APP_VERSION} • Sentinel Protected`} />
       
       <div className="p-8 max-w-7xl mx-auto space-y-6">
         

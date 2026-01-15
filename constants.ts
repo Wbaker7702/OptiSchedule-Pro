@@ -2,9 +2,9 @@ import { Employee, Product, HeatmapDataPoint, DepartmentMetric } from './types';
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
-export const DATE_STRING = "Saturday, December 13, 2025";
+export const DATE_STRING = "Thursday, January 15, 2026";
 export const APP_VERSION = "v3.2.0-Sentinel-Hub";
-export const BRAND_NAME = "OptiSchedule Pro";
+export const BRAND_NAME = "OptiSchedule Pro®";
 
 export const SYSTEM_HEALTH = {
   status: 'Hardened',
