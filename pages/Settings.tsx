@@ -76,7 +76,7 @@ const Settings: React.FC = () => {
 
   return (
     <div className="flex-1 bg-gray-50 overflow-auto">
-      <Header title="System Configuration" subtitle={`OptiSchedule Pro ${APP_VERSION} • Sentinel Security Node`} />
+      <Header title="System Configuration" subtitle={`${BRAND_NAME} ${APP_VERSION} • Sentinel Security Node`} />
       
       <div className="p-8 max-w-5xl mx-auto space-y-8">
         
