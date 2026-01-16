@@ -15,6 +15,14 @@ export const SYSTEM_HEALTH = {
   syncCycle: 'Real-time (SSP Enabled)'
 };
 
+export const Q4_METRICS = {
+  revenue: 1250000,
+  leakageRecovered: 45000,
+  roi: 11.2,
+  topPerformingStore: "5065",
+  complianceScore: 98.5
+};
+
 export const FISCAL_METRICS = {
   avgPayRate: 14.00,
   targetWeeklyHoursRecapture: 186,
