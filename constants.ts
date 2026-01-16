@@ -1,4 +1,4 @@
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, KpiMetric } from './types';
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
@@ -22,6 +22,37 @@ export const Q4_METRICS = {
   topPerformingStore: "5065",
   complianceScore: 98.5
 };
+
+export const KPI_METRICS: KpiMetric[] = [
+  {
+    name: 'Schedule Accuracy',
+    currentValue: '96.4%',
+    targetValue: '97%',
+    trend: 'up',
+    status: 'on_track'
+  },
+  {
+    name: 'Labor Forecast Variance',
+    currentValue: '2.8%',
+    targetValue: '2.5%',
+    trend: 'down',
+    status: 'watch'
+  },
+  {
+    name: 'Integration SLA',
+    currentValue: '99.92%',
+    targetValue: '99.9%',
+    trend: 'steady',
+    status: 'on_track'
+  },
+  {
+    name: 'Audit Readiness',
+    currentValue: '93%',
+    targetValue: '95%',
+    trend: 'up',
+    status: 'critical'
+  }
+];
 
 export const FISCAL_METRICS = {
   avgPayRate: 14.00,
