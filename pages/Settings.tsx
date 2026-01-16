@@ -4,7 +4,6 @@ import {
   Shield, 
   Database, 
   Eye, 
-  Bell, 
   RefreshCw, 
   Lock, 
   Save, 
@@ -15,7 +14,7 @@ import {
   Layers,
   Link as LinkIcon
 } from 'lucide-react';
-import { APP_VERSION } from '../constants';
+import { APP_VERSION, BRAND_NAME } from '../constants';
 import { useSecurity, SecurityLevel, Environment, SyncFrequency } from '../contexts/SecurityContext';
 
 type SettingsSection = 'security' | 'erp' | 'visual' | 'alerts';
@@ -26,7 +25,6 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ highContrast, setHighContrast }) => {
-const Settings: React.FC = () => {
   const {
     securityLevel,
     setSecurityLevel,
@@ -46,15 +44,8 @@ const Settings: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [hubspotLoading, setHubspotLoading] = useState(false);
-  
-  // Sentinel Configuration
-  const [securityLevel, setSecurityLevel] = useState('High');
-  const [sessionTimeout, setSessionTimeout] = useState('30');
-  const [autoRemediate, setAutoRemediate] = useState(true);
-  
-  // Interface Configuration
+
   // Interface Configuration (kept local for now as it's UI only)
-  const [highContrast, setHighContrast] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   const handleSave = () => {
