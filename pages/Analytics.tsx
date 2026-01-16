@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell } from 'recharts';
-import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, Loader2 } from 'lucide-react';
-import { FISCAL_METRICS } from '../constants';
+import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { FISCAL_METRICS, Q4_METRICS } from '../constants';
 
 const laborPivotData = [
   { week: 'W1', leakage: 186, recovered: 0 },
@@ -103,6 +103,46 @@ const Analytics: React.FC = () => {
                Cumulative ROI through Scale
              </div>
           </div>
+        </div>
+
+        {/* Q4 Performance Review */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full opacity-50 -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+           <div className="flex items-center justify-between mb-6 relative z-10">
+              <div>
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  Q4 2025 Performance Review
+                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] uppercase tracking-wider font-bold">New</span>
+                </h3>
+                <p className="text-xs text-gray-500">Fiscal Quarter Analysis & Key Outcomes</p>
+              </div>
+              <div className="flex gap-2">
+                 <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold shadow-sm">Completed</span>
+                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold shadow-sm">Audited</span>
+              </div>
+           </div>
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
+              <div className="p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-default">
+                 <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Revenue</p>
+                 <p className="text-xl font-bold text-gray-900 mt-1">${(Q4_METRICS.revenue / 1000000).toFixed(2)}M</p>
+                 <p className="text-xs text-green-600 mt-1 flex items-center font-medium"><TrendingUp className="w-3 h-3 mr-1" /> +15% vs Q3</p>
+              </div>
+              <div className="p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-default">
+                 <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Leakage Recovered</p>
+                 <p className="text-xl font-bold text-gray-900 mt-1">${(Q4_METRICS.leakageRecovered / 1000).toFixed(1)}k</p>
+                 <p className="text-xs text-green-600 mt-1 flex items-center font-medium"><CheckCircle2 className="w-3 h-3 mr-1" /> 100% Target</p>
+              </div>
+              <div className="p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-default">
+                 <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Q4 ROI</p>
+                 <p className="text-xl font-bold text-blue-600 mt-1">{Q4_METRICS.roi}x</p>
+                 <p className="text-xs text-gray-500 mt-1 font-medium">Efficiency Ratio</p>
+              </div>
+              <div className="p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-default">
+                 <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Compliance</p>
+                 <p className="text-xl font-bold text-gray-900 mt-1">{Q4_METRICS.complianceScore}%</p>
+                 <p className="text-xs text-gray-500 mt-1 font-medium">Store Average</p>
+              </div>
+           </div>
         </div>
 
         {/* Charts Row */}
