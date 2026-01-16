@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell } from 'recharts';
-import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, Loader2, CheckCircle2 } from 'lucide-react';
-import { FISCAL_METRICS, Q4_METRICS } from '../constants';
+import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, ArrowDownRight, Minus, Loader2, CheckCircle2 } from 'lucide-react';
+import { FISCAL_METRICS, KPI_METRICS, Q4_METRICS } from '../constants';
+import { KpiMetric } from '../types';
 
 const laborPivotData = [
   { week: 'W1', leakage: 186, recovered: 0 },
@@ -25,6 +26,59 @@ const reports = [
   { id: 'rep-2', name: 'Resource Reallocation Plan (Store Mgr)', date: 'Dec 10, 2025', size: '845 KB' },
   { id: 'rep-3', name: 'Store 5065 Pilot Proof of Concept', date: 'Dec 01, 2025', size: '2.4 MB' },
 ];
+
+const statusConfig = {
+  on_track: {
+    label: 'On Track',
+    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    dot: 'bg-emerald-500'
+  },
+  watch: {
+    label: 'Watch',
+    badge: 'bg-amber-50 text-amber-700 border-amber-200',
+    dot: 'bg-amber-500'
+  },
+  critical: {
+    label: 'Critical',
+    badge: 'bg-rose-50 text-rose-700 border-rose-200',
+    dot: 'bg-rose-500'
+  }
+};
+
+const trendConfig = {
+  up: { label: 'Improving', icon: ArrowUpRight, color: 'text-emerald-600' },
+  down: { label: 'Declining', icon: ArrowDownRight, color: 'text-rose-600' },
+  steady: { label: 'Stable', icon: Minus, color: 'text-slate-500' }
+};
+
+const KpiCard: React.FC<{ kpi: KpiMetric }> = ({ kpi }) => {
+  const StatusIcon = trendConfig[kpi.trend].icon;
+
+  return (
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-gray-900">{kpi.name}</p>
+          <p className="text-xs text-gray-400 mt-1">Target: {kpi.targetValue}</p>
+        </div>
+        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${statusConfig[kpi.status].badge}`}>
+          <span className={`h-2 w-2 rounded-full ${statusConfig[kpi.status].dot}`} />
+          {statusConfig[kpi.status].label}
+        </span>
+      </div>
+      <div className="mt-4 flex items-center justify-between">
+        <div>
+          <p className="text-2xl font-bold text-gray-900">{kpi.currentValue}</p>
+          <p className="text-xs text-gray-400">Current</p>
+        </div>
+        <div className={`flex items-center gap-1 text-xs font-semibold ${trendConfig[kpi.trend].color}`}>
+          <StatusIcon className="w-4 h-4" />
+          {trendConfig[kpi.trend].label}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Analytics: React.FC = () => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -55,6 +109,21 @@ const Analytics: React.FC = () => {
       <Header title="Analytics & Reports" subtitle="The Fiscal Foundation: Efficiency vs. Leakage" />
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
+
+        {/* KPI Health Grid */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">KPI Health Snapshot</h2>
+              <p className="text-xs text-gray-500">Operational signals aligned to strategic targets.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+            {KPI_METRICS.map((kpi) => (
+              <KpiCard key={kpi.name} kpi={kpi} />
+            ))}
+          </div>
+        </div>
         
         {/* The Scaling Formula Header */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

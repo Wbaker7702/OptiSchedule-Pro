@@ -46,3 +46,14 @@ export interface DepartmentMetric {
   extraMetricValue: string;
   waitTime: string;
 }
+
+export type KpiTrend = 'up' | 'down' | 'steady';
+export type KpiStatus = 'on_track' | 'watch' | 'critical';
+
+export interface KpiMetric {
+  name: string;
+  currentValue: string;
+  targetValue: string;
+  trend: KpiTrend;
+  status: KpiStatus;
+}
