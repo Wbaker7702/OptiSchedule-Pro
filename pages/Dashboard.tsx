@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import StatCard from '../components/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2 } from 'lucide-react';
-import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA } from '../constants';
+import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA, ENTERPRISE_COMPLIANCE } from '../constants';
 
 const data = [
   { time: '8 AM', value: 40 },
@@ -279,6 +279,71 @@ const Dashboard: React.FC = () => {
                  </button>
               </div>
            </div>
+        </div>
+
+        <div className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div>
+              <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                Enterprise Compliance Readiness
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-2 max-w-2xl">
+                Compliance controls are continuously monitored to shorten procurement cycles and prove enterprise readiness
+                at every audit checkpoint.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {ENTERPRISE_COMPLIANCE.certifications.map(cert => (
+                <span
+                  key={cert.name}
+                  className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border ${
+                    cert.status === 'Certified'
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                      : 'bg-blue-500/10 text-blue-300 border-blue-500/30'
+                  }`}
+                >
+                  {cert.name}: {cert.status}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Audit Readiness</p>
+              <p className="text-xs text-slate-200 leading-relaxed">{ENTERPRISE_COMPLIANCE.auditReadiness}</p>
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
+                <span>Last Audit</span>
+                <span className="text-slate-200">{ENTERPRISE_COMPLIANCE.lastAuditDate}</span>
+              </div>
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
+                <span>Next Review</span>
+                <span className="text-slate-200">{ENTERPRISE_COMPLIANCE.nextReviewDate}</span>
+              </div>
+            </div>
+
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Data Residency</p>
+              <p className="text-xs text-slate-200 leading-relaxed">{ENTERPRISE_COMPLIANCE.dataResidency}</p>
+              <div className="flex items-center gap-2 text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                <Globe className="w-3 h-3 text-blue-500" />
+                Regional containment verified
+              </div>
+            </div>
+
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Encryption Standards</p>
+              <ul className="space-y-2">
+                {ENTERPRISE_COMPLIANCE.encryptionStandards.map(standard => (
+                  <li key={standard} className="flex items-center gap-2 text-xs text-slate-200">
+                    <Lock className="w-3 h-3 text-emerald-400" />
+                    {standard}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>

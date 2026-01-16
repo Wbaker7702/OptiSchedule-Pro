@@ -55,6 +55,19 @@ export const DYNAMICS_365_ROI_DATA = {
   revenue: { value: 150, label: "ERP Integration", subtext: "Dynamics 365 Verified" }
 };
 
+export const ENTERPRISE_COMPLIANCE = {
+  certifications: [
+    { name: "SOC 2 Type II", status: "Certified" },
+    { name: "ISO 27001", status: "Certified" },
+    { name: "GDPR", status: "Ready" }
+  ],
+  auditReadiness: "Always-on controls mapped to SOC, ISO, and GDPR.",
+  dataResidency: "US, EU, UK data residency with region-locked backups.",
+  encryptionStandards: ["AES-256 at rest", "TLS 1.3 in transit", "KMS-managed keys"],
+  lastAuditDate: "Nov 18, 2025",
+  nextReviewDate: "May 15, 2026"
+};
+
 export const EMPLOYEES: Employee[] = [
   { id: '1', name: 'John Smith', role: 'Security Ops Lead', department: 'Front End', status: 'Active', performance: 4.8, email: 'john.smith@optischedule.com', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop' },
   { id: '2', name: 'Maria Chen', role: 'Protocol Manager', department: 'Grocery', status: 'Active', performance: 4.6, email: 'maria.chen@optischedule.com', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop' },
