@@ -1,10 +1,18 @@
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, KpiMetric } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog } from './types';
+
+// Helper for relative dates
+const getRelativeDate = (offsetDays: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - offsetDays);
+  return d.toISOString().split('T')[0];
+};
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
-export const DATE_STRING = "Thursday, January 15, 2026";
-export const APP_VERSION = "v3.2.0-Sentinel-Hub";
-export const BRAND_NAME = "OptiSchedule Pro®";
+// Dynamic Date: Always current
+export const DATE_STRING = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+export const APP_VERSION = "v3.4.0-Sentinel-AI-Live";
+export const BRAND_NAME = "OptiSchedule Pro";
 
 export const SYSTEM_HEALTH = {
   status: 'Hardened',
@@ -14,45 +22,6 @@ export const SYSTEM_HEALTH = {
   railsVersion: '8.0.0-Sentinel-Patch',
   syncCycle: 'Real-time (SSP Enabled)'
 };
-
-export const Q4_METRICS = {
-  revenue: 1250000,
-  leakageRecovered: 45000,
-  roi: 11.2,
-  topPerformingStore: "5065",
-  complianceScore: 98.5
-};
-
-export const KPI_METRICS: KpiMetric[] = [
-  {
-    name: 'Schedule Accuracy',
-    currentValue: '96.4%',
-    targetValue: '97%',
-    trend: 'up',
-    status: 'on_track'
-  },
-  {
-    name: 'Labor Forecast Variance',
-    currentValue: '2.8%',
-    targetValue: '2.5%',
-    trend: 'down',
-    status: 'watch'
-  },
-  {
-    name: 'Integration SLA',
-    currentValue: '99.92%',
-    targetValue: '99.9%',
-    trend: 'steady',
-    status: 'on_track'
-  },
-  {
-    name: 'Audit Readiness',
-    currentValue: '93%',
-    targetValue: '95%',
-    trend: 'up',
-    status: 'critical'
-  }
-];
 
 export const FISCAL_METRICS = {
   avgPayRate: 14.00,
@@ -64,12 +33,42 @@ export const FISCAL_METRICS = {
   laborSurplusPct: 15,
 };
 
-export const OPERATIONAL_AUDITS = [
-  { id: 'aud-101', severity: 'error', code: 'POL-01', message: 'Compliance Breach: Variance > 15% in Front End Protocol', file: 'Dept: Front End', fix: 'Deploy Sentinel Protocol' },
-  { id: 'aud-102', severity: 'warning', code: 'SEC-04', message: 'Unauthorized Sync Latency (240ms) - Buffer Threat', file: 'Node: D365_Ingress', fix: 'Purge Sync Cache' },
-  { id: 'aud-103', severity: 'info', code: 'SSP-09', message: 'Sentinel Security Framework validated for peak load', file: 'Log: Dec_13_2025', fix: 'No action' },
-  { id: 'aud-104', severity: 'error', code: 'FIS-02', message: 'Asset Depletion Risk: Critical Inventory Gap', file: 'Dept: Grocery', fix: 'Force Re-stocking' },
-  { id: 'aud-105', severity: 'warning', code: 'LAB-02', message: 'Protocol Deviation: 12.5 surplus hrs unallocated', file: 'Dept: Apparel', fix: 'Re-deploy Assets' },
+export const OPERATIONAL_AUDITS: AuditLog[] = [
+  { id: 'aud-101', severity: 'error', code: 'POL-01', message: 'Compliance Breach: Variance > 15% in Front End Protocol', file: 'Dept: Front End', file_path: 'Dept: Front End', fix: 'Deploy Sentinel Protocol' },
+  { id: 'aud-102', severity: 'warning', code: 'SEC-04', message: 'Unauthorized Sync Latency (240ms) - Buffer Threat', file: 'Node: D365_Ingress', file_path: 'Node: D365_Ingress', fix: 'Purge Sync Cache' },
+  { id: 'aud-103', severity: 'info', code: 'OPT_09', message: 'Optimal staffing achieved for peak hour', file: 'Schedule: Current_Cycle', file_path: 'Schedule: Current_Cycle', fix: 'No action' },
+  { id: 'aud-104', severity: 'error', code: 'FIS-02', message: 'Asset Depletion Risk: Critical Inventory Gap', file: 'Dept: Grocery', file_path: 'Dept: Grocery', fix: 'Force Re-stocking' },
+  { id: 'aud-105', severity: 'warning', code: 'LAB-02', message: 'Protocol Deviation: 12.5 surplus hrs unallocated', file: 'Dept: Apparel', file_path: 'Dept: Apparel', fix: 'Re-deploy Assets' },
+];
+
+export const VULNERABILITY_DATA: Vulnerability[] = [
+  { 
+    id: 'vul-001', 
+    title: 'Workforce Leakage Vector', 
+    severity: 'Critical', 
+    description: '15% labor surplus unallocated in Apparel zone during peak surge.', 
+    remediation: 'Sentinel-Redirect: Auto-assign assets to Front End.',
+    status: 'Detected',
+    category: 'Operational'
+  },
+  { 
+    id: 'vul-002', 
+    title: 'Sync Latency Drift', 
+    severity: 'High', 
+    description: 'Dynamics 365 ingress node exhibiting 240ms response jitter.', 
+    remediation: 'Patch: Clear D365 Cache & Initialize Sentinel Handshake.',
+    status: 'Detected',
+    category: 'Digital'
+  },
+  { 
+    id: 'vul-003', 
+    title: 'Unauthorized Protocol Bypass', 
+    severity: 'Medium', 
+    description: 'Manual schedule override detected in Electronics department.', 
+    remediation: 'Sentinel-Lock: Revert to ROI-optimized deployment.',
+    status: 'Detected',
+    category: 'Personnel'
+  }
 ];
 
 export const HUBSPOT_METRICS = {
@@ -86,71 +85,13 @@ export const DYNAMICS_365_ROI_DATA = {
   revenue: { value: 150, label: "ERP Integration", subtext: "Dynamics 365 Verified" }
 };
 
-export const ENTERPRISE_COMPLIANCE = {
-  certifications: [
-    { name: "SOC 2 Type II", status: "Certified" },
-    { name: "ISO 27001", status: "Certified" },
-    { name: "GDPR", status: "Ready" }
-  ],
-  auditReadiness: "Always-on controls mapped to SOC, ISO, and GDPR.",
-  dataResidency: "US, EU, UK data residency with region-locked backups.",
-  encryptionStandards: ["AES-256 at rest", "TLS 1.3 in transit", "KMS-managed keys"],
-  lastAuditDate: "2025-11-18",
-  nextReviewDate: "2026-05-15"
-};
-export const INTEGRATIONS_STATUS = [
-  {
-    id: 'd365',
-    name: 'Dynamics 365',
-    status: 'Healthy',
-    lastSync: '2m ago',
-    latencyMs: 118,
-    errorRate: 0.2,
-    sla: '99.95%',
-    recentEvents: [
-      { event: 'Workforce payload refresh', status: 'Success', time: '06:12 AM' },
-      { event: 'ERP ledger delta', status: 'Success', time: '05:58 AM' }
-    ]
-  },
-  {
-    id: 'hubspot',
-    name: 'HubSpot',
-    status: 'Degraded',
-    lastSync: '12m ago',
-    latencyMs: 340,
-    errorRate: 2.1,
-    sla: '99.80%',
-    recentEvents: [
-      { event: 'Campaign attribution sync', status: 'Delayed', time: '05:49 AM' },
-      { event: 'Contact delta feed', status: 'Success', time: '05:31 AM' }
-    ]
-  },
-  {
-    id: 'payroll',
-    name: 'Payroll',
-    status: 'Healthy',
-    lastSync: '5m ago',
-    latencyMs: 205,
-    errorRate: 0.4,
-    sla: '99.90%',
-    recentEvents: [
-      { event: 'Timesheet export', status: 'Success', time: '06:05 AM' },
-      { event: 'Overtime exception check', status: 'Success', time: '05:40 AM' }
-    ]
-  },
-  {
-    id: 'pos',
-    name: 'POS',
-    status: 'Investigating',
-    lastSync: '18m ago',
-    latencyMs: 512,
-    errorRate: 4.6,
-    sla: '99.50%',
-    recentEvents: [
-      { event: 'Ticket latency spike', status: 'Investigating', time: '05:44 AM' },
-      { event: 'Store batch ingest', status: 'Success', time: '05:10 AM' }
-    ]
-  }
+export const ENTERPRISE_INGRESS_HISTORY: IngressDataPoint[] = [
+  { date: getRelativeDate(0), volume: 1450, source: 'Dynamics 365', growth: 12.4, status: 'Verified' },
+  { date: getRelativeDate(1), volume: 1290, source: 'Sentinel Node', growth: 8.1, status: 'Hardened' },
+  { date: getRelativeDate(2), volume: 1194, source: 'HubSpot', growth: 15.2, status: 'Verified' },
+  { date: getRelativeDate(3), volume: 1036, source: 'Dynamics 365', growth: 5.8, status: 'Verified' },
+  { date: getRelativeDate(4), volume: 980, source: 'Sentinel Node', growth: 10.2, status: 'Hardened' },
+  { date: getRelativeDate(5), volume: 889, source: 'Dynamics 365', growth: 3.4, status: 'Verified' },
 ];
 
 export const EMPLOYEES: Employee[] = [

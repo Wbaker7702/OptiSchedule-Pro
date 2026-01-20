@@ -29,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
              <Activity className="w-6 h-6 text-white" />
           </div>
           <div className="overflow-hidden">
-            <h1 className="font-black text-sm uppercase tracking-[0.1em] leading-tight text-white truncate">OptiSchedule®</h1>
+            <h1 className="font-black text-sm uppercase tracking-[0.1em] leading-tight text-white truncate">OptiSchedule</h1>
             <p className="text-[10px] text-blue-400 font-mono font-bold uppercase tracking-widest truncate">Pro v3.1</p>
           </div>
         </div>

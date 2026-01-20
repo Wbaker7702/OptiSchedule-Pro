@@ -47,13 +47,30 @@ export interface DepartmentMetric {
   waitTime: string;
 }
 
-export type KpiTrend = 'up' | 'down' | 'steady';
-export type KpiStatus = 'on_track' | 'watch' | 'critical';
+export interface IngressDataPoint {
+  date: string;
+  volume: number;
+  source: 'Dynamics 365' | 'HubSpot' | 'Sentinel Node';
+  growth: number;
+  status: 'Verified' | 'Syncing' | 'Hardened';
+}
 
-export interface KpiMetric {
-  name: string;
-  currentValue: string;
-  targetValue: string;
-  trend: KpiTrend;
-  status: KpiStatus;
+export interface Vulnerability {
+  id: string;
+  title: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  description: string;
+  remediation: string;
+  status: 'Detected' | 'Patching' | 'Patched';
+  category: 'Operational' | 'Digital' | 'Personnel';
+}
+
+export interface AuditLog {
+  id: string;
+  severity: 'error' | 'warning' | 'info';
+  code: string;
+  message: string;
+  file: string; // Maps to 'Entity' in CSV
+  file_path: string; // Kept for compatibility
+  fix: string; // Maps to 'Fix Action' in CSV
 }

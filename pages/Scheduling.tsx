@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { HEATMAP_DATA, INTEGRATIONS_STATUS } from '../constants';
+import { HEATMAP_DATA } from '../constants';
 import { Calendar, Download, Printer, Filter, RefreshCw, Link as LinkIcon, Check, X, ShieldCheck, Settings, Database, Users as UsersIcon, List, ArrowLeftRight, Activity, Globe, Loader2 } from 'lucide-react';
 import { View } from '../types';
 
@@ -30,6 +30,28 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
     { event: 'ERP Resource Audit', target: 'Sentinel Node', status: 'Pending', time: 'Now' },
     { event: 'Inventory Allocation', target: 'Supply Chain Hub', status: 'Failed', time: 'Yesterday' }
   ];
+
+  // Helper to generate current week dates
+  const getDaysOfWeek = () => {
+    const dates = [];
+    const today = new Date();
+    // Calculate Monday of current week
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1); 
+    const monday = new Date(today.setDate(diff));
+
+    for (let i = 0; i < 6; i++) { // Mon to Sat
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        dates.push({
+            day: d.toLocaleDateString('en-US', { weekday: 'short' }),
+            date: d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
+        });
+    }
+    return dates;
+  };
+
+  const weekDates = getDaysOfWeek();
 
   const handleSync = () => {
     setIsSyncing(true);
@@ -328,66 +350,13 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
            )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
-            <div>
-              <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Integrations Drill-In</h3>
-              <p className="text-[11px] text-gray-500 font-medium">Recent sync events across core services.</p>
-            </div>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Last 30 minutes</span>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {INTEGRATIONS_STATUS.map((integration) => (
-              <div key={integration.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50/60">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-xs font-black text-gray-900 uppercase tracking-widest">{integration.name}</p>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Last sync {integration.lastSync}</p>
-                  </div>
-                  <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full ${
-                    integration.status === 'Healthy' ? 'bg-emerald-100 text-emerald-700' :
-                    integration.status === 'Degraded' ? 'bg-amber-100 text-amber-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {integration.status}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {integration.recentEvents.map((event, index) => (
-                    <div key={`${integration.id}-${index}`} className="flex items-center justify-between text-[11px]">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <ArrowLeftRight className="w-4 h-4 text-blue-600" />
-                        <span className="font-semibold">{event.event}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
-                          event.status === 'Success' ? 'bg-blue-100 text-blue-700' :
-                          event.status === 'Delayed' ? 'bg-amber-100 text-amber-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {event.status}
-                        </span>
-                        <p className="text-[10px] text-gray-400 font-bold mt-1">{event.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  <span>Latency {integration.latencyMs}ms</span>
-                  <span>SLA {integration.sla}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Weekly Schedule Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-gray-900">
            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
              <div className="flex items-center gap-4">
                 <h3 className="font-black text-gray-900 uppercase tracking-widest text-xs">Workforce Deployment Ledger</h3>
                 <div className="flex bg-gray-100 rounded-lg p-1">
-                   <button className="px-3 py-1 text-[10px] font-black uppercase tracking-widest bg-white shadow-sm rounded text-gray-800">Dec 15 - Dec 21</button>
+                   <button className="px-3 py-1 text-[10px] font-black uppercase tracking-widest bg-white shadow-sm rounded text-gray-800">Current Cycle</button>
                    <button className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-gray-700">Next Cycle</button>
                 </div>
              </div>
@@ -415,12 +384,11 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                  <thead className="bg-gray-50 text-gray-400 text-[10px] font-black uppercase tracking-widest border-b border-gray-200">
                     <tr>
                       <th className="px-4 py-3 rounded-l-lg min-w-[150px]">Temporal Segment</th>
-                      <th className="px-4 py-3 min-w-[120px]">Mon 12/15</th>
-                      <th className="px-4 py-3 min-w-[120px]">Tue 12/16</th>
-                      <th className="px-4 py-3 min-w-[120px]">Wed 12/17</th>
-                      <th className="px-4 py-3 min-w-[120px]">Thu 12/18</th>
-                      <th className="px-4 py-3 min-w-[120px]">Fri 12/19</th>
-                      <th className="px-4 py-3 rounded-r-lg min-w-[120px]">Sat 12/20</th>
+                      {weekDates.map((d, i) => (
+                         <th key={i} className={`px-4 py-3 min-w-[120px] ${i === 5 ? 'rounded-r-lg' : ''}`}>
+                            {d.day} {d.date}
+                         </th>
+                      ))}
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-gray-100 text-[11px] font-bold text-gray-800">

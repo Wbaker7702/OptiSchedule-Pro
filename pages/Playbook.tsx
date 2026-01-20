@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import { FISCAL_METRICS } from '../constants';
 import { View } from '../types';
-import { Shield, Zap, TrendingUp, Calculator, FileCheck, Users, Terminal, Database, GitBranch, ShieldCheck, CheckCircle2, Timer, Loader2, ExternalLink, Download, AlertCircle } from 'lucide-react';
+import { Book, Shield, Scale, Zap, Info, ArrowRight, TrendingUp, Calculator, FileCheck, Users, Terminal, Database, Code, ShieldCheck, Loader2, ExternalLink, BellRing, Download, Lock, AlertCircle } from 'lucide-react';
 
 interface PlaybookProps {
   setCurrentView?: (view: any) => void;
@@ -125,51 +125,6 @@ Validated by: Sentinel Security Auth Node-5065
     }
   ];
 
-  const multiAgentWorkflows = [
-    {
-      id: 'alignment',
-      title: 'Spec Alignment Ring',
-      summary: 'Lock scope with a three-agent handshake before any execution starts.',
-      cadence: 'Per change request',
-      status: 'Locked',
-      icon: <Users className="w-5 h-5 text-cyan-400" />,
-      agents: [
-        { name: 'Planner Agent', role: 'Translate brief into scope, success metrics, and constraints.' },
-        { name: 'Operator Agent', role: 'Draft execution plan with dependencies and risk notes.' },
-        { name: 'Verifier Agent', role: 'Confirm edge cases, acceptance criteria, and readiness.' }
-      ],
-      guards: ['Spec hash', 'Assumption ledger', 'Scope freeze']
-    },
-    {
-      id: 'execution',
-      title: 'Parallel Build Loop',
-      summary: 'Build and review run in parallel to block drift from the plan.',
-      cadence: 'Daily checkpoint',
-      status: 'Monitoring',
-      icon: <GitBranch className="w-5 h-5 text-blue-400" />,
-      agents: [
-        { name: 'Builder Agent', role: 'Implements change set with traceable diffs.' },
-        { name: 'Reviewer Agent', role: 'Validates intent vs. output, flags drift early.' },
-        { name: 'Recorder Agent', role: 'Maintains decision log and rollback notes.' }
-      ],
-      guards: ['Diff review', 'Golden path tests', 'Rollback note']
-    },
-    {
-      id: 'release',
-      title: 'Stability Gate',
-      summary: 'Audit, verify, and observe after release to enforce steady-state output.',
-      cadence: 'Release window',
-      status: 'Enforced',
-      icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />,
-      agents: [
-        { name: 'Auditor Agent', role: 'Runs variance checks against baseline behavior.' },
-        { name: 'Observer Agent', role: 'Monitors telemetry for drift signals.' },
-        { name: 'Resolver Agent', role: 'Executes remediation and updates safeguards.' }
-      ],
-      guards: ['Post-release audit', 'Telemetry watch', 'Drift alerting']
-    }
-  ];
-
   return (
     <div className="flex-1 bg-slate-950 overflow-auto">
       <Header title="Sentinel Security Policy" subtitle="Authorized Workforce Protocol v3.1.0" />
@@ -283,84 +238,6 @@ Validated by: Sentinel Security Auth Node-5065
                  ))}
               </div>
            </div>
-        </div>
-
-        {/* Multi-Agent Drift Control */}
-        <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-xl overflow-hidden relative">
-          <div className="absolute bottom-0 left-0 p-10 opacity-5 pointer-events-none">
-            <CheckCircle2 className="w-64 h-64 text-cyan-400" />
-          </div>
-          <div className="relative z-10 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-500/10 rounded-full border border-cyan-500/20">
-                  <Users className="w-3 h-3 text-cyan-400" />
-                  <span className="text-[9px] text-cyan-300 font-black uppercase tracking-widest">Multi-Agent Workflow</span>
-                </div>
-                <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter mt-4">Drift Control Protocols</h2>
-                <p className="text-slate-400 text-xs leading-relaxed font-mono mt-2 max-w-xl">
-                  Coordinated agent lanes keep execution aligned with policy. Each workflow includes explicit handoffs and anti-drift guards.
-                </p>
-              </div>
-              <div className="flex items-center gap-3 bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3">
-                <Timer className="w-4 h-4 text-blue-400" />
-                <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
-                  Drift checks synced every 4 hours
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {multiAgentWorkflows.map((workflow) => (
-                <div key={workflow.id} className="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 flex flex-col gap-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                        {workflow.icon}
-                      </div>
-                      <div>
-                        <p className="text-[9px] font-mono uppercase tracking-widest text-slate-500">Workflow</p>
-                        <h3 className="text-sm font-black text-white uppercase tracking-widest">{workflow.title}</h3>
-                      </div>
-                    </div>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400">{workflow.status}</span>
-                  </div>
-
-                  <p className="text-[11px] text-slate-400 font-mono leading-relaxed">{workflow.summary}</p>
-
-                  <div>
-                    <p className="text-[9px] uppercase tracking-widest text-slate-500 font-black mb-3">Agent lanes</p>
-                    <div className="space-y-2">
-                      {workflow.agents.map((agent) => (
-                        <div key={agent.name} className="flex flex-col gap-1 rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">
-                          <span className="text-[10px] font-bold text-slate-100 uppercase tracking-wider">{agent.name}</span>
-                          <span className="text-[10px] text-slate-500 font-mono">{agent.role}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[9px] uppercase tracking-widest text-slate-500 font-black mb-3">Drift guards</p>
-                    <div className="flex flex-wrap gap-2">
-                      {workflow.guards.map((guard) => (
-                        <span key={guard} className="px-2 py-1 rounded-full bg-slate-900 border border-slate-800 text-[9px] font-mono text-slate-400">
-                          {guard}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-auto pt-4 border-t border-slate-800 flex items-center justify-between text-[10px] font-mono text-slate-500">
-                    <span>Cadence: {workflow.cadence}</span>
-                    <span className="flex items-center gap-1 text-cyan-300 uppercase tracking-widest">
-                      <CheckCircle2 className="w-3 h-3" /> Drift sealed
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Sentinel Roadmap */}

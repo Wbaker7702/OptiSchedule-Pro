@@ -1,17 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
-import { DEPARTMENT_METRICS, OPERATIONAL_AUDITS as INITIAL_AUDITS } from '../constants';
-import { RefreshCcw, Users, DollarSign, TrendingUp, Clock, ShieldAlert, CheckCircle, Info, Terminal, Search, AlertCircle, Play, Download, Loader2, ChevronRight, Activity, TerminalSquare, Eye, Maximize2, Radio } from 'lucide-react';
+import { DEPARTMENT_METRICS, OPERATIONAL_AUDITS as INITIAL_AUDITS, VULNERABILITY_DATA as INITIAL_VULNERABILITIES } from '../constants';
+import { RefreshCcw, Users, DollarSign, TrendingUp, Clock, ShieldAlert, CheckCircle, Info, Terminal, Search, AlertCircle, Play, Download, Loader2, ChevronRight, Activity, TerminalSquare, Eye, Maximize2, Radio, Shield, Bug, Zap, Fingerprint } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label } from 'recharts';
-
-const salesData = [
-  { name: 'Front End', sales: 42350 },
-  { name: 'Electronics', sales: 28920 },
-  { name: 'Grocery', sales: 31680 },
-  { name: 'Apparel', sales: 15240 },
-  { name: 'Home Goods', sales: 5890 },
-  { name: 'Pharmacy', sales: 1350 },
-];
+import { Vulnerability } from '../types';
 
 interface LinterLog {
   id: string;
@@ -21,13 +13,15 @@ interface LinterLog {
 }
 
 interface OperationsProps {
-  defaultTab?: 'metrics' | 'audit' | 'vision';
+  defaultTab?: 'metrics' | 'audit' | 'vision' | 'scanner';
 }
 
 const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
-  const [activeTab, setActiveTab] = useState<'metrics' | 'audit' | 'vision'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'metrics' | 'audit' | 'vision' | 'scanner'>(defaultTab);
   const [audits, setAudits] = useState(INITIAL_AUDITS);
+  const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>(INITIAL_VULNERABILITIES);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [fixingId, setFixingId] = useState<string | null>(null);
   const [linterLogs, setLinterLogs] = useState<LinterLog[]>([]);
   const [executionCount, setExecutionCount] = useState(1);
@@ -53,25 +47,14 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
         }, 600);
       }
     }
+    if (activeTab === 'scanner') {
+        addLog(`Vulnerability Node Online. Initializing deep scan of Store 5065 operational framework...`, 'info');
+    }
     if (activeTab === 'vision') {
         addLog(`Sentinel Floor Vision link established. Authenticating stream for ${activeCamera}...`, 'info');
         setTimeout(() => addLog(`Stream secure. Real-time telemetry overlay active.`, 'success'), 1200);
     }
   }, [activeTab]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (activeTab === 'audit') {
-        const nextExec = executionCount + 1;
-        setExecutionCount(nextExec);
-        addLog(`[EXECUTION #${nextExec}] Automated periodic background audit started...`, 'info');
-        setTimeout(() => {
-          addLog(`Automated check #${nextExec} complete. No new deviations detected.`, 'success');
-        }, 2000);
-      }
-    }, 45000);
-    return () => clearInterval(interval);
-  }, [activeTab, executionCount]);
 
   const addLog = (message: string, type: LinterLog['type']) => {
     const newLog: LinterLog = {
@@ -95,21 +78,30 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
     }, 800);
   };
 
-  const handleFullSync = () => {
-    const nextExec = executionCount + 1;
-    setExecutionCount(nextExec);
-    setIsSyncing(true);
-    addLog(`[EXECUTION #${nextExec}] Manual Full-Scope Linter Sync initiated.`, 'info');
+  const handlePatchVulnerability = (id: string) => {
+    setFixingId(id);
+    const vul = vulnerabilities.find(v => v.id === id);
+    addLog(`SENTINEL_PATCH: Hardening vulnerability [${vul?.title}]...`, 'info');
     
     setTimeout(() => {
-      setIsSyncing(false);
-      addLog(`Full Sync #${nextExec} complete. Dynamics 365 & HubSpot vectors validated.`, 'success');
-    }, 2500);
+      setVulnerabilities(prev => prev.map(v => v.id === id ? {...v, status: 'Patched'} : v));
+      setFixingId(null);
+      addLog(`HARDENING SUCCESS: Vector ${id} mitigated and locked.`, 'success');
+    }, 1500);
+  };
+
+  const initiateDeepScan = () => {
+    setIsScanning(true);
+    addLog(`[SECURITY_SCAN] Initiating Deep Operational Audit of Sentinel Nodes...`, 'info');
+    setTimeout(() => {
+      setIsScanning(false);
+      addLog(`Scan complete. ${vulnerabilities.filter(v => v.status === 'Detected').length} vectors identified requiring intervention.`, 'warning');
+    }, 3000);
   };
 
   return (
     <div className="flex-1 bg-gray-50 overflow-auto">
-      <Header title="Operations Hub" subtitle="Enterprise Edition 3.1.0 • Real-time Monitoring & Floor Vision" />
+      <Header title="Operations Hub" subtitle="Enterprise Edition 3.3.0 • Sentinel Hardened Infrastructure" />
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
         
@@ -131,16 +123,24 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
              {activeTab === 'vision' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-t-full" />}
            </button>
            <button 
+             onClick={() => setActiveTab('scanner')}
+             className={`px-4 py-3 text-sm font-bold transition-all relative flex items-center gap-2 ${activeTab === 'scanner' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+           >
+             <Shield className="w-4 h-4" />
+             Vulnerability Scanner
+             {vulnerabilities.filter(v => v.status === 'Detected').length > 0 && (
+                <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                  {vulnerabilities.filter(v => v.status === 'Detected').length}
+                </span>
+             )}
+             {activeTab === 'scanner' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-t-full" />}
+           </button>
+           <button 
              onClick={() => setActiveTab('audit')}
              className={`px-4 py-3 text-sm font-bold transition-all relative flex items-center gap-2 ${activeTab === 'audit' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
            >
              <Terminal className="w-4 h-4" />
              Operational Linter
-             {audits.length > 0 && (
-                <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold animate-pulse">
-                  {audits.length}
-                </span>
-             )}
              {activeTab === 'audit' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-t-full" />}
            </button>
         </div>
@@ -167,7 +167,6 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
                           </div>
                           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                        </div>
-
                        <div className="grid grid-cols-2 gap-4">
                           <div className="bg-gray-50/80 p-3 rounded-lg border border-gray-100">
                             <div className="flex items-center gap-1.5 mb-2 text-gray-500">
@@ -185,102 +184,85 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
                           </div>
                        </div>
                    </div>
-                   
-                   <div className="px-5 py-3 bg-gray-50/50 border-t border-gray-100 grid grid-cols-2 divide-x divide-gray-200">
-                      <div className="flex flex-col items-center justify-center px-2">
-                         <span className="text-[10px] uppercase tracking-wide text-gray-500 font-medium mb-1 flex items-center gap-1">
-                           <TrendingUp className="w-3 h-3 text-blue-500" />
-                           {dept.extraMetricLabel}
-                         </span>
-                         <span className="text-sm font-bold text-gray-700">{dept.extraMetricValue}</span>
-                      </div>
-                      <div className="flex flex-col items-center justify-center px-2">
-                         <span className="text-[10px] uppercase tracking-wide text-gray-500 font-medium mb-1 flex items-center gap-1">
-                           <Clock className="w-3 h-3 text-orange-500" />
-                           Wait Time
-                         </span>
-                         <span className="text-sm font-bold text-gray-700">{dept.waitTime}</span>
-                      </div>
-                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {activeTab === 'vision' && (
-          <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
-             <div className="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative aspect-video group">
-                {/* Simulated Camera Overlay */}
-                <div className="absolute inset-0 z-10 pointer-events-none p-6 flex flex-col justify-between">
-                   <div className="flex justify-between items-start">
-                      <div className="bg-red-600 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-2 animate-pulse">
-                         <Radio className="w-3 h-3" /> REC
-                      </div>
-                      <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 text-white">
-                         <p className="text-[10px] font-mono font-bold tracking-widest">{activeCamera}</p>
-                         <p className="text-[9px] font-mono text-slate-400 mt-0.5">LATENCY: 42ms • AI_OVERLAY: ACTIVE</p>
-                      </div>
-                   </div>
-                   
-                   <div className="flex justify-between items-end">
-                      <div className="bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/10 text-white space-y-2">
-                         <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            <span className="text-[10px] font-mono font-bold">DENSITY ANALYSIS: LOW (4%)</span>
-                         </div>
-                         <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div className="w-4/100 h-full bg-emerald-500" />
-                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                         <button className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-all backdrop-blur-md border border-white/10">
-                            <Maximize2 className="w-4 h-4" />
-                         </button>
-                      </div>
-                   </div>
+        {activeTab === 'scanner' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+             <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                    <Fingerprint className="w-64 h-64 text-blue-500" />
                 </div>
-
-                {/* Simulated Feed Background */}
-                <div className="absolute inset-0 bg-[#0a0a0a] flex items-center justify-center overflow-hidden">
-                    <div className="w-full h-full bg-slate-900/50 relative">
-                        {/* CSS-based grid lines for the high-tech look */}
-                        <div className="absolute inset-0" style={{backgroundImage: 'linear-gradient(#ffffff05 1px, transparent 1px), linear-gradient(90deg, #ffffff05 1px, transparent 1px)', backgroundSize: '40px 40px'}}></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                            <Activity className="w-12 h-12 text-slate-800 mx-auto mb-4 animate-pulse" />
-                            <p className="text-slate-700 font-mono text-[10px] font-bold uppercase tracking-[0.4em]">Floor Vision Stream active</p>
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                   <div className="max-w-xl">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                            <Bug className="w-6 h-6 text-red-500" />
                         </div>
-                    </div>
+                        <h2 className="text-2xl font-black text-white uppercase tracking-tight">Sentinel Vulnerability Scanner</h2>
+                      </div>
+                      <p className="text-slate-400 text-sm leading-relaxed font-mono">
+                        Analyzing operational vectors for potential ROI leakage and protocol deviations. Patching identified vulnerabilities reinforces the <span className="text-blue-400">Sentinel Security Policy</span>.
+                      </p>
+                   </div>
+                   <button 
+                     onClick={initiateDeepScan}
+                     disabled={isScanning}
+                     className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-600/20 flex items-center gap-3 disabled:opacity-50"
+                   >
+                     {isScanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+                     {isScanning ? 'Deep Scanning...' : 'Initiate Deep Scan'}
+                   </button>
                 </div>
-                
-                {/* HUD Scanline */}
-                <div className="absolute inset-0 z-20 pointer-events-none opacity-20 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px]"></div>
              </div>
 
-             <div className="grid grid-cols-4 gap-4">
-                {[
-                   {id: 'CAM_01_CHECKOUT', label: 'Front End Main', status: 'Online'},
-                   {id: 'CAM_02_GROCERY', label: 'Fresh Produce', status: 'Online'},
-                   {id: 'CAM_03_ELECTRONICS', label: 'High Value Cage', status: 'Online'},
-                   {id: 'CAM_04_PHARMACY', label: 'RX Distribution', status: 'Online'}
-                ].map(cam => (
-                   <button 
-                     key={cam.id}
-                     onClick={() => setActiveCamera(cam.id)}
-                     className={`p-4 rounded-xl border text-left transition-all ${
-                        activeCamera === cam.id 
-                        ? 'bg-blue-600 border-blue-500 shadow-lg shadow-blue-500/20' 
-                        : 'bg-white border-gray-200 hover:border-gray-300'
-                     }`}
-                   >
-                      <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeCamera === cam.id ? 'text-blue-100' : 'text-gray-400'}`}>CAM {cam.id.split('_')[1]}</p>
-                      <p className={`text-xs font-bold ${activeCamera === cam.id ? 'text-white' : 'text-gray-900'}`}>{cam.label}</p>
-                   </button>
+             <div className="grid grid-cols-1 gap-4">
+                {vulnerabilities.map((vul) => (
+                  <div key={vul.id} className={`bg-white rounded-xl border p-6 shadow-sm transition-all flex flex-col md:flex-row items-center justify-between gap-6 ${vul.status === 'Patched' ? 'opacity-60 border-emerald-100 bg-emerald-50/10' : 'border-gray-200'}`}>
+                     <div className="flex items-start gap-5 flex-1">
+                        <div className={`p-4 rounded-xl shrink-0 ${
+                            vul.status === 'Patched' ? 'bg-emerald-100 text-emerald-600' :
+                            vul.severity === 'Critical' ? 'bg-red-100 text-red-600' :
+                            vul.severity === 'High' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
+                        }`}>
+                           {vul.status === 'Patched' ? <CheckCircle className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+                        </div>
+                        <div>
+                           <div className="flex items-center gap-3 mb-1">
+                              <h4 className="font-black text-gray-900 uppercase tracking-tight">{vul.title}</h4>
+                              <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                 vul.status === 'Patched' ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
+                              }`}>{vul.status}</span>
+                              <span className="text-[10px] text-gray-400 font-mono font-bold uppercase tracking-widest">{vul.category} Vector</span>
+                           </div>
+                           <p className="text-xs text-gray-600 leading-relaxed max-w-2xl">{vul.description}</p>
+                           {vul.status === 'Detected' && (
+                             <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-2">Remediation: {vul.remediation}</p>
+                           )}
+                        </div>
+                     </div>
+                     <button 
+                       onClick={() => handlePatchVulnerability(vul.id)}
+                       disabled={vul.status === 'Patched' || fixingId === vul.id}
+                       className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap min-w-[160px] flex items-center justify-center gap-2 ${
+                          vul.status === 'Patched' 
+                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 cursor-default' 
+                          : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg'
+                       }`}
+                     >
+                        {fixingId === vul.id ? <Loader2 className="w-3 h-3 animate-spin" /> : vul.status === 'Patched' ? <CheckCircle className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                        {fixingId === vul.id ? 'Patching...' : vul.status === 'Patched' ? 'Vector Secure' : 'Patch & Harden'}
+                     </button>
+                  </div>
                 ))}
              </div>
           </div>
         )}
 
+        {/* Existing tabs (audit, vision) continue below... */}
         {activeTab === 'audit' && (
           <div className="space-y-6 animate-in fade-in duration-500">
              <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden">
@@ -294,33 +276,16 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
                         <p className="text-slate-400 text-xs mt-0.5 font-mono">Dynamics & HubSpot telemetry analysis...</p>
                     </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                    <div className="bg-slate-800 rounded-lg p-1.5 flex items-center gap-2">
-                        <div className="flex items-center gap-1 text-[10px] font-bold px-2 text-red-400 border-r border-slate-700">
-                            <AlertCircle className="w-3 h-3" /> {audits.filter(a => a.severity === 'error').length} ERRORS
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] font-bold px-2 text-orange-400 border-r border-slate-700">
-                            <Info className="w-3 h-3" /> {audits.filter(a => a.severity === 'warning').length} WARN
-                        </div>
-                    </div>
-                    </div>
                 </div>
-                
                 <div className="p-0 min-h-[300px] relative">
-                    {isSyncing && (
-                        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-white">
-                            <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
-                            <p className="font-mono text-sm tracking-widest uppercase animate-pulse">Running Full System Sync...</p>
-                        </div>
-                    )}
                     <table className="w-full text-left font-mono">
                     <thead className="bg-slate-800/30 text-slate-500 text-[10px] uppercase tracking-widest border-b border-slate-800">
                         <tr>
                             <th className="px-6 py-3">Severity</th>
                             <th className="px-6 py-3">Audit Code</th>
                             <th className="px-6 py-3">Diagnostic Message</th>
-                            <th className="px-6 py-3">Source Entity</th>
-                            <th className="px-6 py-3 text-right">Quick Fix</th>
+                            <th className="px-6 py-3">Entity</th>
+                            <th className="px-6 py-3 text-right">Fix Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/50">
@@ -347,69 +312,79 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
                                         <Play className="w-3 h-3" /> {audit.fix}
                                     </button>
                                 )}
+                                {audit.fix === 'No action' && (
+                                   <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Logged</span>
+                                )}
                             </td>
                             </tr>
                         ))}
                     </tbody>
                     </table>
                 </div>
-
-                <div className="p-4 bg-slate-800/30 border-t border-slate-800 flex justify-between items-center">
-                    <p className="text-[10px] text-slate-500">Scan Complete: {new Date().toLocaleDateString()}</p>
-                    <div className="flex gap-2">
-                        <button 
-                            onClick={handleFullSync}
-                            disabled={isSyncing}
-                            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded transition-colors font-bold shadow-lg shadow-blue-500/20 flex items-center gap-2"
-                        >
-                            <RefreshCcw className="w-3 h-3" /> Run Ingress Sync
-                        </button>
-                    </div>
-                </div>
              </div>
+          </div>
+        )}
 
-             {/* Linter Activity Stream */}
-             <div className="bg-slate-950 rounded-2xl border border-slate-800 shadow-xl overflow-hidden flex flex-col">
-                <div className="px-6 py-3 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
-                   <div className="flex items-center gap-2">
-                      <TerminalSquare className="w-4 h-4 text-emerald-500" />
-                      <h4 className="text-white text-[10px] font-black uppercase tracking-widest">Sentinel Activity Feed</h4>
-                   </div>
-                   <div className="flex items-center gap-3">
-                      <div className="bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-[9px] font-mono text-slate-500">EXEC_ID: {executionCount.toString().padStart(4, '0')}</div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[9px] text-emerald-500 font-mono font-bold uppercase tracking-widest">Bridging Active</span>
+        {activeTab === 'vision' && (
+          <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
+             <div className="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative aspect-video group">
+                <div className="absolute inset-0 z-10 pointer-events-none p-6 flex flex-col justify-between">
+                   <div className="flex justify-between items-start">
+                      <div className="bg-red-600 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                         <Radio className="w-3 h-3" /> REC
+                      </div>
+                      <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 text-white">
+                         <p className="text-[10px] font-mono font-bold tracking-widest">{activeCamera}</p>
+                         <p className="text-[9px] font-mono text-slate-400 mt-0.5">LATENCY: 42ms • AI_OVERLAY: ACTIVE</p>
                       </div>
                    </div>
                 </div>
-                <div className="h-44 overflow-y-auto p-4 font-mono text-[11px] custom-scrollbar bg-[#020617] selection:bg-blue-500/30">
-                   <div className="space-y-1.5">
-                      {linterLogs.map((log) => (
-                        <div key={log.id} className="flex gap-3 animate-in fade-in slide-in-from-bottom-1 duration-300 group">
-                           <span className="text-slate-600 shrink-0 font-bold">[{log.timestamp}]</span>
-                           <div className="flex items-start gap-2">
-                              <ChevronRight className={`w-3 h-3 mt-0.5 ${
-                                 log.type === 'error' ? 'text-red-500' :
-                                 log.type === 'warning' ? 'text-orange-500' :
-                                 log.type === 'success' ? 'text-emerald-500' : 'text-blue-500'
-                              }`} />
-                              <span className={`leading-relaxed ${
-                                 log.type === 'error' ? 'text-red-400 font-bold' :
-                                 log.type === 'warning' ? 'text-orange-300' :
-                                 log.type === 'success' ? 'text-emerald-400' : 'text-slate-300'
-                              }`}>
-                                 {log.message}
-                              </span>
-                           </div>
+                <div className="absolute inset-0 bg-[#0a0a0a] flex items-center justify-center overflow-hidden">
+                    <div className="w-full h-full bg-slate-900/50 relative">
+                        <div className="absolute inset-0" style={{backgroundImage: 'linear-gradient(#ffffff05 1px, transparent 1px), linear-gradient(90deg, #ffffff05 1px, transparent 1px)', backgroundSize: '40px 40px'}}></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                            <Activity className="w-12 h-12 text-slate-800 mx-auto mb-4 animate-pulse" />
+                            <p className="text-slate-700 font-mono text-[10px] font-bold uppercase tracking-[0.4em]">Floor Vision Stream active</p>
                         </div>
-                      ))}
-                      <div ref={logEndRef} />
-                   </div>
+                    </div>
                 </div>
              </div>
           </div>
         )}
+
+        {/* Unified Activity Feed */}
+        <div className="bg-slate-950 rounded-2xl border border-slate-800 shadow-xl overflow-hidden flex flex-col">
+          <div className="px-6 py-3 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TerminalSquare className="w-4 h-4 text-emerald-500" />
+                <h4 className="text-white text-[10px] font-black uppercase tracking-widest">Sentinel Operational Logs</h4>
+              </div>
+          </div>
+          <div className="h-44 overflow-y-auto p-4 font-mono text-[11px] custom-scrollbar bg-[#020617] selection:bg-blue-500/30">
+              <div className="space-y-1.5">
+                {linterLogs.map((log) => (
+                  <div key={log.id} className="flex gap-3 animate-in fade-in slide-in-from-bottom-1 duration-300 group">
+                      <span className="text-slate-600 shrink-0 font-bold">[{log.timestamp}]</span>
+                      <div className="flex items-start gap-2">
+                        <ChevronRight className={`w-3 h-3 mt-0.5 ${
+                            log.type === 'error' ? 'text-red-500' :
+                            log.type === 'warning' ? 'text-orange-500' :
+                            log.type === 'success' ? 'text-emerald-500' : 'text-blue-500'
+                        }`} />
+                        <span className={`leading-relaxed ${
+                            log.type === 'error' ? 'text-red-400 font-bold' :
+                            log.type === 'warning' ? 'text-orange-300' :
+                            log.type === 'success' ? 'text-emerald-400' : 'text-slate-300'
+                        }`}>
+                            {log.message}
+                        </span>
+                      </div>
+                  </div>
+                ))}
+                <div ref={logEndRef} />
+              </div>
+          </div>
+        </div>
       </div>
     </div>
   );

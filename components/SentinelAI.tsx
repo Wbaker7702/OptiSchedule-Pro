@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2 } from 'lucide-react';
-import { useSecurity } from '../contexts/SecurityContext';
 
 interface Message {
     role: 'user' | 'ai';
@@ -9,12 +8,11 @@ interface Message {
 }
 
 const SentinelAI: React.FC = () => {
-    const { securityLevel, environment } = useSecurity();
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'ai', content: `Sentinel AI online. Security Protocol: ${securityLevel.toUpperCase()}. How can I assist with your operational protocol today?`, timestamp: new Date().toLocaleTimeString() }
+        { role: 'ai', content: `Sentinel AI online. Date: ${new Date().toLocaleDateString()}. How can I assist with your operational protocol today, Wesley?`, timestamp: new Date().toLocaleTimeString() }
     ]);
     const [isTyping, setIsTyping] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -46,11 +44,13 @@ const SentinelAI: React.FC = () => {
             if (lowerInput.includes('hubspot')) {
                 aiContent = "HubSpot CRM link is currently pending authorization. Attributed campaign revenue for Store 5065 is estimated at $15.4k this period.";
             } else if (lowerInput.includes('dynamics') || lowerInput.includes('erp')) {
-                aiContent = `Dynamics 365 Core Ingress is secure (${environment}). Sales velocity data is synchronized with 99.8% precision.`;
+                aiContent = "Dynamics 365 Core Ingress is secure. Sales velocity data is synchronized with 99.8% precision.";
             } else if (lowerInput.includes('staff') || lowerInput.includes('schedule')) {
                 aiContent = "Current Front End staffing is at 12/15. Compliance grade is 94%. Recommend reallocating 2 assets from Home Goods to cover peak surge at 5 PM.";
+            } else if (lowerInput.includes('status') || lowerInput.includes('health')) {
+                aiContent = `System Status: Hardened. Uptime: 99.999%. Latency: 12ms. All Sentinel Nodes operational as of ${new Date().toLocaleTimeString()}.`;
             } else {
-                aiContent = `I've analyzed the current store state. All operational nodes are within standard deviation parameters. Sentinel Protocol v3.2 is fully enforced at ${securityLevel} level.`;
+                aiContent = "I've analyzed the current store state. All operational nodes are within standard deviation parameters. Sentinel Protocol v3.2 is fully enforced.";
             }
 
             setMessages(prev => [...prev, {
@@ -139,10 +139,10 @@ const SentinelAI: React.FC = () => {
                             </button>
                         </div>
                         <div className="mt-3 flex gap-2">
-                           {['HubSpot Sync', 'D365 Data', 'Floor Traffic'].map(tag => (
+                           {['HubSpot Sync', 'D365 Data', 'Floor Traffic', 'System Status'].map(tag => (
                                <button 
                                  key={tag}
-                                 onClick={() => setInput(`Give me the latest on ${tag}`)}
+                                 onClick={() => setInput(tag === 'System Status' ? 'Check System Status' : `Give me the latest on ${tag}`)}
                                  className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-slate-800 border border-slate-700 text-slate-400 rounded-lg hover:border-blue-500 hover:text-blue-400 transition-all"
                                >
                                   {tag}
