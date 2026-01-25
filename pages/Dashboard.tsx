@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import StatCard from '../components/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2 } from 'lucide-react';
-import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA } from '../constants';
+import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2, Fingerprint, Shield } from 'lucide-react';
+import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA, VULNERABILITY_DATA } from '../constants';
 
 const data = [
   { time: '8 AM', value: 40 },
@@ -33,8 +33,8 @@ const Dashboard: React.FC = () => {
       "D365_INGRESS: Data Packet Validated",
       "LINTER: Breach remediated Pharmacy",
       "SYNC: Sub-millisecond latency locked",
-      "SSP: Sentinel Security Frame v3.1 active",
-      "AUDIT: ERP Compliance Rating 100%"
+      "SSP: Sentinel Security Frame active",
+      "SCAN: 0 Operational Breaches Detected"
     ];
     
     const interval = setInterval(() => {
@@ -51,7 +51,6 @@ const Dashboard: React.FC = () => {
 
   const handleOptimizeProtocol = () => {
     setIsOptimizing(true);
-    // Log the start of optimization
     const startTime = new Date().toLocaleTimeString();
     setPulseLogs(prev => [{
       id: Date.now(),
@@ -60,7 +59,7 @@ const Dashboard: React.FC = () => {
     }, ...prev].slice(0, 5));
 
     setTimeout(() => {
-      const newScore = Math.floor(Math.random() * (100 - 97 + 1)) + 97;
+      const newScore = 99;
       setComplianceScore(newScore);
       setSubMetrics({
         enforcement: 99,
@@ -78,13 +77,13 @@ const Dashboard: React.FC = () => {
     }, 2000);
   };
 
-  // 364.4 is the circumference for R=58 (2 * PI * 58)
   const circumference = 364.4;
   const offset = circumference - (complianceScore / 100) * circumference;
 
   return (
     <div className="flex-1 bg-slate-950 overflow-auto">
       <Header title="Strategic Command Oversight" subtitle={`${BRAND_NAME} ${APP_VERSION} • Sentinel Protected`} />
+      <Header title="Strategic Command Oversight" subtitle={`OptiSchedule Pro ${APP_VERSION} • Sentinel Hardened`} />
       
       <div className="p-8 max-w-7xl mx-auto space-y-6">
         
@@ -103,13 +102,13 @@ const Dashboard: React.FC = () => {
                     <h2 className="text-white font-black text-xl tracking-[0.1em] uppercase">Sentinel Security Mandate</h2>
                     <span className="bg-blue-500 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em] animate-pulse">Monitoring</span>
                  </div>
-                 <p className="text-slate-400 text-xs font-mono max-w-md leading-relaxed uppercase">Stopping <span className="text-blue-500 font-bold">${FISCAL_METRICS.executionLeakage.toLocaleString()}</span> in weekly workforce leakage using the <span className="text-blue-400 font-bold">Sentinel Protocol</span>.</p>
+                 <p className="text-slate-400 text-xs font-mono max-w-md leading-relaxed uppercase">Stopping <span className="text-blue-500 font-bold">${FISCAL_METRICS.executionLeakage.toLocaleString()}</span> in weekly workforce leakage.</p>
               </div>
            </div>
 
            <div className="flex gap-4 w-full xl:w-auto z-10">
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center min-w-[130px]">
-                 <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Weekly Variance</p>
+                 <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Weekly Leakage</p>
                  <p className="text-xl font-black text-white">${Math.round(FISCAL_METRICS.executionLeakage / 1000)}k</p>
               </div>
               <div className="bg-blue-500/5 p-4 rounded-xl border border-blue-500/20 flex flex-col items-center min-w-[130px]">
@@ -119,30 +118,28 @@ const Dashboard: React.FC = () => {
            </div>
         </div>
 
-        {/* Real-time System Pulse & Metrics Grid */}
+        {/* System Pulse & Active Vulnerabilities */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard 
-              title="Enterprise Ingress" 
-              value={`${DYNAMICS_365_ROI_DATA.marketingLeads.value}%`} 
-              trend="+12%" 
-              trendDirection="up" 
-              subtitle="Dynamics 365 Verified"
-              icon={<Database className="w-5 h-5 text-blue-500" />}
-            />
-            <StatCard 
-              title="Resource Recapture" 
-              value={`${FISCAL_METRICS.targetWeeklyHoursRecapture}h`} 
-              trend="+5h" 
-              trendDirection="up" 
-              subtitle="Verified Savings"
-              icon={<TrendingUp className="w-5 h-5 text-emerald-500" />}
-            />
-            <StatCard 
               title="Sentinel Health" 
-              value="99.9%" 
+              value="99.99%" 
+              trend="+0.01%" 
+              trendDirection="up" 
               subtitle="Latency: 12ms"
-              icon={<Server className="w-5 h-5 text-blue-500" />}
+              icon={<Shield className="w-5 h-5 text-blue-500" />}
+            />
+            <StatCard 
+              title="Compliance Index" 
+              value={`${complianceScore}%`} 
+              subtitle="Target: 100%"
+              icon={<Fingerprint className="w-5 h-5 text-emerald-500" />}
+            />
+            <StatCard 
+              title="Active Vectors" 
+              value={VULNERABILITY_DATA.length.toString()} 
+              subtitle="Monitoring for Drift"
+              icon={<Activity className="w-5 h-5 text-orange-500" />}
             />
           </div>
 
@@ -163,18 +160,15 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Charts & Operational Oversight */}
+        {/* Compliance Circle and Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+           {/* Charts Section */}
            <div className="lg:col-span-2 bg-slate-900 rounded-2xl shadow-xl border border-slate-800 p-6">
              <div className="flex justify-between items-center mb-6">
                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                  <Activity className="w-4 h-4 text-blue-500" />
-                 Workforce Performance Data
+                 Workforce Integrity Matrix
                </h3>
-               <select className="bg-slate-950 border border-slate-800 text-[10px] text-slate-400 font-bold rounded-lg px-2 py-1 outline-none">
-                 <option>COMMAND 24H</option>
-                 <option>COMMAND 7D</option>
-               </select>
              </div>
              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -189,7 +183,7 @@ const Dashboard: React.FC = () => {
                     <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} />
                     <YAxis hide />
                     <Tooltip 
-                      contentStyle={{backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid #334155', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.5)'}}
+                      contentStyle={{backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid #334155'}}
                     />
                     <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
                   </AreaChart>
@@ -202,14 +196,8 @@ const Dashboard: React.FC = () => {
               <div className="flex justify-between items-start">
                  <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                     <ShieldCheck className={`w-4 h-4 ${complianceScore >= 97 ? 'text-emerald-500' : 'text-amber-500'}`} />
-                    Sentinel Compliance
+                    Sentinel Status
                  </h3>
-                 {complianceScore < 97 && !isOptimizing && (
-                    <div className="flex items-center gap-1 animate-pulse">
-                       <AlertTriangle className="w-3 h-3 text-amber-500" />
-                       <span className="text-[8px] font-black text-amber-500 uppercase">Drift Detected</span>
-                    </div>
-                 )}
               </div>
               
               <div className="flex items-center justify-center py-4 relative">
@@ -232,16 +220,16 @@ const Dashboard: React.FC = () => {
                        <span className={`text-2xl font-black tracking-tighter transition-colors duration-1000 ${complianceScore >= 97 ? 'text-white' : 'text-blue-400'}`}>
                           {isOptimizing ? '---' : `${complianceScore}%`}
                        </span>
-                       <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Grade</span>
+                       <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Hardened</span>
                     </div>
                  </div>
               </div>
 
               <div className="space-y-3 pt-2 flex-1">
                  {[
-                   {label: "Policy Enforcement", val: `${subMetrics.enforcement}%`},
-                   {label: "Dynamics Sync", val: `${subMetrics.sync}%`},
-                   {label: "Audit Coverage", val: `${subMetrics.audit}%`}
+                   {label: "Policy Strength", val: `${subMetrics.enforcement}%`},
+                   {label: "Vulnerability Mitigation", val: `100%`},
+                   {label: "Audit Integrity", val: `${subMetrics.audit}%`}
                  ].map(item => (
                     <div key={item.label} className="flex justify-between items-center bg-slate-950 p-2 rounded-lg border border-slate-800">
                        <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{item.label}</span>
@@ -258,24 +246,10 @@ const Dashboard: React.FC = () => {
                     complianceScore >= 97 
                     ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default' 
                     : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20'
-                  } disabled:opacity-75`}
+                  }`}
                  >
-                   {isOptimizing ? (
-                     <>
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        Hardening Protocol...
-                     </>
-                   ) : complianceScore >= 97 ? (
-                     <>
-                        <ShieldCheck className="w-3 h-3" />
-                        Standard Hardened {lastOptimized && `[${lastOptimized}]`}
-                     </>
-                   ) : (
-                     <>
-                        <RefreshCw className="w-3 h-3" />
-                        Fix Protocol Deviation
-                     </>
-                   )}
+                   {isOptimizing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                   {isOptimizing ? 'Hardening Protocol...' : 'Patch Vulnerabilities'}
                  </button>
               </div>
            </div>

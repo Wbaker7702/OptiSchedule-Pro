@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell } from 'recharts';
-import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, Loader2 } from 'lucide-react';
-import { FISCAL_METRICS } from '../constants';
+import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, Loader2, Database, ShieldCheck, ArrowUp } from 'lucide-react';
+import { FISCAL_METRICS, ENTERPRISE_INGRESS_HISTORY } from '../constants';
 
 const laborPivotData = [
   { week: 'W1', leakage: 186, recovered: 0 },
@@ -20,10 +20,16 @@ const scalingData = [
   { year: '2028', value: 16 },
 ];
 
+const getFormattedDate = (daysAgo: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
 const reports = [
-  { id: 'rep-1', name: 'Variance Reduction Strategy (CEO/CFO)', date: 'Dec 14, 2025', size: '1.2 MB' },
-  { id: 'rep-2', name: 'Resource Reallocation Plan (Store Mgr)', date: 'Dec 10, 2025', size: '845 KB' },
-  { id: 'rep-3', name: 'Store 5065 Pilot Proof of Concept', date: 'Dec 01, 2025', size: '2.4 MB' },
+  { id: 'rep-1', name: 'Variance Reduction Strategy (CEO/CFO)', date: getFormattedDate(0), size: '1.2 MB' },
+  { id: 'rep-2', name: 'Resource Reallocation Plan (Store Mgr)', date: getFormattedDate(4), size: '845 KB' },
+  { id: 'rep-3', name: 'Store 5065 Pilot Proof of Concept', date: getFormattedDate(14), size: '2.4 MB' },
 ];
 
 const Analytics: React.FC = () => {
@@ -51,7 +57,7 @@ const Analytics: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-gray-50 overflow-auto">
+    <div className="flex-1 bg-gray-50 overflow-auto text-slate-900">
       <Header title="Analytics & Reports" subtitle="The Fiscal Foundation: Efficiency vs. Leakage" />
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -103,6 +109,65 @@ const Analytics: React.FC = () => {
                Cumulative ROI through Scale
              </div>
           </div>
+        </div>
+
+        {/* Enterprise Ingress History Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+           <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-3">
+                 <div className="p-2 bg-blue-100 rounded-lg">
+                    <Database className="w-5 h-5 text-blue-600" />
+                 </div>
+                 <div>
+                    <h3 className="font-bold text-gray-900">Enterprise Ingress History</h3>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-black">Sentinel Data Flow Analytics</p>
+                 </div>
+              </div>
+              <div className="flex items-center gap-2 text-emerald-600 text-xs font-black uppercase tracking-widest">
+                 <TrendingUp className="w-4 h-4" />
+                 Total Surge: +46% (5 Day Window)
+              </div>
+           </div>
+           <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                 <thead className="bg-gray-50 text-gray-500 font-black uppercase tracking-widest text-[10px] border-b border-gray-200">
+                    <tr>
+                       <th className="px-6 py-4">Verification Date</th>
+                       <th className="px-6 py-4">Ingress Volume</th>
+                       <th className="px-6 py-4">Data Source Node</th>
+                       <th className="px-6 py-4">Day/Day Growth</th>
+                       <th className="px-6 py-4">Integrity Status</th>
+                    </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-100 font-medium">
+                    {ENTERPRISE_INGRESS_HISTORY.map((point, idx) => (
+                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4 font-mono text-xs">{point.date}</td>
+                          <td className="px-6 py-4 font-black">{point.volume.toLocaleString()} <span className="text-gray-400 text-[10px] uppercase font-bold tracking-widest">Leads</span></td>
+                          <td className="px-6 py-4">
+                             <span className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-[10px] uppercase tracking-widest font-black text-slate-600">
+                                {point.source}
+                             </span>
+                          </td>
+                          <td className="px-6 py-4">
+                             <div className="flex items-center gap-1.5 text-emerald-600">
+                                <ArrowUp className="w-3.5 h-3.5" />
+                                <span className="font-black">+{point.growth}%</span>
+                             </div>
+                          </td>
+                          <td className="px-6 py-4">
+                             <div className="flex items-center gap-2">
+                                <ShieldCheck className={`w-4 h-4 ${point.status === 'Verified' ? 'text-blue-500' : 'text-emerald-500'}`} />
+                                <span className={`text-[10px] font-black uppercase tracking-widest ${point.status === 'Verified' ? 'text-blue-600' : 'text-emerald-600'}`}>
+                                   {point.status}
+                                </span>
+                             </div>
+                          </td>
+                       </tr>
+                    ))}
+                 </tbody>
+              </table>
+           </div>
         </div>
 
         {/* Charts Row */}

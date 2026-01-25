@@ -1,10 +1,21 @@
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog } from './types';
+
+// Helper for relative dates
+const getRelativeDate = (offsetDays: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - offsetDays);
+  return d.toISOString().split('T')[0];
+};
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
 export const DATE_STRING = "Thursday, January 15, 2026";
 export const APP_VERSION = "v3.2.0-Sentinel-Hub";
 export const BRAND_NAME = "OptiSchedule Pro®";
+// Dynamic Date: Always current
+export const DATE_STRING = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+export const APP_VERSION = "v3.4.0-Sentinel-AI-Live";
+export const BRAND_NAME = "OptiSchedule Pro";
 
 export const SYSTEM_HEALTH = {
   status: 'Hardened',
@@ -25,12 +36,42 @@ export const FISCAL_METRICS = {
   laborSurplusPct: 15,
 };
 
-export const OPERATIONAL_AUDITS = [
-  { id: 'aud-101', severity: 'error', code: 'POL-01', message: 'Compliance Breach: Variance > 15% in Front End Protocol', file: 'Dept: Front End', fix: 'Deploy Sentinel Protocol' },
-  { id: 'aud-102', severity: 'warning', code: 'SEC-04', message: 'Unauthorized Sync Latency (240ms) - Buffer Threat', file: 'Node: D365_Ingress', fix: 'Purge Sync Cache' },
-  { id: 'aud-103', severity: 'info', code: 'SSP-09', message: 'Sentinel Security Framework validated for peak load', file: 'Log: Dec_13_2025', fix: 'No action' },
-  { id: 'aud-104', severity: 'error', code: 'FIS-02', message: 'Asset Depletion Risk: Critical Inventory Gap', file: 'Dept: Grocery', fix: 'Force Re-stocking' },
-  { id: 'aud-105', severity: 'warning', code: 'LAB-02', message: 'Protocol Deviation: 12.5 surplus hrs unallocated', file: 'Dept: Apparel', fix: 'Re-deploy Assets' },
+export const OPERATIONAL_AUDITS: AuditLog[] = [
+  { id: 'aud-101', severity: 'error', code: 'POL-01', message: 'Compliance Breach: Variance > 15% in Front End Protocol', file: 'Dept: Front End', file_path: 'Dept: Front End', fix: 'Deploy Sentinel Protocol' },
+  { id: 'aud-102', severity: 'warning', code: 'SEC-04', message: 'Unauthorized Sync Latency (240ms) - Buffer Threat', file: 'Node: D365_Ingress', file_path: 'Node: D365_Ingress', fix: 'Purge Sync Cache' },
+  { id: 'aud-103', severity: 'info', code: 'OPT_09', message: 'Optimal staffing achieved for peak hour', file: 'Schedule: Current_Cycle', file_path: 'Schedule: Current_Cycle', fix: 'No action' },
+  { id: 'aud-104', severity: 'error', code: 'FIS-02', message: 'Asset Depletion Risk: Critical Inventory Gap', file: 'Dept: Grocery', file_path: 'Dept: Grocery', fix: 'Force Re-stocking' },
+  { id: 'aud-105', severity: 'warning', code: 'LAB-02', message: 'Protocol Deviation: 12.5 surplus hrs unallocated', file: 'Dept: Apparel', file_path: 'Dept: Apparel', fix: 'Re-deploy Assets' },
+];
+
+export const VULNERABILITY_DATA: Vulnerability[] = [
+  { 
+    id: 'vul-001', 
+    title: 'Workforce Leakage Vector', 
+    severity: 'Critical', 
+    description: '15% labor surplus unallocated in Apparel zone during peak surge.', 
+    remediation: 'Sentinel-Redirect: Auto-assign assets to Front End.',
+    status: 'Detected',
+    category: 'Operational'
+  },
+  { 
+    id: 'vul-002', 
+    title: 'Sync Latency Drift', 
+    severity: 'High', 
+    description: 'Dynamics 365 ingress node exhibiting 240ms response jitter.', 
+    remediation: 'Patch: Clear D365 Cache & Initialize Sentinel Handshake.',
+    status: 'Detected',
+    category: 'Digital'
+  },
+  { 
+    id: 'vul-003', 
+    title: 'Unauthorized Protocol Bypass', 
+    severity: 'Medium', 
+    description: 'Manual schedule override detected in Electronics department.', 
+    remediation: 'Sentinel-Lock: Revert to ROI-optimized deployment.',
+    status: 'Detected',
+    category: 'Personnel'
+  }
 ];
 
 export const HUBSPOT_METRICS = {
@@ -46,6 +87,15 @@ export const DYNAMICS_365_ROI_DATA = {
   dealsCreated: { value: 26, label: "Opportunties Validated", subtext: "ERP Standard" },
   revenue: { value: 150, label: "ERP Integration", subtext: "Dynamics 365 Verified" }
 };
+
+export const ENTERPRISE_INGRESS_HISTORY: IngressDataPoint[] = [
+  { date: getRelativeDate(0), volume: 1450, source: 'Dynamics 365', growth: 12.4, status: 'Verified' },
+  { date: getRelativeDate(1), volume: 1290, source: 'Sentinel Node', growth: 8.1, status: 'Hardened' },
+  { date: getRelativeDate(2), volume: 1194, source: 'HubSpot', growth: 15.2, status: 'Verified' },
+  { date: getRelativeDate(3), volume: 1036, source: 'Dynamics 365', growth: 5.8, status: 'Verified' },
+  { date: getRelativeDate(4), volume: 980, source: 'Sentinel Node', growth: 10.2, status: 'Hardened' },
+  { date: getRelativeDate(5), volume: 889, source: 'Dynamics 365', growth: 3.4, status: 'Verified' },
+];
 
 export const EMPLOYEES: Employee[] = [
   { id: '1', name: 'John Smith', role: 'Security Ops Lead', department: 'Front End', status: 'Active', performance: 4.8, email: 'john.smith@optischedule.com', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop' },

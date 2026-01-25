@@ -31,6 +31,28 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
     { event: 'Inventory Allocation', target: 'Supply Chain Hub', status: 'Failed', time: 'Yesterday' }
   ];
 
+  // Helper to generate current week dates
+  const getDaysOfWeek = () => {
+    const dates = [];
+    const today = new Date();
+    // Calculate Monday of current week
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1); 
+    const monday = new Date(today.setDate(diff));
+
+    for (let i = 0; i < 6; i++) { // Mon to Sat
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        dates.push({
+            day: d.toLocaleDateString('en-US', { weekday: 'short' }),
+            date: d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
+        });
+    }
+    return dates;
+  };
+
+  const weekDates = getDaysOfWeek();
+
   const handleSync = () => {
     setIsSyncing(true);
     setTimeout(() => setIsSyncing(false), 2000);
@@ -334,7 +356,7 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
              <div className="flex items-center gap-4">
                 <h3 className="font-black text-gray-900 uppercase tracking-widest text-xs">Workforce Deployment Ledger</h3>
                 <div className="flex bg-gray-100 rounded-lg p-1">
-                   <button className="px-3 py-1 text-[10px] font-black uppercase tracking-widest bg-white shadow-sm rounded text-gray-800">Dec 15 - Dec 21</button>
+                   <button className="px-3 py-1 text-[10px] font-black uppercase tracking-widest bg-white shadow-sm rounded text-gray-800">Current Cycle</button>
                    <button className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-gray-700">Next Cycle</button>
                 </div>
              </div>
@@ -362,12 +384,11 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                  <thead className="bg-gray-50 text-gray-400 text-[10px] font-black uppercase tracking-widest border-b border-gray-200">
                     <tr>
                       <th className="px-4 py-3 rounded-l-lg min-w-[150px]">Temporal Segment</th>
-                      <th className="px-4 py-3 min-w-[120px]">Mon 12/15</th>
-                      <th className="px-4 py-3 min-w-[120px]">Tue 12/16</th>
-                      <th className="px-4 py-3 min-w-[120px]">Wed 12/17</th>
-                      <th className="px-4 py-3 min-w-[120px]">Thu 12/18</th>
-                      <th className="px-4 py-3 min-w-[120px]">Fri 12/19</th>
-                      <th className="px-4 py-3 rounded-r-lg min-w-[120px]">Sat 12/20</th>
+                      {weekDates.map((d, i) => (
+                         <th key={i} className={`px-4 py-3 min-w-[120px] ${i === 5 ? 'rounded-r-lg' : ''}`}>
+                            {d.day} {d.date}
+                         </th>
+                      ))}
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-gray-100 text-[11px] font-bold text-gray-800">
