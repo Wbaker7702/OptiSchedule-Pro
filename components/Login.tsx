@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ShieldCheck, Lock, Mail, ArrowRight, Activity, Database, ShieldAlert } from 'lucide-react';
 import { BRAND_NAME, APP_VERSION } from '../constants';
 
@@ -10,14 +10,41 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail.endsWith('@optischedule.com')) {
+      setErrorMessage('Please use your OptiSchedule corporate email.');
+      return;
+    }
+
+    if (password.trim().length < 8) {
+      setErrorMessage('Policy clearance token must be at least 8 characters.');
+      return;
+    }
+
     setIsLoading(true);
     
     // Simulate API authentication delay
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setIsLoading(false);
+      setPassword('');
       onLogin();
     }, 1200);
   };
@@ -53,6 +80,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {errorMessage && (
+              <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-[11px] text-red-300 font-mono">
+                {errorMessage}
+              </div>
+            )}
             <div>
               <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Corporate ID</label>
               <div className="relative">
@@ -65,6 +97,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
                   placeholder="ID@optischedule.com"
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -82,6 +115,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   required
                 />
               </div>

@@ -9,9 +9,6 @@ const getRelativeDate = (offsetDays: number) => {
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
-export const DATE_STRING = "Thursday, January 15, 2026";
-export const APP_VERSION = "v3.2.0-Sentinel-Hub";
-export const BRAND_NAME = "OptiSchedule Pro®";
 // Dynamic Date: Always current
 export const DATE_STRING = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 export const APP_VERSION = "v3.4.0-Sentinel-AI-Live";
