@@ -14,9 +14,11 @@ interface LinterLog {
 
 interface OperationsProps {
   defaultTab?: 'metrics' | 'audit' | 'vision' | 'scanner';
+  externalTrigger?: string | null;
+  onClearTrigger?: () => void;
 }
 
-const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
+const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externalTrigger, onClearTrigger }) => {
   const [activeTab, setActiveTab] = useState<'metrics' | 'audit' | 'vision' | 'scanner'>(defaultTab);
   const [audits, setAudits] = useState(INITIAL_AUDITS);
   const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>(INITIAL_VULNERABILITIES);
@@ -55,6 +57,19 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
         setTimeout(() => addLog(`Stream secure. Real-time telemetry overlay active.`, 'success'), 1200);
     }
   }, [activeTab]);
+
+  // Handle External Triggers (e.g. from Team page)
+  useEffect(() => {
+    if (externalTrigger && activeTab === 'audit') {
+       if (externalTrigger === 'NEW_ASSET_SCAN') {
+           addLog('[TRIGGER] Sentinel Event: New Personnel Asset detected in registry.', 'info');
+           setTimeout(() => addLog('Initializing background check & protocol verification...', 'warning'), 600);
+           setTimeout(() => addLog('D365 HR Sync: Profile validated. 401(k) & Benefits logic mapped.', 'success'), 1400);
+           setTimeout(() => addLog('Sentinel Policy: Asset cleared for scheduling.', 'success'), 2200);
+       }
+       if (onClearTrigger) onClearTrigger();
+    }
+  }, [externalTrigger, activeTab]);
 
   const addLog = (message: string, type: LinterLog['type']) => {
     const newLog: LinterLog = {

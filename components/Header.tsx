@@ -25,6 +25,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
   }, []);
 
   const notifications = [
+    { id: 0, type: 'alert', text: 'CRITICAL: Cloud Run Quota Exceeded (us-west1). Deployment Halted.', time: 'Just now' },
     { id: 1, type: 'alert', text: 'Overtime risk detected for Checkout Dept', time: '10 min ago' },
     { id: 2, type: 'info', text: 'New inventory shipment arrived', time: '1 hour ago' },
     { id: 3, type: 'success', text: 'Weekly schedule published successfully', time: '2 hours ago' },

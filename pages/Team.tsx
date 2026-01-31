@@ -6,7 +6,11 @@ import { Employee } from '../types';
 
 const ITEMS_PER_PAGE = 5;
 
-const Team: React.FC = () => {
+interface TeamProps {
+  onEmployeeAdded?: () => void;
+}
+
+const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,6 +52,11 @@ const Team: React.FC = () => {
       setShowSuccess(true);
       setFormData({ name: '', role: '', email: '', department: 'Front End' });
       setCurrentPage(1);
+
+      // Trigger automatic linter transition after success message is visible
+      setTimeout(() => {
+         if (onEmployeeAdded) onEmployeeAdded();
+      }, 1500);
 
       setTimeout(() => setShowSuccess(false), 3000);
     }, 1200);

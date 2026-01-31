@@ -15,7 +15,8 @@ import { View } from './types';
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
-  const [operationsTab, setOperationsTab] = useState<'metrics' | 'audit' | 'vision'>('metrics');
+  const [operationsTab, setOperationsTab] = useState<'metrics' | 'audit' | 'vision' | 'scanner'>('metrics');
+  const [linterTrigger, setLinterTrigger] = useState<string | null>(null);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -26,9 +27,14 @@ const App: React.FC = () => {
     setCurrentView(View.DASHBOARD);
   };
 
-  const navigateToOperations = (tab: 'metrics' | 'audit' | 'vision' = 'metrics') => {
+  const navigateToOperations = (tab: 'metrics' | 'audit' | 'vision' | 'scanner' = 'metrics') => {
     setOperationsTab(tab);
     setCurrentView(View.OPERATIONS);
+  };
+
+  const handleEmployeeAdded = () => {
+    setLinterTrigger('NEW_ASSET_SCAN');
+    navigateToOperations('audit');
   };
 
   const renderView = () => {
@@ -38,13 +44,19 @@ const App: React.FC = () => {
       case View.SCHEDULING:
         return <Scheduling setCurrentView={setCurrentView} onFinalize={() => navigateToOperations('audit')} />;
       case View.OPERATIONS:
-        return <Operations defaultTab={operationsTab} />;
+        return (
+          <Operations 
+            defaultTab={operationsTab} 
+            externalTrigger={linterTrigger}
+            onClearTrigger={() => setLinterTrigger(null)}
+          />
+        );
       case View.INVENTORY:
         return <Inventory />;
       case View.ANALYTICS:
         return <Analytics />;
       case View.TEAM:
-        return <Team />;
+        return <Team onEmployeeAdded={handleEmployeeAdded} />;
       case View.PLAYBOOK:
         return <Playbook setCurrentView={setCurrentView} />;
       case View.SETTINGS:

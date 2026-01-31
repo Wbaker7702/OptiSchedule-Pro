@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import StatCard from '../components/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2, Fingerprint, Shield } from 'lucide-react';
-import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA, VULNERABILITY_DATA } from '../constants';
+import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA, VULNERABILITY_DATA, SYSTEM_HEALTH } from '../constants';
 
 const data = [
   { time: '8 AM', value: 40 },
@@ -29,6 +29,8 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const messages = [
+      "CRITICAL: Quota Exceeded us-west1",
+      "ERROR: RoutesReady=False for optischedule-pro",
       "SENTINEL_AUTH: Verification Front End",
       "D365_INGRESS: Data Packet Validated",
       "LINTER: Breach remediated Pharmacy",
@@ -101,7 +103,9 @@ const Dashboard: React.FC = () => {
                     <h2 className="text-white font-black text-xl tracking-[0.1em] uppercase">Sentinel Security Mandate</h2>
                     <span className="bg-blue-500 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em] animate-pulse">Monitoring</span>
                  </div>
-                 <p className="text-slate-400 text-xs font-mono max-w-md leading-relaxed uppercase">Stopping <span className="text-blue-500 font-bold">${FISCAL_METRICS.executionLeakage.toLocaleString()}</span> in weekly workforce leakage.</p>
+                 <p className="text-slate-400 text-xs font-mono max-w-lg leading-relaxed uppercase">
+                    "Execution Leakage" is a breach of policy. Every unallocated labor hour is a digital security failure. The Sentinel Security Policy must be enforced without variance.
+                 </p>
               </div>
            </div>
 
@@ -122,11 +126,11 @@ const Dashboard: React.FC = () => {
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard 
               title="Sentinel Health" 
-              value="99.99%" 
-              trend="+0.01%" 
-              trendDirection="up" 
-              subtitle="Latency: 12ms"
-              icon={<Shield className="w-5 h-5 text-blue-500" />}
+              value={SYSTEM_HEALTH.status}
+              trend="Region: us-west1" 
+              trendDirection="down" 
+              subtitle={`Error: ${SYSTEM_HEALTH.latency}`}
+              icon={<ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" />}
             />
             <StatCard 
               title="Compliance Index" 

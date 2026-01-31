@@ -15,12 +15,12 @@ export const APP_VERSION = "v3.4.0-Sentinel-AI-Live";
 export const BRAND_NAME = "OptiSchedule Pro";
 
 export const SYSTEM_HEALTH = {
-  status: 'Hardened',
-  uptime: '99.999%',
-  latency: '12ms',
-  environment: 'Sentinel-Secure',
+  status: 'Critical Failure',
+  uptime: 'Service Degraded',
+  latency: 'ERR_QUOTA',
+  environment: 'us-west1 (Quota Exceeded)',
   railsVersion: '8.0.0-Sentinel-Patch',
-  syncCycle: 'Real-time (SSP Enabled)'
+  syncCycle: 'Halted (ProjectInitFailed)'
 };
 
 export const FISCAL_METRICS = {
@@ -43,6 +43,15 @@ export const OPERATIONAL_AUDITS: AuditLog[] = [
 ];
 
 export const VULNERABILITY_DATA: Vulnerability[] = [
+  { 
+    id: 'vul-004', 
+    title: 'Cloud Run Quota Breach', 
+    severity: 'Critical', 
+    description: 'Project initialization failed in us-west1 due to quota limits. Service optischedule-pro-walmart-store-5065 RoutesReady=False.', 
+    remediation: 'Request Quota Increase for Cloud Run API in us-west1.',
+    status: 'Detected',
+    category: 'Digital'
+  },
   { 
     id: 'vul-001', 
     title: 'Workforce Leakage Vector', 
