@@ -8,6 +8,7 @@ import Inventory from './pages/Inventory';
 import Team from './pages/Team';
 import Analytics from './pages/Analytics';
 import Playbook from './pages/Playbook';
+import Feedback from './pages/Feedback';
 import Settings from './pages/Settings';
 import Login from './components/Login';
 import SentinelAI from './components/SentinelAI';
@@ -75,6 +76,8 @@ const App: React.FC = () => {
         return <Team onEmployeeAdded={handleEmployeeAdded} />;
       case View.PLAYBOOK:
         return <Playbook setCurrentView={setCurrentView} />;
+      case View.FEEDBACK:
+        return <Feedback />;
       case View.SETTINGS:
         return <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />;
       default:
