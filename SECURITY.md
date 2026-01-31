@@ -16,7 +16,7 @@ We take the security of our software seriously. If you suspect that you have fou
 ### How to Report
 
 1.  **Do not** open a GitHub issue.
-2.  Please send an email to security@example.com (replace with actual security contact) with a full description of the vulnerability.
+2.  Please send an email to security@your-project.com (replace with actual security contact) with a full description of the vulnerability.
 3.  Please include the steps required to reproduce the issue.
 4.  We will acknowledge your report within 48 hours.
 
