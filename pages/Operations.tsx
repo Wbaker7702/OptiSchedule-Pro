@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import { DEPARTMENT_METRICS, OPERATIONAL_AUDITS as INITIAL_AUDITS, VULNERABILITY_DATA as INITIAL_VULNERABILITIES } from '../constants';
 import { RefreshCcw, Users, DollarSign, TrendingUp, Clock, ShieldAlert, CheckCircle, Info, Terminal, Search, AlertCircle, Play, Download, Loader2, ChevronRight, Activity, TerminalSquare, Eye, Maximize2, Radio, Shield, Bug, Zap, Fingerprint } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label, CartesianGrid } from 'recharts';
 import { Vulnerability } from '../types';
 
 interface LinterLog {
@@ -31,6 +31,15 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
 
   // Vision state
   const [activeCamera, setActiveCamera] = useState('CAM_01_CHECKOUT');
+
+  // Chart Data Preparation
+  const salesData = DEPARTMENT_METRICS.map(dept => ({
+    name: dept.name,
+    sales: parseInt(dept.sales.replace(/[^0-9]/g, '')),
+    originalSales: dept.sales
+  }));
+
+  const averageSales = salesData.reduce((acc, curr) => acc + curr.sales, 0) / salesData.length;
 
   useEffect(() => {
     setActiveTab(defaultTab);
@@ -202,6 +211,57 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
                    </div>
                 </div>
               ))}
+            </div>
+
+            {/* Sales by Department Chart */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 className="font-black text-gray-900 uppercase tracking-widest text-sm">Sales Distribution Analysis</h3>
+                        <p className="text-xs text-gray-500 mt-1">Departmental revenue vs. Store Average</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-bold">
+                        <div className="w-3 h-3 bg-emerald-500 rounded-sm"></div>
+                        <span className="text-gray-600">Above Avg</span>
+                        <div className="w-3 h-3 bg-blue-500 rounded-sm ml-2"></div>
+                        <span className="text-gray-600">Below Avg</span>
+                    </div>
+                </div>
+                <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={salesData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} />
+                            <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} tickFormatter={(value) => `$${value/1000}k`} />
+                            <Tooltip
+                                cursor={{fill: '#f8fafc'}}
+                                content={({ active, payload }) => {
+                                    if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                            <div className="bg-slate-900 text-white p-3 rounded-lg shadow-xl border border-slate-800">
+                                                <p className="font-bold text-xs uppercase tracking-wider mb-1 text-slate-400">{data.name}</p>
+                                                <p className="font-black text-lg">{data.originalSales}</p>
+                                                <p className={`text-[10px] font-bold mt-1 ${data.sales > averageSales ? 'text-emerald-400' : 'text-blue-400'}`}>
+                                                    {data.sales > averageSales ? `+${Math.round(((data.sales - averageSales) / averageSales) * 100)}% vs Avg` : `${Math.round(((data.sales - averageSales) / averageSales) * 100)}% vs Avg`}
+                                                </p>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                            />
+                            <ReferenceLine y={averageSales} stroke="#fbbf24" strokeDasharray="3 3">
+                                <Label value="AVG" position="insideTopLeft" fill="#fbbf24" fontSize={10} fontWeight="bold" />
+                            </ReferenceLine>
+                            <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
+                                {salesData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.sales > averageSales ? '#10b981' : '#3b82f6'} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
           </div>
         )}

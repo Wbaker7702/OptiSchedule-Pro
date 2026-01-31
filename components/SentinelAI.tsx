@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2 } from 'lucide-react';
+import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
 
 interface Message {
     role: 'user' | 'ai';
     content: string;
     timestamp: string;
+    groundingChunks?: any[];
 }
 
 const SentinelAI: React.FC = () => {
@@ -23,7 +25,7 @@ const SentinelAI: React.FC = () => {
         }
     }, [messages, isTyping]);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!input.trim()) return;
 
         const userMsg: Message = {
@@ -36,30 +38,46 @@ const SentinelAI: React.FC = () => {
         setInput('');
         setIsTyping(true);
 
-        // Simulate AI Response
-        setTimeout(() => {
-            let aiContent = "Analyzing Sentinel Telemetry... ";
-            const lowerInput = input.toLowerCase();
-            
-            if (lowerInput.includes('hubspot')) {
-                aiContent = "HubSpot CRM link is currently pending authorization. Attributed campaign revenue for Store 5065 is estimated at $15.4k this period.";
-            } else if (lowerInput.includes('dynamics') || lowerInput.includes('erp')) {
-                aiContent = "Dynamics 365 Core Ingress is secure. Sales velocity data is synchronized with 99.8% precision.";
-            } else if (lowerInput.includes('staff') || lowerInput.includes('schedule')) {
-                aiContent = "Current Front End staffing is at 12/15. Compliance grade is 94%. Recommend reallocating 2 assets from Home Goods to cover peak surge at 5 PM.";
-            } else if (lowerInput.includes('status') || lowerInput.includes('health')) {
-                aiContent = `System Status: Hardened. Uptime: 99.999%. Latency: 12ms. All Sentinel Nodes operational as of ${new Date().toLocaleTimeString()}.`;
-            } else {
-                aiContent = "I've analyzed the current store state. All operational nodes are within standard deviation parameters. Sentinel Protocol v3.2 is fully enforced.";
-            }
+        try {
+            // Initialize Gemini with Search Grounding
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: userMsg.content,
+                config: {
+                    tools: [{ googleSearch: {} }],
+                }
+            });
+
+            const aiContent = response.text || "Operational data not found.";
+            const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
 
             setMessages(prev => [...prev, {
                 role: 'ai',
                 content: aiContent,
+                timestamp: new Date().toLocaleTimeString(),
+                groundingChunks: groundingChunks
+            }]);
+        } catch (error) {
+            console.error("Sentinel AI Error:", error);
+            // Fallback for demo purposes if API fails or key is missing
+            let fallbackContent = "Sentinel Node Connection Interrupted. Unable to fetch live intelligence.";
+            
+            const lowerInput = userMsg.content.toLowerCase();
+            if (lowerInput.includes('hubspot')) {
+                fallbackContent = "HubSpot CRM link is currently pending authorization. Attributed campaign revenue for Store 5065 is estimated at $15.4k this period.";
+            } else if (lowerInput.includes('dynamics') || lowerInput.includes('erp')) {
+                fallbackContent = "Dynamics 365 Core Ingress is secure. Sales velocity data is synchronized with 99.8% precision.";
+            }
+
+            setMessages(prev => [...prev, {
+                role: 'ai',
+                content: fallbackContent,
                 timestamp: new Date().toLocaleTimeString()
             }]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     if (!isOpen) {
@@ -75,7 +93,7 @@ const SentinelAI: React.FC = () => {
     }
 
     return (
-        <div className={`fixed right-8 bottom-8 z-50 bg-slate-950 border border-slate-800 rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] flex flex-col transition-all duration-300 overflow-hidden ${isMinimized ? 'w-64 h-14' : 'w-[400px] h-[550px]'}`}>
+        <div className={`fixed right-8 bottom-8 z-50 bg-slate-950 border border-slate-800 rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] flex flex-col transition-all duration-300 overflow-hidden ${isMinimized ? 'w-64 h-14' : 'w-[400px] h-[600px]'}`}>
             {/* Header */}
             <div className="bg-[#002050] p-4 flex items-center justify-between border-b border-blue-400/20">
                 <div className="flex items-center gap-3">
@@ -109,6 +127,36 @@ const SentinelAI: React.FC = () => {
                                     : 'bg-slate-900 text-slate-300 border border-slate-800 rounded-tl-none'
                                 }`}>
                                     {msg.content}
+                                    
+                                    {/* Grounding Sources */}
+                                    {msg.groundingChunks && msg.groundingChunks.length > 0 && (
+                                        <div className="mt-3 pt-2 border-t border-slate-700/50">
+                                            <p className="text-[9px] font-mono text-slate-500 mb-2 uppercase tracking-widest flex items-center gap-1">
+                                                <Sparkles className="w-3 h-3 text-blue-500" /> Source Data
+                                            </p>
+                                            <div className="space-y-1.5">
+                                                {msg.groundingChunks.map((chunk, idx) => {
+                                                    if (chunk.web?.uri && chunk.web?.title) {
+                                                        return (
+                                                            <a 
+                                                                key={idx}
+                                                                href={chunk.web.uri}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-2 p-2 rounded bg-slate-950/50 hover:bg-slate-800 border border-slate-800 transition-colors group"
+                                                            >
+                                                                <ExternalLink className="w-3 h-3 text-blue-500 group-hover:text-blue-400" />
+                                                                <span className="text-[10px] text-blue-400 group-hover:text-blue-300 truncate font-medium underline decoration-blue-500/30">
+                                                                    {chunk.web.title}
+                                                                </span>
+                                                            </a>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <span className="text-[8px] font-mono text-slate-600 mt-1 uppercase tracking-widest">{msg.timestamp}</span>
                             </div>
