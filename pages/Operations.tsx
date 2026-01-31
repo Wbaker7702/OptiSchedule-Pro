@@ -65,6 +65,7 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
            addLog('[TRIGGER] Sentinel Event: New Personnel Asset detected in registry.', 'info');
            setTimeout(() => addLog('Initializing background check & protocol verification...', 'warning'), 600);
            setTimeout(() => addLog('D365 HR Sync: Profile validated. 401(k) & Benefits logic mapped.', 'success'), 1400);
+           setTimeout(() => addLog('HubSpot CRM: Access Role Provisioned (Sales/Service).', 'success'), 1800);
            setTimeout(() => addLog('Sentinel Policy: Asset cleared for scheduling.', 'success'), 2200);
        }
        if (onClearTrigger) onClearTrigger();
