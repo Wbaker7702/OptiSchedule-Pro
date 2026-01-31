@@ -1,6 +1,12 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
+import { IntegrationStatus } from '../types';
+
+interface SentinelAIProps {
+    hubspotStatus: IntegrationStatus;
+}
 
 interface Message {
     role: 'user' | 'ai';
@@ -9,7 +15,7 @@ interface Message {
     groundingChunks?: any[];
 }
 
-const SentinelAI: React.FC = () => {
+const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [input, setInput] = useState('');
@@ -60,12 +66,16 @@ const SentinelAI: React.FC = () => {
             }]);
         } catch (error) {
             console.error("Sentinel AI Error:", error);
-            // Fallback for demo purposes if API fails or key is missing
+            // Fallback with context awareness
             let fallbackContent = "Sentinel Node Connection Interrupted. Unable to fetch live intelligence.";
             
             const lowerInput = userMsg.content.toLowerCase();
-            if (lowerInput.includes('hubspot')) {
-                fallbackContent = "HubSpot CRM link is currently pending authorization. Attributed campaign revenue for Store 5065 is estimated at $15.4k this period.";
+            if (lowerInput.includes('hubspot') || lowerInput.includes('crm') || lowerInput.includes('sales')) {
+                if (hubspotStatus === 'connected') {
+                     fallbackContent = "HubSpot Data Ingress is ACTIVE. Current metrics indicate $15.4k in attributed campaign revenue this period, with a 12% uptick in loyalty signups impacting grocery department traffic.";
+                } else {
+                     fallbackContent = "HubSpot CRM link is currently pending authorization. Attributed campaign revenue data is unavailable until the node is initialized in Settings or Scheduling.";
+                }
             } else if (lowerInput.includes('dynamics') || lowerInput.includes('erp')) {
                 fallbackContent = "Dynamics 365 Core Ingress is secure. Sales velocity data is synchronized with 99.8% precision.";
             }

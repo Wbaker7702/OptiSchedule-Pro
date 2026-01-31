@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
@@ -10,13 +11,18 @@ import Playbook from './pages/Playbook';
 import Settings from './pages/Settings';
 import Login from './components/Login';
 import SentinelAI from './components/SentinelAI';
-import { View } from './types';
+import { View, ERPProvider, IntegrationStatus } from './types';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
   const [operationsTab, setOperationsTab] = useState<'metrics' | 'audit' | 'vision' | 'scanner'>('metrics');
   const [linterTrigger, setLinterTrigger] = useState<string | null>(null);
+
+  // Global Integration State
+  const [activeERPProvider, setActiveERPProvider] = useState<ERPProvider>('Dynamics 365');
+  const [isERPConnected, setIsERPConnected] = useState(false);
+  const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('disconnected');
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -42,7 +48,17 @@ const App: React.FC = () => {
       case View.DASHBOARD:
         return <Dashboard />;
       case View.SCHEDULING:
-        return <Scheduling setCurrentView={setCurrentView} onFinalize={() => navigateToOperations('audit')} />;
+        return (
+          <Scheduling 
+            setCurrentView={setCurrentView} 
+            onFinalize={() => navigateToOperations('audit')}
+            activeProvider={activeERPProvider}
+            setActiveProvider={setActiveERPProvider}
+            isConnected={isERPConnected}
+            setIsConnected={setIsERPConnected}
+            setHubspotStatus={setHubspotStatus}
+          />
+        );
       case View.OPERATIONS:
         return (
           <Operations 
@@ -54,13 +70,13 @@ const App: React.FC = () => {
       case View.INVENTORY:
         return <Inventory />;
       case View.ANALYTICS:
-        return <Analytics />;
+        return <Analytics hubspotStatus={hubspotStatus} />;
       case View.TEAM:
         return <Team onEmployeeAdded={handleEmployeeAdded} />;
       case View.PLAYBOOK:
         return <Playbook setCurrentView={setCurrentView} />;
       case View.SETTINGS:
-        return <Settings />;
+        return <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />;
       default:
         return <Dashboard />;
     }
@@ -82,7 +98,7 @@ const App: React.FC = () => {
       />
       <main className="flex-1 ml-64 flex flex-col h-screen relative">
         {renderView()}
-        <SentinelAI />
+        <SentinelAI hubspotStatus={hubspotStatus} />
       </main>
     </div>
   );

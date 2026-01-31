@@ -10,6 +10,9 @@ export enum View {
   SETTINGS = 'SETTINGS',
 }
 
+export type ERPProvider = 'Dynamics 365' | 'SAP S/4HANA' | 'FDE' | 'HubSpot';
+export type IntegrationStatus = 'connected' | 'disconnected';
+
 export interface Employee {
   id: string;
   name: string;

@@ -1,8 +1,14 @@
+
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell } from 'recharts';
 import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, Loader2, Database, ShieldCheck, ArrowUp, Megaphone, Heart, BarChart2, Layers } from 'lucide-react';
 import { FISCAL_METRICS, HUBSPOT_METRICS } from '../constants';
+import { IntegrationStatus } from '../types';
+
+interface AnalyticsProps {
+  hubspotStatus: IntegrationStatus;
+}
 
 const laborPivotData = [
   { week: 'W1', leakage: 186, recovered: 0 },
@@ -32,7 +38,7 @@ const reports = [
   { id: 'rep-3', name: 'Store 5065 Pilot Proof of Concept', date: getFormattedDate(14), size: '2.4 MB' },
 ];
 
-const Analytics: React.FC = () => {
+const Analytics: React.FC<AnalyticsProps> = ({ hubspotStatus }) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const handleDownloadReport = (report: typeof reports[0]) => {
@@ -89,10 +95,10 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* HubSpot Integration Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-orange-100 overflow-hidden">
-             <div className="p-6 border-b border-orange-100 bg-orange-50/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className={`bg-white rounded-xl shadow-sm border overflow-hidden ${hubspotStatus === 'connected' ? 'border-orange-100' : 'border-gray-200 opacity-80'}`}>
+             <div className={`p-6 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 ${hubspotStatus === 'connected' ? 'border-orange-100 bg-orange-50/30' : 'border-gray-100 bg-gray-50'}`}>
                  <div className="flex items-center gap-4">
-                     <div className="p-3 bg-[#ff7a59] rounded-xl shadow-lg shadow-orange-500/20">
+                     <div className={`p-3 rounded-xl shadow-lg ${hubspotStatus === 'connected' ? 'bg-[#ff7a59] shadow-orange-500/20' : 'bg-gray-400 shadow-gray-400/20'}`}>
                          <Layers className="w-6 h-6 text-white" />
                      </div>
                      <div>
@@ -101,40 +107,42 @@ const Analytics: React.FC = () => {
                      </div>
                  </div>
                  <div className="flex items-center gap-3">
-                     <div className="px-3 py-1 bg-white border border-orange-200 rounded-lg flex items-center gap-2">
-                         <div className={`w-2 h-2 rounded-full ${HUBSPOT_METRICS.syncStatus === 'Disconnected' ? 'bg-slate-300' : 'bg-emerald-500 animate-pulse'}`} />
-                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{HUBSPOT_METRICS.syncStatus === 'Disconnected' ? 'Connect HubSpot' : 'Live Sync Active'}</span>
+                     <div className={`px-3 py-1 bg-white border rounded-lg flex items-center gap-2 ${hubspotStatus === 'connected' ? 'border-orange-200' : 'border-gray-200'}`}>
+                         <div className={`w-2 h-2 rounded-full ${hubspotStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+                             {hubspotStatus === 'connected' ? 'Live Sync Active' : 'Node Disconnected'}
+                         </span>
                      </div>
                  </div>
              </div>
              
              <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
                  <div className="flex items-center gap-4">
-                     <div className="p-3 bg-orange-100 rounded-lg text-[#ff7a59]">
+                     <div className={`p-3 rounded-lg ${hubspotStatus === 'connected' ? 'bg-orange-100 text-[#ff7a59]' : 'bg-gray-100 text-gray-400'}`}>
                          <Megaphone className="w-5 h-5" />
                      </div>
                      <div>
-                         <p className="text-2xl font-black text-gray-900">{HUBSPOT_METRICS.activeCampaigns}</p>
+                         <p className="text-2xl font-black text-gray-900">{hubspotStatus === 'connected' ? HUBSPOT_METRICS.activeCampaigns : '-'}</p>
                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Campaigns</p>
                      </div>
                  </div>
 
-                 <div className="flex items-center gap-4 border-l border-orange-100 pl-8">
-                     <div className="p-3 bg-orange-100 rounded-lg text-[#ff7a59]">
+                 <div className={`flex items-center gap-4 border-l pl-8 ${hubspotStatus === 'connected' ? 'border-orange-100' : 'border-gray-100'}`}>
+                     <div className={`p-3 rounded-lg ${hubspotStatus === 'connected' ? 'bg-orange-100 text-[#ff7a59]' : 'bg-gray-100 text-gray-400'}`}>
                          <Heart className="w-5 h-5" />
                      </div>
                      <div>
-                         <p className="text-2xl font-black text-gray-900">{HUBSPOT_METRICS.loyaltySignups.toLocaleString()}</p>
+                         <p className="text-2xl font-black text-gray-900">{hubspotStatus === 'connected' ? HUBSPOT_METRICS.loyaltySignups.toLocaleString() : '-'}</p>
                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Loyalty Signups</p>
                      </div>
                  </div>
 
-                 <div className="flex items-center gap-4 border-l border-orange-100 pl-8">
-                     <div className="p-3 bg-orange-100 rounded-lg text-[#ff7a59]">
+                 <div className={`flex items-center gap-4 border-l pl-8 ${hubspotStatus === 'connected' ? 'border-orange-100' : 'border-gray-100'}`}>
+                     <div className={`p-3 rounded-lg ${hubspotStatus === 'connected' ? 'bg-orange-100 text-[#ff7a59]' : 'bg-gray-100 text-gray-400'}`}>
                          <BarChart2 className="w-5 h-5" />
                      </div>
                      <div>
-                         <p className="text-2xl font-black text-gray-900">${(HUBSPOT_METRICS.attributedRevenue / 1000).toFixed(1)}k</p>
+                         <p className="text-2xl font-black text-gray-900">{hubspotStatus === 'connected' ? `$${(HUBSPOT_METRICS.attributedRevenue / 1000).toFixed(1)}k` : '-'}</p>
                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Attributed Rev</p>
                      </div>
                  </div>

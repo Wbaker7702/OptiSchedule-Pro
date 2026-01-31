@@ -1,29 +1,38 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { HEATMAP_DATA } from '../constants';
-import { Calendar, Download, Printer, Filter, RefreshCw, Link as LinkIcon, Check, X, ShieldCheck, Settings, Database, Users as UsersIcon, List, ArrowLeftRight, Activity, Globe, Loader2, Server, Layers, Hexagon, AlertTriangle, Scale, ArrowRight, Zap, FileText } from 'lucide-react';
-import { View } from '../types';
+import { Calendar, RefreshCw, Link as LinkIcon, Check, X, ShieldCheck, Settings, Database, Users as UsersIcon, List, ArrowLeftRight, Activity, Globe, Server, Layers, Hexagon, AlertTriangle, ArrowRight, Share2, Loader2, FileText } from 'lucide-react';
+import { View, ERPProvider, IntegrationStatus } from '../types';
 
 interface SchedulingProps {
   setCurrentView?: (view: View) => void;
   onFinalize?: () => void;
+  activeProvider: ERPProvider;
+  setActiveProvider: (provider: ERPProvider) => void;
+  isConnected: boolean;
+  setIsConnected: (connected: boolean) => void;
+  setHubspotStatus: (status: IntegrationStatus) => void;
 }
 
-type ERPProvider = 'Dynamics 365' | 'SAP S/4HANA' | 'FDE';
 type SyncStatus = 'SYNCED' | 'SYNCING' | 'CONFLICT' | 'OFFLINE';
 
-const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [activeProvider, setActiveProvider] = useState<ERPProvider>('Dynamics 365'); 
-  const [selectedProvider, setSelectedProvider] = useState<ERPProvider>('SAP S/4HANA'); 
-  const [isModalOpen, setIsModalOpen] = useState(true);
+const Scheduling: React.FC<SchedulingProps> = ({ 
+  setCurrentView, 
+  onFinalize,
+  activeProvider,
+  setActiveProvider,
+  isConnected,
+  setIsConnected,
+  setHubspotStatus
+}) => {
+  const [selectedProvider, setSelectedProvider] = useState<ERPProvider>('HubSpot'); 
+  const [isModalOpen, setIsModalOpen] = useState(!isConnected);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<'heatmap' | 'logs'>('heatmap');
   
   // Conflict State
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>('OFFLINE');
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(isConnected ? 'SYNCED' : 'OFFLINE');
   const [showConflictModal, setShowConflictModal] = useState(false);
   const [conflictData, setConflictData] = useState({
       metric: 'Projected Staffing (Fri 6PM)',
@@ -46,8 +55,8 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
 
   // Dynamic logs based on active provider
   const syncLogs = [
-    { event: 'Fetch Personnel Assets', target: activeProvider === 'SAP S/4HANA' ? 'SAP HCM' : activeProvider === 'FDE' ? 'FDE Gateway' : 'Finance & Ops', status: 'Success', time: '06:00 AM' },
-    { event: 'Pipeline Sync', target: activeProvider === 'SAP S/4HANA' ? 'SAP Sales Cloud' : activeProvider === 'FDE' ? 'FDE Ledger' : 'Dynamics 365 Sales', status: 'Success', time: '06:05 AM' },
+    { event: 'Fetch Personnel Assets', target: activeProvider === 'SAP S/4HANA' ? 'SAP HCM' : activeProvider === 'HubSpot' ? 'Marketing Hub' : activeProvider === 'FDE' ? 'FDE Gateway' : 'Finance & Ops', status: 'Success', time: '06:00 AM' },
+    { event: 'Pipeline Sync', target: activeProvider === 'SAP S/4HANA' ? 'SAP Sales Cloud' : activeProvider === 'HubSpot' ? 'Sales Hub' : activeProvider === 'FDE' ? 'FDE Ledger' : 'Dynamics 365 Sales', status: 'Success', time: '06:05 AM' },
     { event: 'HubSpot Marketing Data', target: 'CRM Ingress Node', status: 'Success', time: '06:08 AM' },
     { event: 'ERP Resource Audit', target: 'Sentinel Node', status: 'Pending', time: 'Now' },
     { event: 'Inventory Allocation', target: 'Supply Chain Hub', status: 'Failed', time: 'Yesterday' }
@@ -100,6 +109,11 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                 setIsSyncing(false);
                 setSyncStatus('SYNCED');
                 setSyncProgress(0);
+                
+                // Update global HubSpot status if applicable
+                if (selectedProvider === 'HubSpot') {
+                    setHubspotStatus('connected');
+                }
             }, 600);
         }
     }, 200);
@@ -112,6 +126,7 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
   const renderProviderIcon = (provider: ERPProvider, className = "w-6 h-6") => {
       if (provider === 'SAP S/4HANA') return <Server className={className} />;
       if (provider === 'FDE') return <Layers className={className} />;
+      if (provider === 'HubSpot') return <Share2 className={className} />;
       return <Database className={className} />;
   };
 
@@ -214,11 +229,15 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
       {/* Connection Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all scale-100 border border-gray-100 text-slate-900">
-                <div className="bg-[#002050] p-6 flex items-center justify-between">
+            <div className={`bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all scale-100 border text-slate-900 ${
+                selectedProvider === 'HubSpot' ? 'border-orange-100' : 'border-gray-100'
+            }`}>
+                <div className={`p-6 flex items-center justify-between transition-colors duration-500 ${
+                    selectedProvider === 'HubSpot' ? 'bg-[#ff7a59]' : 'bg-[#002050]'
+                }`}>
                     <h3 className="text-white font-bold text-xl flex items-center gap-2">
-                        {renderProviderIcon(selectedProvider, "w-6 h-6 text-blue-400")}
-                        {isConnected ? `${activeProvider} Settings` : 'Connect Enterprise ERP'}
+                        {renderProviderIcon(selectedProvider, "w-6 h-6 text-white")}
+                        {isConnected ? `${activeProvider} Settings` : 'Connect Enterprise Node'}
                     </h3>
                     {!isSyncing && (
                         <button onClick={() => setIsModalOpen(false)} className="text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full p-1">
@@ -232,17 +251,17 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                         <>
                             {!isConnected && (
                                 <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
-                                    {(['Dynamics 365', 'SAP S/4HANA', 'FDE'] as ERPProvider[]).map((p) => (
+                                    {(['Dynamics 365', 'SAP S/4HANA', 'FDE', 'HubSpot'] as ERPProvider[]).map((p) => (
                                         <button
                                             key={p}
                                             onClick={() => setSelectedProvider(p)}
                                             className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
                                                 selectedProvider === p 
-                                                ? 'bg-white text-blue-900 shadow-sm' 
+                                                ? 'bg-white text-slate-900 shadow-sm' 
                                                 : 'text-gray-400 hover:text-gray-600'
                                             }`}
                                         >
-                                            {p.replace('Dynamics ', 'D').replace('S/4HANA', 'HANA')}
+                                            {p === 'HubSpot' ? 'HubSpot' : p.replace('Dynamics ', 'D').replace('S/4HANA', 'HANA')}
                                         </button>
                                     ))}
                                 </div>
@@ -251,7 +270,9 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                             <p className="text-slate-700 text-sm mb-6 text-center leading-relaxed font-semibold">
                                 {isConnected 
                                   ? `Modify your ${activeProvider} environment settings below. Changes are enforced via the Sentinel Protocol.`
-                                  : `Connect your ${selectedProvider} environment to synchronize enterprise resource planning and workforce deployment.`}
+                                  : selectedProvider === 'HubSpot' 
+                                    ? 'Integrate Marketing & Sales Hubs to inform workforce scheduling with real-time deal flow and campaign velocity.'
+                                    : `Connect your ${selectedProvider} environment to synchronize enterprise resource planning and workforce deployment.`}
                             </p>
 
                             <form onSubmit={handleConnect} className="space-y-5">
@@ -282,6 +303,43 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                                                     onChange={(e) => setTenantId(e.target.value)}
                                                     placeholder="00000000-0000-0000-0000-000000000000"
                                                     className="w-full pl-4 pr-10 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-all placeholder-slate-400 bg-white font-mono text-sm text-slate-900 font-bold"
+                                                    required={!isConnected}
+                                                />
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                                    <ShieldCheck className="w-4 h-4" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {selectedProvider === 'HubSpot' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-800 uppercase tracking-widest mb-2">Portal ID (Hub ID)</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type="text" 
+                                                    value={tenantId}
+                                                    onChange={(e) => setTenantId(e.target.value)}
+                                                    placeholder="e.g. 45091238"
+                                                    className="w-full pl-4 pr-10 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#ff7a59] focus:border-[#ff7a59] outline-none transition-all placeholder-slate-400 bg-white font-mono text-sm text-slate-900 font-bold"
+                                                    required={!isConnected}
+                                                />
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                                    <Share2 className="w-4 h-4" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-slate-800 uppercase tracking-widest mb-2">Private App Token</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type="password" 
+                                                    value={apiKey}
+                                                    onChange={(e) => setApiKey(e.target.value)}
+                                                    placeholder="pat-na1-..."
+                                                    className="w-full pl-4 pr-10 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-[#ff7a59] focus:border-[#ff7a59] outline-none transition-all placeholder-slate-400 bg-white font-mono text-sm text-slate-900 font-bold"
                                                     required={!isConnected}
                                                 />
                                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
@@ -400,9 +458,11 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                                 <div className="pt-4">
                                     <button 
                                         type="submit"
-                                        className="w-full py-4 bg-[#002050] hover:bg-[#003070] text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-blue-900/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
+                                        className={`w-full py-4 text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 ${
+                                            selectedProvider === 'HubSpot' ? 'bg-[#ff7a59] hover:bg-[#ff8f75] shadow-orange-500/20' : 'bg-[#002050] hover:bg-[#003070] shadow-blue-900/20'
+                                        }`}
                                     >
-                                        {isConnected ? 'Update ERP Logic' : `Authorize ${selectedProvider} Node`}
+                                        {isConnected ? 'Update Node Logic' : `Authorize ${selectedProvider} Node`}
                                     </button>
                                 </div>
                             </form>
@@ -410,13 +470,19 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                     ) : (
                         <div className="py-8 space-y-6 flex flex-col items-center justify-center min-h-[300px]">
                             <div className="relative">
-                                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center animate-pulse">
-                                    {renderProviderIcon(selectedProvider, "w-8 h-8 text-blue-600")}
+                                <div className={`w-20 h-20 rounded-full flex items-center justify-center animate-pulse ${
+                                    selectedProvider === 'HubSpot' ? 'bg-orange-50' : 'bg-blue-50'
+                                }`}>
+                                    {renderProviderIcon(selectedProvider, `w-8 h-8 ${selectedProvider === 'HubSpot' ? 'text-[#ff7a59]' : 'text-blue-600'}`)}
                                 </div>
                                 <div className="absolute top-0 right-0">
                                     <span className="relative flex h-4 w-4">
-                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                      <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500"></span>
+                                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                        selectedProvider === 'HubSpot' ? 'bg-orange-400' : 'bg-blue-400'
+                                      }`}></span>
+                                      <span className={`relative inline-flex rounded-full h-4 w-4 ${
+                                        selectedProvider === 'HubSpot' ? 'bg-[#ff7a59]' : 'bg-blue-500'
+                                      }`}></span>
                                     </span>
                                 </div>
                             </div>
@@ -424,21 +490,30 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                             <div className="w-full max-w-xs space-y-2">
                                 <div className="flex justify-between text-xs font-black uppercase tracking-widest text-slate-500">
                                     <span>Syncing {selectedProvider}...</span>
-                                    <span className="text-blue-600">{syncProgress}%</span>
+                                    <span className={selectedProvider === 'HubSpot' ? 'text-[#ff7a59]' : 'text-blue-600'}>{syncProgress}%</span>
                                 </div>
                                 <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden border border-gray-200">
                                     <div 
-                                        className="bg-blue-600 h-full transition-all duration-200 ease-out relative"
+                                        className={`h-full transition-all duration-200 ease-out relative ${
+                                            selectedProvider === 'HubSpot' ? 'bg-[#ff7a59]' : 'bg-blue-600'
+                                        }`}
                                         style={{ width: `${syncProgress}%` }}
                                     >
-                                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_1s_infinite] border-r border-blue-400/50"></div>
+                                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_1s_infinite] border-r border-white/30"></div>
                                     </div>
                                 </div>
                                 <p className="text-center text-[10px] text-slate-400 font-mono font-bold pt-2 uppercase tracking-wide">
-                                    {syncProgress < 25 ? "Initiating Handshake..." : 
-                                     syncProgress < 50 ? "Fetching Schema Definitions..." :
-                                     syncProgress < 75 ? "Validating Shift Patterns..." : 
-                                     "Finalizing Sentinel Protocol..."}
+                                    {selectedProvider === 'HubSpot' ? (
+                                        syncProgress < 25 ? "Authenticating Private App Key..." :
+                                        syncProgress < 50 ? "Mapping Contact Properties..." :
+                                        syncProgress < 75 ? "Syncing Deal Stages..." :
+                                        "Finalizing CRM Handshake..."
+                                    ) : (
+                                        syncProgress < 25 ? "Initiating Handshake..." : 
+                                        syncProgress < 50 ? "Fetching Schema Definitions..." :
+                                        syncProgress < 75 ? "Validating Shift Patterns..." : 
+                                        "Finalizing Sentinel Protocol..."
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -459,9 +534,9 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                       <Database className="w-10 h-10 text-blue-600" />
                    </div>
                    <div className="max-w-xl">
-                     <h3 className="text-xl font-bold text-gray-900 mb-2 uppercase tracking-tight">Enterprise Resource Planning (ERP)</h3>
+                     <h3 className="text-xl font-bold text-gray-900 mb-2 uppercase tracking-tight">Enterprise Data Nodes</h3>
                      <p className="text-gray-600 leading-relaxed text-sm font-medium">
-                        To enforce the Sentinel "Zone Defense" protocol, integrate a certified ERP environment. Supported protocols include <span className="text-blue-700 font-bold">Dynamics 365</span>, <span className="text-blue-700 font-bold">SAP S/4HANA</span>, and <span className="text-blue-700 font-bold">FDE</span>.
+                        To enforce the Sentinel "Zone Defense" protocol, integrate a certified data environment. Supported protocols include <span className="text-blue-700 font-bold">Dynamics 365</span>, <span className="text-blue-700 font-bold">SAP S/4HANA</span>, <span className="text-blue-700 font-bold">FDE</span>, and <span className="text-[#ff7a59] font-bold">HubSpot</span>.
                      </p>
                    </div>
                 </div>
@@ -470,14 +545,20 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                     className="flex items-center gap-3 px-8 py-4 bg-[#002050] hover:bg-[#003070] text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl z-10 whitespace-nowrap"
                 >
                    <LinkIcon className="w-5 h-5" />
-                   Initialize ERP Node
+                   Initialize Node
                 </button>
              </div>
         ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-6 flex flex-col lg:flex-row items-center justify-between bg-gradient-to-r from-white via-blue-50/20 to-blue-50/40 gap-6">
+            <div className={`bg-white rounded-2xl shadow-sm border p-6 flex flex-col lg:flex-row items-center justify-between bg-gradient-to-r gap-6 ${
+                activeProvider === 'HubSpot' 
+                ? 'border-orange-100 from-white via-orange-50/20 to-orange-50/40' 
+                : 'border-blue-100 from-white via-blue-50/20 to-blue-50/40'
+            }`}>
                <div className="flex items-center gap-5 w-full lg:w-auto">
                   <div className="relative shrink-0">
-                      <div className="w-14 h-14 bg-[#002050] rounded-xl flex items-center justify-center text-white shadow-lg ring-4 ring-white">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-lg ring-4 ring-white ${
+                          activeProvider === 'HubSpot' ? 'bg-[#ff7a59]' : 'bg-[#002050]'
+                      }`}>
                          {renderProviderIcon(activeProvider, "w-8 h-8")}
                       </div>
                       <div className={`absolute -bottom-1 -right-1 border-[3px] border-white w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${getStatusColor(syncStatus)}`}>
@@ -491,7 +572,7 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                         {activeProvider} Node Online
                     </h3>
                     <div className="flex items-center gap-2">
-                        <p className="text-xs text-slate-700 font-mono font-black uppercase tracking-widest">Environment: <span className="text-blue-700">PRODUCTION-SECURE</span></p>
+                        <p className="text-xs text-slate-700 font-mono font-black uppercase tracking-widest">Environment: <span className={activeProvider === 'HubSpot' ? 'text-[#ff7a59]' : 'text-blue-700'}>PRODUCTION-SECURE</span></p>
                         <span className="text-gray-300">|</span>
                         <p className={`text-xs font-mono font-black uppercase tracking-widest ${syncStatus === 'CONFLICT' ? 'text-red-600' : 'text-emerald-600'}`}>Status: {syncStatus}</p>
                     </div>
@@ -511,7 +592,7 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                        disabled={isSyncing}
                        className={`flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-slate-800 hover:bg-gray-50 rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-sm ${isSyncing ? 'opacity-70 cursor-wait' : ''}`}
                    >
-                      <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-blue-600' : ''}`} />
+                      <RefreshCw className={`w-4 h-4 ${isSyncing ? (activeProvider === 'HubSpot' ? 'text-[#ff7a59]' : 'text-blue-600') : ''} ${isSyncing ? 'animate-spin' : ''}`} />
                       {isSyncing ? 'Syncing...' : `Force ${activeProvider} Refresh`}
                    </button>
                </div>
@@ -526,7 +607,7 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                 className={`flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors relative ${activeTab === 'heatmap' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 <Activity className="w-4 h-4" />
-                {activeProvider === 'FDE' ? 'FDE Volume Heatmap' : activeProvider === 'SAP S/4HANA' ? 'S/4HANA Resource Map' : 'Dynamics Pulse Heatmap'}
+                {activeProvider === 'HubSpot' ? 'CRM Traffic Analysis' : activeProvider === 'FDE' ? 'FDE Volume Heatmap' : activeProvider === 'SAP S/4HANA' ? 'S/4HANA Resource Map' : 'Dynamics Pulse Heatmap'}
                 {activeTab === 'heatmap' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
               </button>
               <button 
@@ -534,7 +615,7 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                 className={`flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-colors relative ${activeTab === 'logs' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 <List className="w-4 h-4" />
-                ERP Transaction Log
+                {activeProvider === 'HubSpot' ? 'CRM Event Log' : 'ERP Transaction Log'}
                 {activeTab === 'logs' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
               </button>
            </div>
@@ -545,7 +626,7 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                    <div>
                       <h2 className="text-lg font-black text-white uppercase tracking-wider">Resource Allocation Variance</h2>
                       <p className="text-blue-400 text-xs font-mono font-bold mt-1 uppercase tracking-widest">
-                          "{activeProvider === 'SAP S/4HANA' ? 'S/4HANA Consumption Analysis' : 'ERP Pipeline Ingress Analysis'}"
+                          "{activeProvider === 'HubSpot' ? 'Marketing Campaign Impact Analysis' : activeProvider === 'SAP S/4HANA' ? 'S/4HANA Consumption Analysis' : 'ERP Pipeline Ingress Analysis'}"
                       </p>
                    </div>
                    
@@ -574,12 +655,15 @@ const Scheduling: React.FC<SchedulingProps> = ({ setCurrentView, onFinalize }) =
                          if(point.efficiency > 80) topColorClass = "bg-emerald-500";
                          else if(point.efficiency < 40) topColorClass = "bg-amber-500";
                          
+                         // If HubSpot is active, simulate different volume data visually
+                         const displayVolume = activeProvider === 'HubSpot' ? Math.round(point.transactionVolume * 1.2) : point.transactionVolume;
+
                          return (
                           <div key={index} className="flex flex-col relative group">
                             <div className="h-8 border-b border-slate-700 flex items-center justify-center text-slate-500 text-[9px] font-black uppercase">{point.hour}</div>
                             
                             <div className={`h-24 ${topColorClass} border-r border-slate-800/20 flex items-center justify-center text-white font-black text-lg group-hover:opacity-90 transition-opacity`}>
-                               {point.transactionVolume}
+                               {displayVolume}
                             </div>
                             <div className={`h-24 bg-blue-950 border-r border-slate-800/20 flex items-center justify-center text-blue-200 font-black text-lg relative`}>
                                {point.staffing}

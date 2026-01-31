@@ -24,13 +24,17 @@ import {
   Zap
 } from 'lucide-react';
 import { APP_VERSION } from '../constants';
+import { IntegrationStatus } from '../types';
 
-const Settings: React.FC = () => {
+interface SettingsProps {
+  hubspotStatus: IntegrationStatus;
+  setHubspotStatus: (status: IntegrationStatus) => void;
+}
+
+const Settings: React.FC<SettingsProps> = ({ hubspotStatus, setHubspotStatus }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
-  // HubSpot Configuration
-  const [hubspotConnected, setHubspotConnected] = useState(false);
   const [hubspotLoading, setHubspotLoading] = useState(false);
   
   // Sentinel Configuration
@@ -61,7 +65,7 @@ const Settings: React.FC = () => {
   const toggleHubspot = () => {
     setHubspotLoading(true);
     setTimeout(() => {
-      setHubspotConnected(!hubspotConnected);
+      setHubspotStatus(hubspotStatus === 'connected' ? 'disconnected' : 'connected');
       setHubspotLoading(false);
     }, 2000);
   };
@@ -139,8 +143,8 @@ const Settings: React.FC = () => {
                       </div>
                       <h3 className="font-black text-gray-900 text-xs uppercase tracking-[0.1em]">HubSpot CRM Integration</h3>
                    </div>
-                   <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${hubspotConnected ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
-                      {hubspotConnected ? 'Online' : 'Disconnected'}
+                   <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${hubspotStatus === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
+                      {hubspotStatus === 'connected' ? 'Online' : 'Disconnected'}
                    </span>
                 </div>
                 <div className="p-8">
@@ -155,14 +159,14 @@ const Settings: React.FC = () => {
                         onClick={toggleHubspot}
                         disabled={hubspotLoading}
                         className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${
-                           hubspotConnected 
+                           hubspotStatus === 'connected' 
                            ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' 
                            : 'bg-[#ff7a59] text-white shadow-lg shadow-orange-500/20 hover:bg-[#ff8f75]'
                         }`}
                       >
                          {hubspotLoading ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
-                         ) : hubspotConnected ? (
+                         ) : hubspotStatus === 'connected' ? (
                             <>Terminate HubSpot Link</>
                          ) : (
                             <><LinkIcon className="w-4 h-4" /> Authorize HubSpot</>
@@ -170,7 +174,7 @@ const Settings: React.FC = () => {
                       </button>
                    </div>
                    
-                   {hubspotConnected && (
+                   {hubspotStatus === 'connected' && (
                       <div className="mt-6 p-4 bg-orange-50 border border-orange-100 rounded-xl space-y-3">
                          <div className="flex items-center justify-between text-[10px] font-black text-orange-800 uppercase tracking-widest">
                             <span className="flex items-center gap-2"><Activity className="w-3 h-3" /> Connection Health</span>
