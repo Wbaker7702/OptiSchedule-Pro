@@ -1,4 +1,4 @@
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, FieldReport } from './types';
 
 // Helper for relative dates
 const getRelativeDate = (offsetDays: number) => {
@@ -179,4 +179,34 @@ export const DEPARTMENT_METRICS: DepartmentMetric[] = [
     extraMetricValue: '142',
     waitTime: '8m 20s'
   },
+];
+
+export const INITIAL_FIELD_REPORTS: FieldReport[] = [
+  {
+    id: 'rep-001',
+    author: 'Sarah Johnson',
+    timestamp: '08:45 AM',
+    category: 'Safety',
+    urgency: 'High',
+    status: 'Escalated',
+    content: 'Spill detected in Aisle 4 (Chemicals). Cleanup protocol initiated but ventilation check required.'
+  },
+  {
+    id: 'rep-002',
+    author: 'Kevin Lee',
+    timestamp: '09:15 AM',
+    category: 'Asset',
+    urgency: 'Medium',
+    status: 'Logged',
+    content: 'POS Terminal #5 intermittent connectivity drops. Suspect local node interference.'
+  },
+  {
+    id: 'rep-003',
+    author: 'Maria Chen',
+    timestamp: '09:30 AM',
+    category: 'Process',
+    urgency: 'Low',
+    status: 'Analyzing',
+    content: 'Suggesting review of morning huddle timing. Overlap with delivery ingress causes minor congestion.'
+  }
 ];

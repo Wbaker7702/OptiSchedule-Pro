@@ -7,6 +7,7 @@ export enum View {
   ANALYTICS = 'ANALYTICS',
   TEAM = 'TEAM',
   PLAYBOOK = 'PLAYBOOK',
+  FEEDBACK = 'FEEDBACK',
   SETTINGS = 'SETTINGS',
 }
 
@@ -76,4 +77,14 @@ export interface AuditLog {
   file: string; // Maps to 'Entity' in CSV
   file_path: string; // Kept for compatibility
   fix: string; // Maps to 'Fix Action' in CSV
+}
+
+export interface FieldReport {
+  id: string;
+  author: string;
+  timestamp: string;
+  category: 'Safety' | 'Asset' | 'Process' | 'Morale' | 'Other';
+  urgency: 'Low' | 'Medium' | 'High' | 'Critical';
+  status: 'Pending' | 'Analyzing' | 'Logged' | 'Escalated';
+  content: string;
 }
