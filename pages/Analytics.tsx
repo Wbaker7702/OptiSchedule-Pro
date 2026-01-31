@@ -103,7 +103,7 @@ const Analytics: React.FC = () => {
                  <div className="flex items-center gap-3">
                      <div className="px-3 py-1 bg-white border border-orange-200 rounded-lg flex items-center gap-2">
                          <div className={`w-2 h-2 rounded-full ${HUBSPOT_METRICS.syncStatus === 'Disconnected' ? 'bg-slate-300' : 'bg-emerald-500 animate-pulse'}`} />
-                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{HUBSPOT_METRICS.syncStatus === 'Disconnected' ? 'Connect D365 First' : 'Live Sync Active'}</span>
+                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{HUBSPOT_METRICS.syncStatus === 'Disconnected' ? 'Connect HubSpot' : 'Live Sync Active'}</span>
                      </div>
                  </div>
              </div>
