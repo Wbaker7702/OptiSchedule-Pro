@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink } from 'lucide-react';
+import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { IntegrationStatus } from '../types';
 
@@ -13,6 +13,7 @@ interface Message {
     content: string;
     timestamp: string;
     groundingChunks?: any[];
+    isBreeze?: boolean;
 }
 
 const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
@@ -20,7 +21,14 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
     const [isMinimized, setIsMinimized] = useState(false);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
-        { role: 'ai', content: `Sentinel AI online. Date: ${new Date().toLocaleDateString()}. How can I assist with your operational protocol today, Wesley?`, timestamp: new Date().toLocaleTimeString() }
+        { 
+            role: 'ai', 
+            content: hubspotStatus === 'connected' 
+                ? "Breeze Agent Online. HubSpot CRM is synced. I'm monitoring marketing velocity to optimize your floor deployment. How can I assist, Wesley?"
+                : `Sentinel AI online. Date: ${new Date().toLocaleDateString()}. How can I assist with your operational protocol today, Wesley?`, 
+            timestamp: new Date().toLocaleTimeString(),
+            isBreeze: hubspotStatus === 'connected'
+        }
     ]);
     const [isTyping, setIsTyping] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -45,12 +53,14 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         setIsTyping(true);
 
         try {
-            // Initialize Gemini with Search Grounding
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const response = await ai.models.generateContent({
                 model: 'gemini-3-flash-preview',
                 contents: userMsg.content,
                 config: {
+                    systemInstruction: hubspotStatus === 'connected' 
+                        ? "You are the HubSpot Breeze Agent. You provide proactive intelligence on marketing campaigns and their impact on retail staffing. Be concise, professional, and data-driven."
+                        : "You are the Sentinel AI operational assistant. You focus on workforce optimization and system integrity.",
                     tools: [{ googleSearch: {} }],
                 }
             });
@@ -62,28 +72,27 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                 role: 'ai',
                 content: aiContent,
                 timestamp: new Date().toLocaleTimeString(),
-                groundingChunks: groundingChunks
+                groundingChunks: groundingChunks,
+                isBreeze: hubspotStatus === 'connected'
             }]);
         } catch (error) {
             console.error("Sentinel AI Error:", error);
-            // Fallback with context awareness
             let fallbackContent = "Sentinel Node Connection Interrupted. Unable to fetch live intelligence.";
             
             const lowerInput = userMsg.content.toLowerCase();
-            if (lowerInput.includes('hubspot') || lowerInput.includes('crm') || lowerInput.includes('sales')) {
+            if (lowerInput.includes('hubspot') || lowerInput.includes('crm') || lowerInput.includes('breeze')) {
                 if (hubspotStatus === 'connected') {
-                     fallbackContent = "HubSpot Data Ingress is ACTIVE. Current metrics indicate $15.4k in attributed campaign revenue this period, with a 12% uptick in loyalty signups impacting grocery department traffic.";
+                     fallbackContent = "Breeze Agent report: Marketing attribution is 100% active. We detected a 15% surge in loyalty redemptions in Zone B. I recommend reallocating one resource from Apparel to Front End to mitigate wait-time spikes.";
                 } else {
-                     fallbackContent = "HubSpot CRM link is currently pending authorization. Attributed campaign revenue data is unavailable until the node is initialized in Settings or Scheduling.";
+                     fallbackContent = "HubSpot link is currently inactive. Launch the Breeze Agent in the Scheduling Center to enable real-time marketing traffic forecasting.";
                 }
-            } else if (lowerInput.includes('dynamics') || lowerInput.includes('erp')) {
-                fallbackContent = "Dynamics 365 Core Ingress is secure. Sales velocity data is synchronized with 99.8% precision.";
             }
 
             setMessages(prev => [...prev, {
                 role: 'ai',
                 content: fallbackContent,
-                timestamp: new Date().toLocaleTimeString()
+                timestamp: new Date().toLocaleTimeString(),
+                isBreeze: hubspotStatus === 'connected'
             }]);
         } finally {
             setIsTyping(false);
@@ -94,32 +103,34 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         return (
             <button 
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-8 right-8 w-14 h-14 bg-[#002050] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all z-50 group border border-blue-400/30"
+                className={`fixed bottom-8 right-8 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all z-50 group border ${hubspotStatus === 'connected' ? 'bg-[#ff7a59] border-white/50' : 'bg-[#002050] border-blue-400/30'}`}
             >
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-slate-900 animate-pulse" />
-                <Bot className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 animate-pulse ${hubspotStatus === 'connected' ? 'bg-white' : 'bg-blue-500'}`} />
+                {hubspotStatus === 'connected' ? <Zap className="w-6 h-6 text-white fill-white" /> : <Bot className="w-6 h-6 text-white group-hover:rotate-12 transition-transform" />}
             </button>
         );
     }
 
     return (
-        <div className={`fixed right-8 bottom-8 z-50 bg-slate-950 border border-slate-800 rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] flex flex-col transition-all duration-300 overflow-hidden ${isMinimized ? 'w-64 h-14' : 'w-[400px] h-[600px]'}`}>
+        <div className={`fixed right-8 bottom-8 z-50 bg-slate-950 border rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] flex flex-col transition-all duration-300 overflow-hidden ${isMinimized ? 'w-64 h-14' : 'w-[400px] h-[600px]'} ${hubspotStatus === 'connected' ? 'border-[#ff7a59]/30' : 'border-slate-800'}`}>
             {/* Header */}
-            <div className="bg-[#002050] p-4 flex items-center justify-between border-b border-blue-400/20">
+            <div className={`p-4 flex items-center justify-between border-b transition-colors duration-500 ${hubspotStatus === 'connected' ? 'bg-[#ff7a59] border-white/10' : 'bg-[#002050] border-blue-400/20'}`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-400/30">
-                        <Terminal className="w-4 h-4 text-blue-400" />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${hubspotStatus === 'connected' ? 'bg-white/20 border-white/30' : 'bg-blue-500/20 border-blue-400/30'}`}>
+                        {hubspotStatus === 'connected' ? <Zap className="w-4 h-4 text-white fill-white" /> : <Terminal className="w-4 h-4 text-blue-400" />}
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] leading-tight">Sentinel AI</p>
-                        <p className="text-[9px] text-blue-300/60 font-mono uppercase tracking-widest mt-0.5">Protocol Node 5065</p>
+                        <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] leading-tight">{hubspotStatus === 'connected' ? 'Breeze Agent' : 'Sentinel AI'}</p>
+                        <p className={`text-[9px] font-mono uppercase tracking-widest mt-0.5 ${hubspotStatus === 'connected' ? 'text-white/60' : 'text-blue-300/60'}`}>
+                            {hubspotStatus === 'connected' ? 'Smart CRM Node' : 'Protocol Node 5065'}
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setIsMinimized(!isMinimized)} className="p-1.5 hover:bg-white/10 rounded transition-colors text-blue-200">
+                    <button onClick={() => setIsMinimized(!isMinimized)} className="p-1.5 hover:bg-white/10 rounded transition-colors text-white/80">
                         {isMinimized ? <Maximize2 className="w-3.5 h-3.5" /> : <Minimize2 className="w-3.5 h-3.5" />}
                     </button>
-                    <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-red-500/20 rounded transition-colors text-blue-200 hover:text-red-400">
+                    <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-red-500/20 rounded transition-colors text-white/80">
                         <X className="w-3.5 h-3.5" />
                     </button>
                 </div>
@@ -134,36 +145,26 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                                 <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] leading-relaxed shadow-sm ${
                                     msg.role === 'user' 
                                     ? 'bg-blue-600 text-white rounded-tr-none' 
-                                    : 'bg-slate-900 text-slate-300 border border-slate-800 rounded-tl-none'
+                                    : msg.isBreeze 
+                                        ? 'bg-[#2d1b15] text-orange-100 border border-orange-500/20 rounded-tl-none' 
+                                        : 'bg-slate-900 text-slate-300 border border-slate-800 rounded-tl-none'
                                 }`}>
                                     {msg.content}
                                     
-                                    {/* Grounding Sources */}
                                     {msg.groundingChunks && msg.groundingChunks.length > 0 && (
                                         <div className="mt-3 pt-2 border-t border-slate-700/50">
-                                            <p className="text-[9px] font-mono text-slate-500 mb-2 uppercase tracking-widest flex items-center gap-1">
-                                                <Sparkles className="w-3 h-3 text-blue-500" /> Source Data
+                                            <p className={`text-[9px] font-mono mb-2 uppercase tracking-widest flex items-center gap-1 ${msg.isBreeze ? 'text-orange-400' : 'text-slate-500'}`}>
+                                                <Sparkles className="w-3 h-3" /> Data Ingress
                                             </p>
                                             <div className="space-y-1.5">
-                                                {msg.groundingChunks.map((chunk, idx) => {
-                                                    if (chunk.web?.uri && chunk.web?.title) {
-                                                        return (
-                                                            <a 
-                                                                key={idx}
-                                                                href={chunk.web.uri}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="flex items-center gap-2 p-2 rounded bg-slate-950/50 hover:bg-slate-800 border border-slate-800 transition-colors group"
-                                                            >
-                                                                <ExternalLink className="w-3 h-3 text-blue-500 group-hover:text-blue-400" />
-                                                                <span className="text-[10px] text-blue-400 group-hover:text-blue-300 truncate font-medium underline decoration-blue-500/30">
-                                                                    {chunk.web.title}
-                                                                </span>
-                                                            </a>
-                                                        );
-                                                    }
-                                                    return null;
-                                                })}
+                                                {msg.groundingChunks.map((chunk, idx) => (
+                                                    chunk.web?.uri && (
+                                                        <a key={idx} href={chunk.web.uri} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-2 rounded bg-slate-950/50 border transition-colors group ${msg.isBreeze ? 'border-orange-500/20 hover:bg-orange-950/20' : 'border-slate-800 hover:bg-slate-800'}`}>
+                                                            <ExternalLink className={`w-3 h-3 ${msg.isBreeze ? 'text-orange-400' : 'text-blue-500'}`} />
+                                                            <span className={`text-[10px] truncate font-medium underline decoration-current/30 ${msg.isBreeze ? 'text-orange-300' : 'text-blue-400'}`}>{chunk.web.title}</span>
+                                                        </a>
+                                                    )
+                                                ))}
                                             </div>
                                         </div>
                                     )}
@@ -172,8 +173,8 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                             </div>
                         ))}
                         {isTyping && (
-                            <div className="flex items-start gap-2 text-blue-400 italic font-mono text-[10px] animate-pulse">
-                                <Sparkles className="w-3 h-3" /> Processing Sentinel Streams...
+                            <div className={`flex items-start gap-2 italic font-mono text-[10px] animate-pulse ${hubspotStatus === 'connected' ? 'text-orange-400' : 'text-blue-400'}`}>
+                                <Sparkles className="w-3 h-3" /> {hubspotStatus === 'connected' ? 'Breeze Agent Fetching Insights...' : 'Processing Sentinel Streams...'}
                             </div>
                         )}
                     </div>
@@ -186,22 +187,22 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                                placeholder="Ask Sentinel..."
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-12 py-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
+                                placeholder={hubspotStatus === 'connected' ? 'Ask Breeze Agent...' : 'Ask Sentinel AI...'}
+                                className={`w-full bg-slate-950 border rounded-xl pl-4 pr-12 py-3 text-xs text-white placeholder-slate-600 focus:outline-none transition-all font-mono ${hubspotStatus === 'connected' ? 'border-orange-500/20 focus:ring-1 focus:ring-orange-500' : 'border-slate-800 focus:ring-1 focus:ring-blue-500'}`}
                             />
                             <button 
                                 onClick={handleSend}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-blue-500 hover:text-blue-400 transition-colors"
+                                className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-colors ${hubspotStatus === 'connected' ? 'text-[#ff7a59] hover:text-[#ff8f75]' : 'text-blue-500 hover:text-blue-400'}`}
                             >
                                 <Send className="w-4 h-4" />
                             </button>
                         </div>
                         <div className="mt-3 flex gap-2">
-                           {['HubSpot Sync', 'D365 Data', 'Floor Traffic', 'System Status'].map(tag => (
+                           {['Breeze Report', 'Deal Velocity', 'Traffic Correlation', 'Campaign ROI'].map(tag => (
                                <button 
                                  key={tag}
-                                 onClick={() => setInput(tag === 'System Status' ? 'Check System Status' : `Give me the latest on ${tag}`)}
-                                 className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-slate-800 border border-slate-700 text-slate-400 rounded-lg hover:border-blue-500 hover:text-blue-400 transition-all"
+                                 onClick={() => setInput(`Provide ${tag} data`)}
+                                 className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border transition-all ${hubspotStatus === 'connected' ? 'bg-orange-500/5 border-orange-500/20 text-orange-400 hover:bg-orange-500/20' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-blue-500 hover:text-blue-400'}`}
                                >
                                   {tag}
                                </button>
