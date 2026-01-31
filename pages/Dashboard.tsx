@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import StatCard from '../components/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2, Fingerprint, Shield, Sparkles, Share2, Tag } from 'lucide-react';
+import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2, Fingerprint, Shield, Sparkles, Share2, Tag, Check } from 'lucide-react';
 import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA, VULNERABILITY_DATA, SYSTEM_HEALTH } from '../constants';
+import { View } from '../types';
 
 const data = [
   { time: '8 AM', value: 40 },
@@ -16,11 +17,17 @@ const data = [
   { time: '8 PM', value: 45 },
 ];
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  setCurrentView?: (view: View) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
   const [pulseLogs, setPulseLogs] = useState<{id: number, msg: string, time: string}[]>([]);
   const [complianceScore, setComplianceScore] = useState(98);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isBreezeAdjusting, setIsBreezeAdjusting] = useState(false);
   const [lastOptimized, setLastOptimized] = useState<string | null>(null);
+  const [showBreezeSuccess, setShowBreezeSuccess] = useState(false);
   
   // For demonstration, let's assume breeze is active if we want to show the widget
   const isBreezeActive = true; 
@@ -83,6 +90,27 @@ const Dashboard: React.FC = () => {
     }, 2000);
   };
 
+  const handleBreezeAdjustment = () => {
+    setIsBreezeAdjusting(true);
+    setPulseLogs(prev => [{
+      id: Date.now(),
+      msg: "BREEZE_AI: Correlating CRM deal velocity with floor traffic...",
+      time: new Date().toLocaleTimeString()
+    }, ...prev].slice(0, 5));
+
+    setTimeout(() => {
+      setIsBreezeAdjusting(false);
+      setShowBreezeSuccess(true);
+      setPulseLogs(prev => [{
+        id: Date.now() + 1,
+        msg: "BREEZE_AI: Labor allocation adjusted (+2 units to Front End)",
+        time: new Date().toLocaleTimeString()
+      }, ...prev].slice(0, 5));
+      
+      setTimeout(() => setShowBreezeSuccess(false), 3000);
+    }, 2000);
+  };
+
   const circumference = 364.4;
   const offset = circumference - (complianceScore / 100) * circumference;
 
@@ -113,15 +141,24 @@ const Dashboard: React.FC = () => {
               </div>
            </div>
 
-           <div className="flex gap-4 w-full xl:w-auto z-10">
+           <div className="flex gap-4 w-full xl:w-auto z-10 items-center">
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center min-w-[130px]">
                  <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Weekly Leakage</p>
                  <p className="text-xl font-black text-white">${Math.round(FISCAL_METRICS.executionLeakage / 1000)}k</p>
               </div>
-              <div className="bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/20 flex flex-col items-center min-w-[130px]">
-                 <p className="text-[9px] text-emerald-400 uppercase font-black tracking-widest mb-1">Policy ROI</p>
-                 <p className="text-xl font-black text-emerald-400">{FISCAL_METRICS.currentROI}x</p>
-              </div>
+              <button 
+                onClick={handleOptimizeProtocol}
+                disabled={isOptimizing}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white p-4 rounded-xl border border-emerald-500/30 shadow-lg transition-all flex flex-col items-center min-w-[130px] active:scale-[0.98] disabled:opacity-50"
+              >
+                 <p className="text-[9px] text-emerald-100 uppercase font-black tracking-widest mb-1">
+                   {isOptimizing ? 'Hardening...' : 'Policy ROI'}
+                 </p>
+                 <div className="flex items-center gap-2">
+                    {isOptimizing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Shield className="w-5 h-5" />}
+                    <p className="text-xl font-black">{FISCAL_METRICS.currentROI}x</p>
+                 </div>
+              </button>
            </div>
         </div>
 
@@ -254,8 +291,19 @@ const Dashboard: React.FC = () => {
               </div>
 
               <div className="mt-auto pt-6 border-t border-white/5">
-                 <button className="w-full py-3 bg-[#ff7a59] text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-orange-500/20 hover:bg-[#ff8f75] transition-all flex items-center justify-center gap-2">
-                    <Zap className="w-3 h-3 fill-white" /> Adjust Staffing Now
+                 <button 
+                   onClick={handleBreezeAdjustment}
+                   disabled={isBreezeAdjusting}
+                   className={`w-full py-3 bg-[#ff7a59] text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-orange-500/20 hover:bg-[#ff8f75] transition-all flex items-center justify-center gap-2 disabled:opacity-75 ${showBreezeSuccess ? 'bg-emerald-600' : ''}`}
+                 >
+                    {isBreezeAdjusting ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : showBreezeSuccess ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      <Zap className="w-3 h-3 fill-white" />
+                    )}
+                    {isBreezeAdjusting ? 'Analyzing...' : showBreezeSuccess ? 'Staffing Optimized' : 'Adjust Staffing Now'}
                  </button>
               </div>
            </div>

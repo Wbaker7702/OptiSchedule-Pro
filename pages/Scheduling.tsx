@@ -37,11 +37,13 @@ const Scheduling: React.FC<SchedulingProps> = ({
   const [selectedProvider, setSelectedProvider] = useState<ERPProvider>('HubSpot'); 
   const [isModalOpen, setIsModalOpen] = useState(!isConnected);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isAdjusting, setIsAdjusting] = useState(false);
   const [syncProgress, setSyncProgress] = useState(0);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'heatmap' | 'logs'>('heatmap');
   const [isBreezeMode, setIsBreezeMode] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [showAdjustmentSuccess, setShowAdjustmentSuccess] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
   
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(isConnected ? 'SYNCED' : 'OFFLINE');
@@ -80,6 +82,16 @@ const Scheduling: React.FC<SchedulingProps> = ({
             setSyncStatus('SYNCED');
         }
     }, 2000);
+  };
+
+  const handleAdjustStaffing = () => {
+    setIsAdjusting(true);
+    setTimeout(() => {
+      setIsAdjusting(false);
+      setShowAdjustmentSuccess(true);
+      setSyncStatus('SYNCED');
+      setTimeout(() => setShowAdjustmentSuccess(false), 3000);
+    }, 1500);
   };
 
   const handleBreezeDiscovery = () => {
@@ -324,81 +336,129 @@ const Scheduling: React.FC<SchedulingProps> = ({
             </div>
         )}
 
-        <div className="space-y-6">
-           <div className="flex items-center gap-4 border-b border-slate-200 pb-1">
-              <button onClick={() => setActiveTab('heatmap')} className={`flex items-center gap-3 px-6 py-4 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'heatmap' ? 'text-[#ff7a59]' : 'text-slate-400 hover:text-slate-600'}`}>
-                <Activity className="w-4 h-4" /> Labor Capacity Matrix
-                {activeTab === 'heatmap' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ff7a59] rounded-t-full shadow-[0_-4px_10px_rgba(255,122,89,0.3)]" />}
-              </button>
-              <button onClick={() => setActiveTab('logs')} className={`flex items-center gap-3 px-6 py-4 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'logs' ? 'text-[#ff7a59]' : 'text-slate-400 hover:text-slate-600'}`}>
-                <List className="w-4 h-4" /> Enterprise Audit Trail
-                {activeTab === 'logs' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ff7a59] rounded-t-full shadow-[0_-4px_10px_rgba(255,122,89,0.3)]" />}
-              </button>
-           </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+               <div className="flex items-center gap-4 border-b border-slate-200 pb-1">
+                  <button onClick={() => setActiveTab('heatmap')} className={`flex items-center gap-3 px-6 py-4 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'heatmap' ? 'text-[#ff7a59]' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <Activity className="w-4 h-4" /> Labor Capacity Matrix
+                    {activeTab === 'heatmap' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ff7a59] rounded-t-full shadow-[0_-4px_10px_rgba(255,122,89,0.3)]" />}
+                  </button>
+                  <button onClick={() => setActiveTab('logs')} className={`flex items-center gap-3 px-6 py-4 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'logs' ? 'text-[#ff7a59]' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <List className="w-4 h-4" /> Enterprise Audit Trail
+                    {activeTab === 'logs' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ff7a59] rounded-t-full shadow-[0_-4px_10px_rgba(255,122,89,0.3)]" />}
+                  </button>
+               </div>
 
-           {activeTab === 'heatmap' ? (
-              <div className="bg-slate-950 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden relative">
-                <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                   <div>
-                       <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
-                         <Layers className="w-5 h-5 text-[#ff7a59]" />
-                         Predictive Capacity Model
-                       </h2>
-                       <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">Powered by Breeze Intelligence Engine</p>
-                   </div>
-                   <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div><span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Real Volume</span></div>
-                        <div className="flex items-center gap-2"><div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div><span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Breeze Forecast</span></div>
-                   </div>
-                </div>
-                <div className="p-8 overflow-x-auto">
-                  <div className="min-w-[800px] grid grid-cols-[160px_repeat(10,1fr)]">
-                      <div className="flex flex-col justify-center space-y-16 text-slate-500 font-black text-[10px] uppercase tracking-widest pr-6 border-r border-slate-800">
-                        <div className="h-24 flex items-center justify-end">Predicted Traffic</div>
-                        <div className="h-24 flex items-center justify-end">Capacity Goal</div>
-                      </div>
-                      {HEATMAP_DATA.map((point, index) => (
-                          <div key={index} className="flex flex-col relative group">
-                            <div className="h-10 border-b border-slate-800 flex items-center justify-center text-slate-500 text-[10px] font-mono">{point.hour}</div>
-                            <div className={`h-24 transition-all duration-500 border-r border-slate-800/50 flex items-center justify-center text-white font-black text-xl ${activeProvider === 'HubSpot' ? 'bg-[#ff7a59]/20 group-hover:bg-[#ff7a59]/30' : 'bg-blue-600/20'}`}>
-                                {activeProvider === 'HubSpot' ? Math.round(point.transactionVolume * 1.2) : point.transactionVolume}
-                            </div>
-                            <div className={`h-24 bg-slate-900 border-r border-slate-800/50 flex items-center justify-center text-slate-400 font-black text-xl relative group-hover:bg-slate-800 transition-colors`}>
-                                {point.staffing}
-                            </div>
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                                <span className="bg-white text-slate-950 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-2xl whitespace-nowrap">
-                                    Efficiency: {point.efficiency}%
-                                </span>
-                            </div>
+               {activeTab === 'heatmap' ? (
+                  <div className="bg-slate-950 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden relative">
+                    <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                       <div>
+                           <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                             <Layers className="w-5 h-5 text-[#ff7a59]" />
+                             Predictive Capacity Model
+                           </h2>
+                           <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">Powered by Breeze Intelligence Engine</p>
+                       </div>
+                       <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div><span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Real Volume</span></div>
+                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div><span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Breeze Forecast</span></div>
+                       </div>
+                    </div>
+                    <div className="p-8 overflow-x-auto">
+                      <div className="min-w-[800px] grid grid-cols-[160px_repeat(10,1fr)]">
+                          <div className="flex flex-col justify-center space-y-16 text-slate-500 font-black text-[10px] uppercase tracking-widest pr-6 border-r border-slate-800">
+                            <div className="h-24 flex items-center justify-end">Predicted Traffic</div>
+                            <div className="h-24 flex items-center justify-end">Capacity Goal</div>
                           </div>
+                          {HEATMAP_DATA.map((point, index) => (
+                              <div key={index} className="flex flex-col relative group">
+                                <div className="h-10 border-b border-slate-800 flex items-center justify-center text-slate-500 text-[10px] font-mono">{point.hour}</div>
+                                <div className={`h-24 transition-all duration-500 border-r border-slate-800/50 flex items-center justify-center text-white font-black text-xl ${activeProvider === 'HubSpot' ? 'bg-[#ff7a59]/20 group-hover:bg-[#ff7a59]/30' : 'bg-blue-600/20'}`}>
+                                    {activeProvider === 'HubSpot' ? Math.round(point.transactionVolume * 1.2) : point.transactionVolume}
+                                </div>
+                                <div className={`h-24 bg-slate-900 border-r border-slate-800/50 flex items-center justify-center text-slate-400 font-black text-xl relative group-hover:bg-slate-800 transition-colors`}>
+                                    {point.staffing}
+                                </div>
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+                                    <span className="bg-white text-slate-950 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-2xl whitespace-nowrap">
+                                        Efficiency: {point.efficiency}%
+                                    </span>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                    </div>
+                  </div>
+               ) : (
+                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="divide-y divide-slate-100">
+                        {syncLogs.map((log, i) => (
+                            <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group">
+                                <div className="flex items-center gap-5">
+                                    <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${log.status === 'Success' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
+                                        {log.status === 'Success' ? <Check className="w-4 h-4" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{log.event}</p>
+                                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">Destination: {log.target}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded inline-block">{log.status}</p>
+                                    <p className="text-[10px] text-slate-400 font-mono mt-1.5">{log.time}</p>
+                                </div>
+                            </div>
                         ))}
                     </div>
+                 </div>
+               )}
+            </div>
+
+            {/* Breeze Copilot Inline Action */}
+            <div className="bg-[#1c120f] rounded-3xl shadow-2xl border border-[#ff7a59]/20 p-8 flex flex-col relative overflow-hidden h-fit sticky top-24">
+                <div className="absolute top-0 right-0 p-6 opacity-10">
+                    <Sparkles className="w-32 h-32 text-[#ff7a59]" />
                 </div>
-              </div>
-           ) : (
-             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="divide-y divide-slate-100">
-                    {syncLogs.map((log, i) => (
-                        <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group">
-                            <div className="flex items-center gap-5">
-                                <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${log.status === 'Success' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
-                                    {log.status === 'Success' ? <Check className="w-4 h-4" /> : <Loader2 className="w-4 h-4 animate-spin" />}
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{log.event}</p>
-                                    <p className="text-[10px] text-slate-500 font-mono mt-0.5">Destination: {log.target}</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded inline-block">{log.status}</p>
-                                <p className="text-[10px] text-slate-400 font-mono mt-1.5">{log.time}</p>
-                            </div>
+                <div className="relative z-10 space-y-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-[#ff7a59]/20 rounded-2xl border border-[#ff7a59]/30">
+                            <Zap className="w-6 h-6 text-[#ff7a59]" />
                         </div>
-                    ))}
+                        <div>
+                            <h3 className="text-lg font-black text-white uppercase tracking-tighter">Breeze Copilot</h3>
+                            <p className="text-[10px] text-[#ff7a59]/60 font-mono uppercase tracking-widest">Active Intelligence</p>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-slate-900/50 rounded-2xl border border-white/5 space-y-4">
+                        <p className="text-sm font-bold text-white/90 leading-relaxed">
+                            HubSpot signals indicate a <span className="text-orange-400">12% increase</span> in regional traffic probability due to the 'Spring Surge' campaign.
+                        </p>
+                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            <Check className="w-4 h-4 text-emerald-500" />
+                            Policy Alignment Verified
+                        </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5">
+                        <button 
+                          onClick={handleAdjustStaffing}
+                          disabled={isAdjusting}
+                          className={`w-full py-5 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center justify-center gap-4 active:scale-[0.98] disabled:opacity-50 ${showAdjustmentSuccess ? 'bg-emerald-600' : 'bg-[#ff7a59] hover:bg-[#ff8f75] shadow-orange-500/20'}`}
+                        >
+                            {isAdjusting ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : showAdjustmentSuccess ? (
+                              <Check className="w-5 h-5" />
+                            ) : (
+                              <Zap className="w-5 h-5 fill-white" />
+                            )}
+                            {isAdjusting ? 'Reallocating...' : showAdjustmentSuccess ? 'Deployment Adjusted' : 'Adjust Staffing Now'}
+                        </button>
+                        <p className="text-center text-[9px] text-slate-600 mt-4 uppercase font-black tracking-widest">Action will be logged in Sentinel Audit Trail</p>
+                    </div>
                 </div>
-             </div>
-           )}
+            </div>
         </div>
       </div>
     </div>

@@ -46,7 +46,7 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case View.DASHBOARD:
-        return <Dashboard />;
+        return <Dashboard setCurrentView={setCurrentView} />;
       case View.SCHEDULING:
         return (
           <Scheduling 
@@ -78,7 +78,7 @@ const App: React.FC = () => {
       case View.SETTINGS:
         return <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />;
       default:
-        return <Dashboard />;
+        return <Dashboard setCurrentView={setCurrentView} />;
     }
   };
 
