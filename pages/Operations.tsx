@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import { DEPARTMENT_METRICS, OPERATIONAL_AUDITS as INITIAL_AUDITS, VULNERABILITY_DATA as INITIAL_VULNERABILITIES } from '../constants';
-import { RefreshCcw, Users, DollarSign, TrendingUp, Clock, ShieldAlert, CheckCircle, Info, Terminal, Search, AlertCircle, Play, Download, Loader2, ChevronRight, Activity, TerminalSquare, Eye, Maximize2, Radio, Shield, Bug, Zap, Fingerprint, Wifi, ShieldCheck, Camera, ScanLine, Box, Aperture } from 'lucide-react';
+import { RefreshCcw, Users, DollarSign, TrendingUp, Clock, ShieldAlert, CheckCircle, Info, Terminal, Search, AlertCircle, Play, Download, Loader2, ChevronRight, Activity, TerminalSquare, Eye, Maximize2, Radio, Shield, Bug, Zap, Fingerprint, Wifi, ShieldCheck, Camera, ScanLine, Box, Aperture, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label, CartesianGrid } from 'recharts';
 import { Vulnerability, DepartmentMetric } from '../types';
 
@@ -12,6 +12,7 @@ interface LinterLog {
   code: string;
   message: string;
   status: 'Pass' | 'Fail' | 'Warn';
+  fixAction?: string;
 }
 
 interface OperationsProps {
@@ -101,6 +102,51 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
           };
         })
       );
+
+      // Randomly generate a linter log
+      if (Math.random() > 0.6) {
+          const statuses: ('Pass' | 'Fail' | 'Warn')[] = ['Pass', 'Pass', 'Pass', 'Warn', 'Fail'];
+          const status = statuses[Math.floor(Math.random() * statuses.length)];
+          
+          let code = 'SYS_OK';
+          let message = 'Routine system integrity verified.';
+          let fixAction = undefined;
+
+          if (status === 'Fail') {
+             const fails = [
+                 { c: 'SEC_BREACH', m: 'Unauthorized door access detected (Zone B)', f: 'Dispatch Security Unit' },
+                 { c: 'DATA_LOSS', m: 'Packet loss > 15% on D365 uplink', f: 'Switch to Backup Node' },
+                 { c: 'SCHED_CONFLICT', m: 'Shift overlap detected: J. Smith / M. Chen', f: 'Auto-Resolve Schedule' },
+                 { c: 'POLICY_ERR', m: 'Execution Leakage detected in Grocery', f: 'Rebalance Staffing' }
+             ];
+             const f = fails[Math.floor(Math.random() * fails.length)];
+             code = f.c;
+             message = f.m;
+             fixAction = f.f;
+          } else if (status === 'Warn') {
+             const warns = [
+                 { c: 'MEM_HIGH', m: 'Sentinel Node memory usage at 85%', f: 'Clear Cache' },
+                 { c: 'LATENCY', m: 'Network latency observed (150ms)', f: 'Optimize Route' },
+                 { c: 'STOCK_LOW', m: 'Inventory low on SKU: ELEC-001', f: 'Flag Procurement' },
+                 { c: 'TEMP_VAR', m: 'Server room temp +2°C above baseline', f: 'Check Cooling' }
+             ];
+             const w = warns[Math.floor(Math.random() * warns.length)];
+             code = w.c;
+             message = w.m;
+             fixAction = w.f;
+          }
+
+          const newLog: LinterLog = {
+            id: Math.random().toString(36).substr(2, 9),
+            timestamp: new Date().toLocaleTimeString(),
+            code,
+            message,
+            status,
+            fixAction
+          };
+          setLinterLogs(prev => [newLog, ...prev].slice(0, 50));
+      }
+
     }, 2500);
 
     return () => clearInterval(interval);
@@ -397,26 +443,48 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
                    )}
                    
                    {linterLogs.map(log => (
-                     <div key={log.id} className="flex gap-3 p-2 hover:bg-white/5 rounded transition-colors animate-in fade-in slide-in-from-left-2">
-                        <span className="text-slate-500 shrink-0">[{log.timestamp}]</span>
-                        <span className={`font-bold shrink-0 w-24 ${
-                          log.status === 'Pass' ? 'text-emerald-500' : 
-                          log.status === 'Fail' ? 'text-red-500' : 'text-amber-500'
-                        }`}>{log.status.toUpperCase()}</span>
-                        <span className="text-blue-400 shrink-0 w-32">{log.code}</span>
-                        <span className="text-slate-300">{log.message}</span>
+                     <div key={log.id} className="flex flex-col gap-1 p-3 hover:bg-white/5 rounded transition-colors animate-in fade-in slide-in-from-left-2 border-b border-slate-800/40">
+                        <div className="flex items-center gap-3">
+                            <span className="text-slate-500 shrink-0 font-mono text-[10px]">[{log.timestamp}]</span>
+                            <span className={`font-bold shrink-0 w-16 text-[10px] uppercase tracking-wider ${
+                              log.status === 'Pass' ? 'text-emerald-500' : 
+                              log.status === 'Fail' ? 'text-red-500' : 'text-amber-500'
+                            }`}>{log.status}</span>
+                            <span className="text-blue-400 shrink-0 w-24 font-mono text-xs">{log.code}</span>
+                            <span className="text-slate-300 text-xs">{log.message}</span>
+                        </div>
+                        {(log.status === 'Fail' || log.status === 'Warn') && log.fixAction && (
+                            <div className="pl-[140px] flex items-center gap-2 mt-1">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                                <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Fix Action:</span>
+                                <span className="text-[10px] text-blue-300 font-mono bg-blue-900/20 px-2 py-0.5 rounded border border-blue-500/30 flex items-center gap-1">
+                                    {log.fixAction}
+                                    <ArrowRight className="w-3 h-3" />
+                                </span>
+                            </div>
+                        )}
                      </div>
                    ))}
 
                    {audits.map((log) => (
-                     <div key={log.id} className="flex gap-3 p-2 hover:bg-white/5 rounded transition-colors border-l-2 border-transparent hover:border-slate-700">
-                        <span className="text-slate-500 shrink-0 opacity-50">[ARCHIVED]</span>
-                        <span className={`font-bold shrink-0 w-24 ${
-                          log.severity === 'error' ? 'text-red-500' : 
-                          log.severity === 'warning' ? 'text-amber-500' : 'text-blue-500'
-                        }`}>{log.severity.toUpperCase()}</span>
-                        <span className="text-slate-500 shrink-0 w-32">{log.code}</span>
-                        <span className="text-slate-400">{log.message}</span>
+                     <div key={log.id} className="flex flex-col gap-1 p-3 hover:bg-white/5 rounded transition-colors border-l-2 border-transparent hover:border-slate-700 opacity-70 hover:opacity-100">
+                        <div className="flex items-center gap-3">
+                            <span className="text-slate-600 shrink-0 text-[10px] font-mono">[ARCHIVED]</span>
+                            <span className={`font-bold shrink-0 w-16 text-[10px] uppercase tracking-wider ${
+                              log.severity === 'error' ? 'text-red-500' : 
+                              log.severity === 'warning' ? 'text-amber-500' : 'text-blue-500'
+                            }`}>{log.severity === 'error' ? 'FAIL' : log.severity === 'warning' ? 'WARN' : 'PASS'}</span>
+                            <span className="text-slate-500 shrink-0 w-24 font-mono text-xs">{log.code}</span>
+                            <span className="text-slate-400 text-xs">{log.message}</span>
+                        </div>
+                        {log.fix && log.fix !== 'No action' && (
+                             <div className="pl-[140px] flex items-center gap-2 mt-1">
+                                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">Resolution:</span>
+                                <span className="text-[10px] text-slate-400 font-mono bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+                                    {log.fix}
+                                </span>
+                            </div>
+                        )}
                      </div>
                    ))}
                 </div>

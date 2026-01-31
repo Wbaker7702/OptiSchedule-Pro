@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { FISCAL_METRICS } from '../constants';
 import { View } from '../types';
-import { Book, Shield, Scale, Zap, Info, ArrowRight, TrendingUp, Calculator, FileCheck, Users, Terminal, Database, Code, ShieldCheck, Loader2, ExternalLink, BellRing, Download, Lock, AlertCircle } from 'lucide-react';
+import { Book, Shield, Scale, Zap, Info, ArrowRight, TrendingUp, Calculator, FileCheck, Users, Terminal, Database, Code, ShieldCheck, Loader2, ExternalLink, BellRing, Download, Lock, AlertCircle, PenTool, CheckCircle2 } from 'lucide-react';
 
 interface PlaybookProps {
   setCurrentView?: (view: any) => void;
@@ -13,6 +14,12 @@ const Playbook: React.FC<PlaybookProps> = ({ setCurrentView }) => {
   const [activeActions, setActiveActions] = useState<Record<string, boolean>>({});
   const [lastAlert, setLastAlert] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  
+  // SOP State
+  const [signature, setSignature] = useState('');
+  const [managerTitle, setManagerTitle] = useState('');
+  const [isAcknowledged, setIsAcknowledged] = useState(false);
+  const [signing, setSigning] = useState(false);
   
   const projectedSavings = recaptureInput * FISCAL_METRICS.avgPayRate * 52;
   const projectedProtection = projectedSavings * FISCAL_METRICS.currentROI;
@@ -80,6 +87,17 @@ Validated by: Sentinel Security Auth Node-5065
       URL.revokeObjectURL(url);
       setIsDownloading(false);
     }, 1200);
+  };
+
+  const handleAcknowledgment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if(!signature || !managerTitle) return;
+    
+    setSigning(true);
+    setTimeout(() => {
+        setIsAcknowledged(true);
+        setSigning(false);
+    }, 1500);
   };
 
   const engineRoomCards = [
@@ -238,6 +256,106 @@ Validated by: Sentinel Security Auth Node-5065
                  ))}
               </div>
            </div>
+        </div>
+
+        {/* SOP Digital Acknowledgment Section */}
+        <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl relative animate-in slide-in-from-bottom-8 duration-700">
+            <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+            <div className="p-8 md:p-12">
+                <div className="flex flex-col items-center text-center mb-10">
+                    <ShieldCheck className="w-12 h-12 text-blue-500 mb-4" />
+                    <h2 className="text-2xl font-black text-white uppercase tracking-[0.2em] mb-2">Store Manager Standard Operating Procedure (SOP)</h2>
+                    <p className="text-sm font-mono text-slate-500 uppercase tracking-widest">Sentinel × OptiSchedule Pro — Store 5065</p>
+                </div>
+
+                <div className="max-w-3xl mx-auto space-y-8 text-slate-300">
+                    <div className="space-y-4 font-mono text-sm leading-relaxed border-l-2 border-slate-800 pl-6">
+                        <p>This SOP establishes mandatory enforcement of labor execution through Sentinel and OptiSchedule Pro.</p>
+                        <p><span className="text-red-400 font-bold">Labor variance is classified as a security failure.</span></p>
+                        <p>Managers must execute system-generated schedules without modification.</p>
+                        <p>Manual overrides are prohibited without logged, market-approved exceptions.</p>
+                        <p>All actions are continuously audited.</p>
+                    </div>
+
+                    <div className="bg-slate-950 p-8 rounded-xl border border-slate-800 mt-8">
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <PenTool className="w-4 h-4 text-blue-500" />
+                            Digital Acknowledgment
+                        </h3>
+                        
+                        {!isAcknowledged ? (
+                            <form onSubmit={handleAcknowledgment} className="space-y-6">
+                                <p className="text-sm italic text-slate-400">
+                                    "I acknowledge that labor execution is a controlled system. My role is execution, not optimization."
+                                </p>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Signed</label>
+                                        <input 
+                                            type="text" 
+                                            value={signature}
+                                            onChange={(e) => setSignature(e.target.value)}
+                                            placeholder="Type full name"
+                                            className="w-full bg-transparent border-b-2 border-slate-700 py-2 text-white font-serif italic text-xl focus:border-blue-500 focus:outline-none placeholder-slate-700"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Date</label>
+                                        <div className="w-full border-b-2 border-slate-700 py-3 text-slate-400 font-mono text-sm">
+                                            {new Date().toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Title</label>
+                                        <input 
+                                            type="text" 
+                                            value={managerTitle}
+                                            onChange={(e) => setManagerTitle(e.target.value)}
+                                            placeholder="Store Manager / ASM"
+                                            className="w-full bg-transparent border-b-2 border-slate-700 py-2 text-white font-mono text-sm focus:border-blue-500 focus:outline-none uppercase placeholder-slate-700"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="submit" 
+                                    disabled={signing}
+                                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {signing ? (
+                                        <><Loader2 className="w-4 h-4 animate-spin" /> Authenticating Signature...</>
+                                    ) : (
+                                        <>Sign & Confirm Protocol Adherence</>
+                                    )}
+                                </button>
+                            </form>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-8 space-y-4 animate-in fade-in zoom-in duration-500">
+                                <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/30">
+                                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                                </div>
+                                <div className="text-center">
+                                    <h4 className="text-xl font-black text-white uppercase tracking-widest mb-1">SOP Acknowledged</h4>
+                                    <p className="text-emerald-500 font-mono text-xs uppercase tracking-wider">Digital Hash: {Math.random().toString(36).substr(2, 12).toUpperCase()}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-8 text-center mt-6 w-full max-w-md border-t border-slate-800 pt-6">
+                                    <div>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Signed By</p>
+                                        <p className="text-white font-serif italic text-lg">{signature}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Timestamp</p>
+                                        <p className="text-white font-mono text-sm">{new Date().toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
 
         {/* Sentinel Roadmap */}
