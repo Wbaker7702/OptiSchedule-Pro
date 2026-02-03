@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import { FISCAL_METRICS } from '../constants';
 import { View } from '../types';
-import { Book, Shield, Scale, Zap, Info, ArrowRight, TrendingUp, Calculator, FileCheck, Users, Terminal, Database, Code, ShieldCheck, Loader2, ExternalLink, BellRing, Download, Lock, AlertCircle, PenTool, CheckCircle2 } from 'lucide-react';
+import { Book, Shield, Scale, Zap, Info, ArrowRight, TrendingUp, Calculator, FileCheck, Users, Terminal, Database, Code, ShieldCheck, Loader2, ExternalLink, BellRing, Download, Lock, AlertCircle, PenTool, CheckCircle2, Activity } from 'lucide-react';
 
 interface PlaybookProps {
   setCurrentView?: (view: any) => void;
@@ -29,7 +29,7 @@ const Playbook: React.FC<PlaybookProps> = ({ setCurrentView }) => {
     setTimeout(() => {
       setActiveActions(prev => ({ ...prev, [id]: false }));
       if (id === 'alert') {
-        setLastAlert(`SENTINEL PROTOCOL ALERT: High customer density detected. Reallocating resources.`);
+        setLastAlert(`OPERATIONAL ALERT: Traffic surge detected at registers. Mitigating unplanned overtime risk.`);
         setTimeout(() => setLastAlert(null), 4000);
       }
     }, duration);
@@ -39,40 +39,40 @@ const Playbook: React.FC<PlaybookProps> = ({ setCurrentView }) => {
     setIsDownloading(true);
     
     const briefingContent = `
-SENTINEL SECURITY POLICY (SSP) v3.1.0
-CLASSIFIED: AUTHORIZED STORE MANAGERS ONLY
+SENTINEL OPERATIONAL POLICY (SOP) v3.1.0
+RETAIL MANAGEMENT DIRECTIVE: STORE 5065
 =====================================================
 
-1. SENTINEL MISSION
-Securing the workforce through absolute operational 
-standardization and Sentinel oversight. Variance is a 
-breach of system integrity.
+1. MISSION STATEMENT
+Securing store profitability through absolute labor efficiency 
+and variance management. Variance represents a plan-to-actual 
+gap that impacts EBITDA.
 
-2. FISCAL SECURITY FRAMEWORK (STORE 5065)
-- Weekly Asset Protection (Leakage): $${FISCAL_METRICS.executionLeakage.toLocaleString()}
-- Sentinel Multiplier (ROI): ${FISCAL_METRICS.currentROI}x
-- Market Recovery Directive: $${FISCAL_METRICS.annualRecoveryTarget}M
-- 2028 Strategic Cap: $${FISCAL_METRICS.vision2028}M
+2. LABOR METRICS (STORE 5065)
+- Weekly Labor Variance (Gap): $${FISCAL_METRICS.executionLeakage.toLocaleString()}
+- Sentinel ROI Guard: ${FISCAL_METRICS.currentROI}x
+- Annual Efficiency Recovery: $${FISCAL_METRICS.annualRecoveryTarget}M
+- 2028 Strategic Valuation: $${FISCAL_METRICS.vision2028}M
 
-3. CURRENT POLICY SIMULATION
-- Targeted Resource Recapture: ${recaptureInput} hours/week
+3. LABOR RECAPTURE PROJECTION
+- Targeted Overtime Mitigation: ${recaptureInput} hours/week
 - Projected Annual Savings: $${Math.round(projectedSavings).toLocaleString()}
 - EBITDA Value Safeguard: $${Math.round(projectedProtection).toLocaleString()}
 
-4. SECURITY ENGINE (OPERATIONAL INFRASTRUCTURE)
-- Framework: Sentinel Secure Node (Hardened)
-- Sync Frequency: Real-time Dynamics 365 Ingress
-- Audit Engine: Sentinel Linter v3.1 (Enforce Standard)
+4. OPERATIONAL INFRASTRUCTURE
+- Data Ingress: Dynamics 365 / HubSpot Breeze
+- Audit Engine: Labor Variance Linter v3.1
+- Strategic Priority: Mitigate unplanned overtime through AI forecasting.
 
 5. POLICY MANDATE
-"Execution Leakage" is a breach of policy. 
-Every unallocated labor hour is a digital security failure.
-The Sentinel Security Policy must be enforced without variance.
+Labor variance is an operational inefficiency. Every unallocated 
+labor hour or unplanned overtime minute impacts our bottom line. 
+The Sentinel Protocol ensures scheduling accuracy is maintained.
 
-Standardize or Fail.
+Efficiency is Profit.
 
 Document Generated: ${new Date().toLocaleString()}
-Validated by: Sentinel Security Auth Node-5065
+Validated by: Store Management Node-5065
     `;
 
     setTimeout(() => {
@@ -80,7 +80,7 @@ Validated by: Sentinel Security Auth Node-5065
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Sentinel_Security_Policy_5065.txt`;
+      link.download = `Store_5065_Labor_Policy.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -103,41 +103,41 @@ Validated by: Sentinel Security Auth Node-5065
   const engineRoomCards = [
     {
       id: 'lint',
-      title: "Sentinel Linter (Active)",
-      desc: "Real-time auditing of staffing patterns against Sentinel Standards.",
+      title: "Labor Linter (Active)",
+      desc: "Real-time auditing of planned vs. actual labor spend.",
       icon: <FileCheck className="w-5 h-5 text-blue-500" />,
-      code: "Sentinel::Policy.enforce!",
-      actionLabel: "Enforce Policy",
+      code: "Sentinel::Audit.variance",
+      actionLabel: "Audit Variance",
       action: () => simulateAction('lint'),
       isAsync: true
     },
     {
       id: 'sync',
-      title: "D365 Ingress Node",
-      desc: "Secure link to Microsoft Dynamics 365 and ERP data ingestion.",
+      title: "CRM Traffic Ingress",
+      desc: "Secure link to HubSpot CRM for traffic surge prediction.",
       icon: <Database className="w-5 h-5 text-blue-400" />,
-      code: "Sentinel.validate_ingress",
-      actionLabel: "Monitor Node",
+      code: "Sentinel.forecast_traffic",
+      actionLabel: "Forecast Peak",
       action: () => setCurrentView?.(View.SCHEDULING),
       isAsync: false
     },
     {
       id: 'audit',
-      title: "Oversight Log",
-      desc: "Immutable ledger of all operational deviations and corrections.",
+      title: "Efficiency Log",
+      desc: "History of all scheduling corrections and overtime events.",
       icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />,
-      code: "SentinelLedger.record",
-      actionLabel: "Audit Ledger",
+      code: "EfficiencyLedger.record",
+      actionLabel: "View Efficiency",
       action: () => setCurrentView?.(View.OPERATIONS),
       isAsync: false
     },
     {
       id: 'alert',
-      title: "Zone Defense Trigger",
-      desc: "Instant broadcast of emergency labor reallocation directives.",
+      title: "Overtime Mitigator",
+      desc: "AI broadcast of resource shifts to prevent late-stay overtime.",
       icon: <Zap className="w-5 h-5 text-amber-500" />,
-      code: "Sentinel.broadcast('Surge')",
-      actionLabel: "Execute Directive",
+      code: "Sentinel.mitigate_overtime",
+      actionLabel: "Shift Resources",
       action: () => simulateAction('alert'),
       isAsync: true
     }
@@ -145,7 +145,7 @@ Validated by: Sentinel Security Auth Node-5065
 
   return (
     <div className="flex-1 bg-slate-950 overflow-auto">
-      <Header title="Sentinel Security Policy" subtitle="Authorized Workforce Protocol v3.1.0" />
+      <Header title="Labor Efficiency Policy" subtitle="Retail Operations Protocol v3.1.0" />
       
       <div className="p-8 max-w-7xl mx-auto space-y-8">
         
@@ -155,12 +155,12 @@ Validated by: Sentinel Security Auth Node-5065
             <div>
               <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] flex items-center gap-3">
                 <Calculator className="w-5 h-5 text-blue-500" />
-                Sentinel Resource Simulator
+                Labor Recapture Simulator
               </h3>
-              <p className="text-slate-500 text-[10px] font-mono mt-1 uppercase">Modeling ROI through strict Sentinel Policy compliance.</p>
+              <p className="text-slate-500 text-[10px] font-mono mt-1 uppercase">Modeling ROI through mitigation of unplanned overtime and scheduling gaps.</p>
             </div>
             <div className="flex items-center gap-4 bg-slate-900 p-2 rounded-xl border border-slate-800">
-               <span className="text-slate-500 text-[9px] font-black uppercase tracking-widest px-2">Recapture Directive</span>
+               <span className="text-slate-500 text-[9px] font-black uppercase tracking-widest px-2">Weekly Overtime Goal (Hrs)</span>
                <input 
                  type="number" 
                  value={recaptureInput}
@@ -172,19 +172,19 @@ Validated by: Sentinel Security Auth Node-5065
           
           <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-2">
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Annual Asset Protection</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Annual Labor Savings</p>
               <h4 className="text-3xl font-black text-white tracking-tighter">${Math.round(projectedSavings).toLocaleString()}</h4>
-              <p className="text-xs text-slate-500 font-mono">Recovered via Sentinel Policy</p>
+              <p className="text-xs text-slate-500 font-mono">Recovered via Efficiency Guard</p>
             </div>
             <div className="space-y-2 border-x border-slate-800 px-8">
-              <p className="text-[10px] text-blue-500 uppercase tracking-widest font-black">Sentinel ROI Multiplier</p>
+              <p className="text-[10px] text-blue-500 uppercase tracking-widest font-black">Profit Guard ROI</p>
               <h4 className="text-3xl font-black text-blue-500 tracking-tighter">${Math.round(projectedProtection).toLocaleString()}</h4>
-              <p className="text-xs text-slate-500 font-mono">10.3x Growth Multiplier Enabled</p>
+              <p className="text-xs text-slate-500 font-mono">EBITDA Growth Multiplier Enabled</p>
             </div>
             <div className="space-y-2">
-              <p className="text-[10px] text-emerald-500 uppercase tracking-widest font-black">2028 Strategic Vision</p>
+              <p className="text-[10px] text-emerald-500 uppercase tracking-widest font-black">2028 Store Valuation</p>
               <h4 className="text-3xl font-black text-emerald-500 tracking-tighter">${FISCAL_METRICS.vision2028}M</h4>
-              <p className="text-xs text-slate-500 font-mono">Enterprise Value Safeguard</p>
+              <p className="text-xs text-slate-500 font-mono">Profitability Integrity Safeguard</p>
             </div>
           </div>
         </div>
@@ -192,30 +192,31 @@ Validated by: Sentinel Security Auth Node-5065
         {/* Engine Room Section */}
         <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-xl overflow-hidden relative">
            <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-             <Shield className="w-64 h-64 text-blue-500" />
+             <Scale className="w-64 h-64 text-blue-500" />
            </div>
            
            <div className="relative z-10 flex flex-col lg:flex-row gap-12">
               <div className="lg:w-1/3 space-y-6">
                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
-                    <Terminal className="w-3 h-3 text-blue-500" />
-                    <span className="text-[9px] text-blue-500 font-black uppercase tracking-widest">Sentinel Protocol</span>
+                    {/* Fixed: Added missing Activity icon */}
+                    <Activity className="w-3 h-3 text-blue-500" />
+                    <span className="text-[9px] text-blue-500 font-black uppercase tracking-widest">Profit Guard Protocol</span>
                  </div>
-                 <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter">The Sentinel Secure Engine</h2>
+                 <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter">The Efficiency Engine</h2>
                  <p className="text-slate-400 text-xs leading-relaxed font-mono">
-                   The Sentinel Security Framework leverages a hardened, transactional architecture to eliminate workforce variance. Operational "leakage" is treated as a security breach, detected by the Sentinel Linter.
+                   Our framework analyzes the labor gap—the variance between planned staffing and actual spend. Unexpected overtime is detected early by the Breeze AI and mitigated through proactive resource shifting.
                  </p>
                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">HARDENED NODE</span>
-                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">DYNAMICS INGRESS</span>
-                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">SHIELD CACHE</span>
+                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">OT PROTECTION</span>
+                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">PLAN ACCURACY</span>
+                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">VARIANCE MAPPING</span>
                  </div>
 
                  {lastAlert && (
-                   <div className="p-4 bg-red-950/40 border border-red-500/30 rounded-xl animate-in slide-in-from-left-4 fade-in duration-300">
+                   <div className="p-4 bg-orange-950/40 border border-orange-500/30 rounded-xl animate-in slide-in-from-left-4 fade-in duration-300">
                       <div className="flex items-center gap-3">
-                         <AlertCircle className="w-5 h-5 text-red-500 animate-pulse" />
-                         <p className="text-[10px] font-mono text-red-100 font-bold uppercase tracking-widest">{lastAlert}</p>
+                         <AlertCircle className="w-5 h-5 text-orange-500 animate-pulse" />
+                         <p className="text-[10px] font-mono text-orange-100 font-bold uppercase tracking-widest">{lastAlert}</p>
                       </div>
                    </div>
                  )}
@@ -243,7 +244,7 @@ Validated by: Sentinel Security Auth Node-5065
                         {activeActions[box.id] ? (
                           <>
                             <Loader2 className="w-3 h-3 animate-spin" />
-                            Executing...
+                            Analyzing...
                           </>
                         ) : (
                           <>
@@ -264,29 +265,29 @@ Validated by: Sentinel Security Auth Node-5065
             <div className="p-8 md:p-12">
                 <div className="flex flex-col items-center text-center mb-10">
                     <ShieldCheck className="w-12 h-12 text-blue-500 mb-4" />
-                    <h2 className="text-2xl font-black text-white uppercase tracking-[0.2em] mb-2">Store Manager Standard Operating Procedure (SOP)</h2>
-                    <p className="text-sm font-mono text-slate-500 uppercase tracking-widest">Sentinel × OptiSchedule Pro — Store 5065</p>
+                    <h2 className="text-2xl font-black text-white uppercase tracking-[0.2em] mb-2">Standard Operating Procedure (SOP): Labor Control</h2>
+                    <p className="text-sm font-mono text-slate-500 uppercase tracking-widest">Store 5065 Efficiency Protocol</p>
                 </div>
 
                 <div className="max-w-3xl mx-auto space-y-8 text-slate-300">
                     <div className="space-y-4 font-mono text-sm leading-relaxed border-l-2 border-slate-800 pl-6">
-                        <p>This SOP establishes mandatory enforcement of labor execution through Sentinel and OptiSchedule Pro.</p>
-                        <p><span className="text-red-400 font-bold">Labor variance is classified as a security failure.</span></p>
-                        <p>Managers must execute system-generated schedules without modification.</p>
-                        <p>Manual overrides are prohibited without logged, market-approved exceptions.</p>
-                        <p>All actions are continuously audited.</p>
+                        <p>This SOP establishes the mandatory management of labor variance via OptiSchedule Pro.</p>
+                        <p><span className="text-orange-400 font-bold">Unmanaged labor variance impacts store EBITDA directly.</span></p>
+                        <p>Managers must review AI-generated traffic alerts to shift resources and prevent unplanned overtime.</p>
+                        <p>Variance corrections must be logged to maintain the integrity of the store's fiscal plan.</p>
+                        <p>Overtime oversight is a primary KPI for all Store Management staff.</p>
                     </div>
 
                     <div className="bg-slate-950 p-8 rounded-xl border border-slate-800 mt-8">
                         <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
                             <PenTool className="w-4 h-4 text-blue-500" />
-                            Digital Acknowledgment
+                            Management Acknowledgment
                         </h3>
                         
                         {!isAcknowledged ? (
                             <form onSubmit={handleAcknowledgment} className="space-y-6">
                                 <p className="text-sm italic text-slate-400">
-                                    "I acknowledge that labor execution is a controlled system. My role is execution, not optimization."
+                                    "I acknowledge that managing labor variance and overtime is critical to store health. I will use Breeze AI to proactively manage staffing peaks."
                                 </p>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -296,7 +297,7 @@ Validated by: Sentinel Security Auth Node-5065
                                             type="text" 
                                             value={signature}
                                             onChange={(e) => setSignature(e.target.value)}
-                                            placeholder="Type full name"
+                                            placeholder="Full Name"
                                             className="w-full bg-transparent border-b-2 border-slate-700 py-2 text-white font-serif italic text-xl focus:border-blue-500 focus:outline-none placeholder-slate-700"
                                             required
                                         />
@@ -313,7 +314,7 @@ Validated by: Sentinel Security Auth Node-5065
                                             type="text" 
                                             value={managerTitle}
                                             onChange={(e) => setManagerTitle(e.target.value)}
-                                            placeholder="Store Manager / ASM"
+                                            placeholder="Store Manager / Assistant Manager"
                                             className="w-full bg-transparent border-b-2 border-slate-700 py-2 text-white font-mono text-sm focus:border-blue-500 focus:outline-none uppercase placeholder-slate-700"
                                             required
                                         />
@@ -326,9 +327,9 @@ Validated by: Sentinel Security Auth Node-5065
                                     className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     {signing ? (
-                                        <><Loader2 className="w-4 h-4 animate-spin" /> Authenticating Signature...</>
+                                        <><Loader2 className="w-4 h-4 animate-spin" /> Submitting Acknowledgment...</>
                                     ) : (
-                                        <>Sign & Confirm Protocol Adherence</>
+                                        <>Confirm Policy Alignment</>
                                     )}
                                 </button>
                             </form>
@@ -338,8 +339,8 @@ Validated by: Sentinel Security Auth Node-5065
                                     <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                                 </div>
                                 <div className="text-center">
-                                    <h4 className="text-xl font-black text-white uppercase tracking-widest mb-1">SOP Acknowledged</h4>
-                                    <p className="text-emerald-500 font-mono text-xs uppercase tracking-wider">Digital Hash: {Math.random().toString(36).substr(2, 12).toUpperCase()}</p>
+                                    <h4 className="text-xl font-black text-white uppercase tracking-widest mb-1">SOP Signed</h4>
+                                    <p className="text-emerald-500 font-mono text-xs uppercase tracking-wider">Audit Ref: {Math.random().toString(36).substr(2, 12).toUpperCase()}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-8 text-center mt-6 w-full max-w-md border-t border-slate-800 pt-6">
                                     <div>
@@ -357,65 +358,6 @@ Validated by: Sentinel Security Auth Node-5065
                 </div>
             </div>
         </div>
-
-        {/* Sentinel Roadmap */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-xl">
-              <div>
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                   <TrendingUp className="w-4 h-4 text-emerald-500" />
-                   Sentinel Strategic Roadmap
-                </h3>
-                <div className="space-y-6">
-                   {[
-                     {year: "2025", goal: "Sentinel Framework Hardening", progress: "100%"},
-                     {year: "2026", goal: "Regional Protocol Rollout", progress: "25%"},
-                     {year: "2027", goal: "Autonomous Workforce Logic", progress: "0%"},
-                     {year: "2028", goal: "Enterprise Compliance State", progress: "0%"}
-                   ].map(step => (
-                     <div key={step.year} className="relative pl-8 border-l-2 border-slate-800 last:border-0 pb-6">
-                        <div className={`absolute -left-[7px] top-0 w-3 h-3 rounded-full border-2 border-slate-900 ${step.progress === '100%' ? 'bg-blue-500' : 'bg-slate-800'}`}></div>
-                        <span className="text-[9px] font-black text-blue-500 font-mono uppercase tracking-widest">{step.year}</span>
-                        <p className="text-[11px] font-black text-white uppercase tracking-wider">{step.goal}</p>
-                        <div className="mt-2 w-full bg-slate-800 h-1 rounded-full overflow-hidden">
-                           <div className="bg-blue-600 h-full" style={{width: step.progress}}></div>
-                        </div>
-                     </div>
-                   ))}
-                </div>
-              </div>
-           </div>
-
-           <div className="bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden flex flex-col justify-center shadow-2xl">
-              <div className="absolute top-0 right-0 p-8 opacity-10">
-                 <Shield className="w-48 h-48" />
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-2xl font-black mb-4 uppercase tracking-tighter leading-tight">Standardize<br/>or Fail</h3>
-                <p className="text-blue-100 leading-relaxed mb-8 font-bold text-xs uppercase tracking-wide opacity-80">
-                  Workforce variance is the primary enemy of enterprise stability. The Sentinel Security Policy transforms the operational landscape into a strictly enforced protocol. Compliance is the only path to ROI.
-                </p>
-                <div className="flex gap-4">
-                   <button 
-                     onClick={handleDownloadBriefing}
-                     disabled={isDownloading}
-                     className="flex-1 py-4 bg-slate-950 text-blue-400 font-black text-[10px] uppercase tracking-[0.3em] rounded-xl shadow-xl hover:bg-slate-900 transition-all flex items-center justify-center gap-3 disabled:opacity-75 disabled:cursor-wait"
-                   >
-                     {isDownloading ? (
-                       <>
-                         <Loader2 className="w-4 h-4 animate-spin" /> Verifying Clearance...
-                       </>
-                     ) : (
-                       <>
-                         Download Policy <Download className="w-4 h-4" />
-                       </>
-                     )}
-                   </button>
-                </div>
-              </div>
-           </div>
-        </div>
-
       </div>
     </div>
   );

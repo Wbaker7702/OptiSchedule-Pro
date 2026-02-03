@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, CalendarDays, Activity, Package, BarChart3, Users, Settings as SettingsIcon, LogOut, ShieldCheck, Lock, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Activity, Package, BarChart3, Users, Settings as SettingsIcon, LogOut, ShieldCheck, Lock, Power } from 'lucide-react';
 import { View } from '../types';
 import { APP_VERSION, BRAND_NAME } from '../constants';
 
@@ -19,7 +19,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
     { id: View.ANALYTICS, label: 'Fiscal Oversight', icon: BarChart3 },
     { id: View.TEAM, label: 'Personnel Registry', icon: Users },
     { id: View.PLAYBOOK, label: 'Sentinel Policy', icon: ShieldCheck },
-    { id: View.FEEDBACK, label: 'Field Report', icon: MessageSquare },
   ];
 
   return (
@@ -71,10 +70,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
         </button>
         <button 
           onClick={onLogout}
-          className="flex items-center gap-3 px-4 py-2 text-red-400 hover:text-red-300 w-full rounded-lg hover:bg-slate-800 transition-colors mt-1"
+          className="flex items-center gap-3 px-4 py-2 text-amber-400 hover:text-amber-300 w-full rounded-lg hover:bg-slate-800 transition-colors mt-1"
         >
-          <LogOut className="w-4 h-4" />
-          <span className="text-xs font-bold uppercase tracking-widest">Terminate Session</span>
+          <Power className="w-4 h-4" />
+          <span className="text-xs font-bold uppercase tracking-widest">Suspend Session</span>
         </button>
       </div>
     </div>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import StatCard from '../components/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2, Fingerprint, Shield, Sparkles, Share2, Tag, Check } from 'lucide-react';
+import { CheckCircle2, Clock, ShieldAlert, ShieldCheck, Scale, TrendingUp, Zap, Database, Activity, Terminal, Server, Globe, Lock, RefreshCw, AlertTriangle, Loader2, Fingerprint, Shield, Sparkles, Share2, Tag, Check, Info } from 'lucide-react';
 import { DATE_STRING, FISCAL_METRICS, APP_VERSION, DYNAMICS_365_ROI_DATA, VULNERABILITY_DATA, SYSTEM_HEALTH } from '../constants';
 import { View } from '../types';
 
@@ -19,9 +19,10 @@ const data = [
 
 interface DashboardProps {
   setCurrentView?: (view: View) => void;
+  onAdjustStaffing?: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
+const Dashboard: React.FC<DashboardProps> = ({ setCurrentView, onAdjustStaffing }) => {
   const [pulseLogs, setPulseLogs] = useState<{id: number, msg: string, time: string}[]>([]);
   const [complianceScore, setComplianceScore] = useState(98);
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -29,25 +30,16 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
   const [lastOptimized, setLastOptimized] = useState<string | null>(null);
   const [showBreezeSuccess, setShowBreezeSuccess] = useState(false);
   
-  // For demonstration, let's assume breeze is active if we want to show the widget
-  const isBreezeActive = true; 
-
-  const [subMetrics, setSubMetrics] = useState({
-    enforcement: 98,
-    sync: 100,
-    audit: 100
-  });
-
   useEffect(() => {
     const messages = [
       "SYSTEM_HEALTH: All Nodes Operational",
       "SENTINEL_AUTH: Verification Front End Success",
       "D365_INGRESS: Data Packet Validated (12ms)",
-      "LINTER: Policy check passed 100%",
+      "LINTER: Labor variance check passed 100%",
       "SYNC: Real-time link established",
-      "SSP: Sentinel Security Frame active",
+      "SSP: Operational Integrity Frame active",
       "BREEZE_SYNC: HubSpot Deal Flow Map Active",
-      "OPTIMIZER: Efficiency Target Reached"
+      "OPTIMIZER: Overtime Target Reached"
     ];
     
     const interval = setInterval(() => {
@@ -67,24 +59,19 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
     const startTime = new Date().toLocaleTimeString();
     setPulseLogs(prev => [{
       id: Date.now(),
-      msg: "SENTINEL_OPTIMIZE: Hardening all floor protocols...",
+      msg: "SENTINEL_OPTIMIZE: Mitigating labor variance vectors...",
       time: startTime
     }, ...prev].slice(0, 5));
 
     setTimeout(() => {
       const newScore = 100;
       setComplianceScore(newScore);
-      setSubMetrics({
-        enforcement: 100,
-        sync: 100,
-        audit: 100
-      });
       setLastOptimized(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       setIsOptimizing(false);
       
       setPulseLogs(prev => [{
         id: Date.now() + 1,
-        msg: `SENTINEL_SUCCESS: Compliance score restored to ${newScore}%`,
+        msg: `SENTINEL_SUCCESS: Operational efficiency restored to ${newScore}%`,
         time: new Date().toLocaleTimeString()
       }, ...prev].slice(0, 5));
     }, 2000);
@@ -99,20 +86,18 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
     }, ...prev].slice(0, 5));
 
     setTimeout(() => {
+      if (onAdjustStaffing) onAdjustStaffing();
       setIsBreezeAdjusting(false);
       setShowBreezeSuccess(true);
       setPulseLogs(prev => [{
         id: Date.now() + 1,
-        msg: "BREEZE_AI: Labor allocation adjusted (+2 units to Front End)",
+        msg: "BREEZE_AI: Labor allocation adjusted to prevent overtime spikes.",
         time: new Date().toLocaleTimeString()
       }, ...prev].slice(0, 5));
       
       setTimeout(() => setShowBreezeSuccess(false), 3000);
     }, 2000);
   };
-
-  const circumference = 364.4;
-  const offset = circumference - (complianceScore / 100) * circumference;
 
   return (
     <div className="flex-1 bg-slate-950 overflow-auto">
@@ -132,18 +117,18 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
               </div>
               <div>
                  <div className="flex items-center gap-3 mb-1">
-                    <h2 className="text-white font-black text-xl tracking-[0.1em] uppercase">Sentinel Security Mandate</h2>
-                    <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em] animate-pulse">System Secure</span>
+                    <h2 className="text-white font-black text-xl tracking-[0.1em] uppercase">Labor Efficiency Mandate</h2>
+                    <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em] animate-pulse">Efficiency Active</span>
                  </div>
                  <p className="text-slate-400 text-xs font-mono max-w-lg leading-relaxed uppercase">
-                    "Execution Leakage" is a breach of policy. Every unallocated labor hour is a digital security failure.
+                    Labor variance represents the gap between planned and actual spend. Unmanaged overtime is an operational leakage risk.
                  </p>
               </div>
            </div>
 
            <div className="flex gap-4 w-full xl:w-auto z-10 items-center">
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center min-w-[130px]">
-                 <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Weekly Leakage</p>
+                 <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Weekly Variance</p>
                  <p className="text-xl font-black text-white">${Math.round(FISCAL_METRICS.executionLeakage / 1000)}k</p>
               </div>
               <button 
@@ -152,7 +137,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
                 className="bg-emerald-600 hover:bg-emerald-500 text-white p-4 rounded-xl border border-emerald-500/30 shadow-lg transition-all flex flex-col items-center min-w-[130px] active:scale-[0.98] disabled:opacity-50"
               >
                  <p className="text-[9px] text-emerald-100 uppercase font-black tracking-widest mb-1">
-                   {isOptimizing ? 'Hardening...' : 'Policy ROI'}
+                   {isOptimizing ? 'Optimizing...' : 'ROI Guard'}
                  </p>
                  <div className="flex items-center gap-2">
                     {isOptimizing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Shield className="w-5 h-5" />}
@@ -166,7 +151,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard 
-              title="Sentinel Health" 
+              title="System Health" 
               value={SYSTEM_HEALTH.status}
               trend="Region: us-west1" 
               trendDirection="up" 
@@ -174,7 +159,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
               icon={<CheckCircle2 className="w-5 h-5 text-emerald-500" />}
             />
             <StatCard 
-              title="Compliance Index" 
+              title="Efficiency Index" 
               value={`${complianceScore}%`} 
               subtitle="Target: 100%"
               icon={<Fingerprint className="w-5 h-5 text-emerald-500" />}
@@ -183,7 +168,15 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
                 <div className="absolute top-0 right-0 p-2 opacity-5">
                     <Sparkles className="w-12 h-12 text-[#ff7a59]" />
                 </div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Breeze Forecast</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Breeze Forecast</p>
+                  <div className="group/info relative cursor-help">
+                    <Info className="w-3 h-3 text-slate-600" />
+                    <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-800 text-white text-[8px] rounded-lg opacity-0 group-hover/info:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-700 font-mono">
+                      BREEZE_INSIGHT: Correlating 4 active HubSpot campaigns with local CRM check-ins. High conversion probability in Zone B. Mitigating unplanned overtime spikes.
+                    </div>
+                  </div>
+                </div>
                 <div className="flex items-baseline gap-2 mt-1">
                     <h3 className="text-2xl font-black text-white">+12%</h3>
                     <span className="text-[10px] font-bold text-orange-400 uppercase">Traffic Surge</span>
@@ -195,7 +188,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
           <div className="bg-slate-900 rounded-xl border border-slate-800 p-5 shadow-sm overflow-hidden flex flex-col">
             <div className="flex items-center gap-2 mb-4">
               <Terminal className="w-4 h-4 text-emerald-500" />
-              <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Sentinel Pulse</h3>
+              <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Operational Pulse</h3>
             </div>
             <div className="space-y-3 flex-1 overflow-hidden">
                {pulseLogs.map(log => (
@@ -230,10 +223,6 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
                         <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
                         <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                       </linearGradient>
-                      <linearGradient id="colorBreeze" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ff7a59" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#ff7a59" stopOpacity={0}/>
-                      </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
                     <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} />
@@ -266,13 +255,21 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
                           <div className="flex justify-between items-center">
                               <span className="text-xl font-black text-orange-400">88%</span>
                               <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                                <TrendingUp className="w-3 h-3" /> High Confidence
+                                <TrendingUp className="w-3 h-3" /> Overtime Protection
                               </span>
                           </div>
                       </div>
 
                       <div className="space-y-3">
-                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 border-b border-white/5 pb-2">CRM Signal Feed</p>
+                         <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">CRM Signal Feed</p>
+                           <div className="group relative cursor-help">
+                              <Info className="w-2.5 h-2.5 text-slate-600" />
+                              <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-800 text-white text-[8px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-700 font-mono">
+                                HubSpot CRM attributes this surge to 'Spring Surge' leads. Reallocating staff helps avoid unplanned overtime during the 4PM peak.
+                              </div>
+                           </div>
+                         </div>
                          {[
                            { event: "Coupon Code 'S5065' Redemptions (+15)", time: "Just Now" },
                            { event: "Cart Abandonment Re-engagement Win", time: "2m ago" },
@@ -303,7 +300,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setCurrentView }) => {
                     ) : (
                       <Zap className="w-3 h-3 fill-white" />
                     )}
-                    {isBreezeAdjusting ? 'Analyzing...' : showBreezeSuccess ? 'Staffing Optimized' : 'Adjust Staffing Now'}
+                    {isBreezeAdjusting ? 'Re-aligning...' : showBreezeSuccess ? 'Overtime Prevented' : 'Adjust Staffing Now'}
                  </button>
               </div>
            </div>

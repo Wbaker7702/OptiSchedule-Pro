@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
-import { HEATMAP_DATA } from '../constants';
-import { Calendar, RefreshCw, Link as LinkIcon, Check, X, ShieldCheck, Settings, Database, Users as UsersIcon, List, ArrowLeftRight, Activity, Globe, Server, Layers, Hexagon, AlertTriangle, ArrowRight, Share2, Loader2, FileText, Terminal, Zap, Sparkles, Fingerprint, Search, Shield } from 'lucide-react';
-import { View, ERPProvider, IntegrationStatus } from '../types';
+import { Calendar, RefreshCw, Link as LinkIcon, Check, X, ShieldCheck, Settings, Database, Users as UsersIcon, List, ArrowLeftRight, Activity, Globe, Server, Layers, Hexagon, AlertTriangle, ArrowRight, Share2, Loader2, FileText, Terminal, Zap, Sparkles, Fingerprint, Search, Shield, Info } from 'lucide-react';
+import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint } from '../types';
 
 interface SchedulingProps {
   setCurrentView?: (view: View) => void;
@@ -13,16 +12,18 @@ interface SchedulingProps {
   isConnected: boolean;
   setIsConnected: (connected: boolean) => void;
   setHubspotStatus: (status: IntegrationStatus) => void;
+  heatmapData: HeatmapDataPoint[];
+  onAdjustStaffing: () => void;
 }
 
 type SyncStatus = 'SYNCED' | 'SYNCING' | 'CONFLICT' | 'OFFLINE';
 
 const syncLogs = [
   { event: 'Personnel Registry Sync', target: 'Azure AD / Sentinel Node', status: 'Success', time: '09:42:11' },
-  { event: 'Fiscal Budget Ingress', target: 'SAP S/4HANA', status: 'Success', time: '09:40:05' },
+  { event: 'Overtime Analysis Sync', target: 'Workday / D365', status: 'Success', time: '09:40:05' },
   { event: 'Marketing Attribution Load', target: 'HubSpot CRM', status: 'Success', time: '09:38:50' },
   { event: 'Inventory Level Verification', target: 'Dynamics 365 SCM', status: 'Success', time: '09:35:22' },
-  { event: 'Policy Linter Check', target: 'Local Node', status: 'Success', time: '09:30:00' },
+  { event: 'Labor Variance Linter', target: 'Local Node', status: 'Success', time: '09:30:00' },
 ];
 
 const Scheduling: React.FC<SchedulingProps> = ({ 
@@ -32,26 +33,24 @@ const Scheduling: React.FC<SchedulingProps> = ({
   setActiveProvider,
   isConnected,
   setIsConnected,
-  setHubspotStatus
+  setHubspotStatus,
+  heatmapData,
+  onAdjustStaffing
 }) => {
   const [selectedProvider, setSelectedProvider] = useState<ERPProvider>('HubSpot'); 
   const [isModalOpen, setIsModalOpen] = useState(!isConnected);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isAdjusting, setIsAdjusting] = useState(false);
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualPortalId, setManualPortalId] = useState('');
   const [syncProgress, setSyncProgress] = useState(0);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'heatmap' | 'logs'>('heatmap');
-  const [isBreezeMode, setIsBreezeMode] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [showAdjustmentSuccess, setShowAdjustmentSuccess] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
   
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(isConnected ? 'SYNCED' : 'OFFLINE');
-  const [showConflictModal, setShowConflictModal] = useState(false);
-  
-  const [environmentUrl, setEnvironmentUrl] = useState('');
-  const [tenantId, setTenantId] = useState('');
-  const [apiKey, setApiKey] = useState('');
 
   const breezeSteps = [
     "BREEZE_AGENT: Initiating Smart-Discovery for Store 5065...",
@@ -74,19 +73,14 @@ const Scheduling: React.FC<SchedulingProps> = ({
     setSyncStatus('SYNCING');
     setTimeout(() => {
         setIsSyncing(false);
-        const hasConflict = Math.random() > 0.4;
-        if (hasConflict) {
-            setSyncStatus('CONFLICT');
-            setShowConflictModal(true);
-        } else {
-            setSyncStatus('SYNCED');
-        }
+        setSyncStatus('SYNCED');
     }, 2000);
   };
 
   const handleAdjustStaffing = () => {
     setIsAdjusting(true);
     setTimeout(() => {
+      onAdjustStaffing();
       setIsAdjusting(false);
       setShowAdjustmentSuccess(true);
       setSyncStatus('SYNCED');
@@ -118,6 +112,15 @@ const Scheduling: React.FC<SchedulingProps> = ({
             }, 800);
         }
     }, 400);
+  };
+
+  const handleManualEntry = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualPortalId) return;
+    setIsScanning(true);
+    setTerminalLogs([`BREEZE AGENT: MANUAL BIND TO PORTAL ${manualPortalId}...`]);
+    // Simulate connection flow with portal ID
+    setTimeout(handleBreezeDiscovery, 500);
   };
 
   const handleConnect = (e: React.FormEvent) => {
@@ -185,7 +188,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
                                 {(['Dynamics 365', 'SAP S/4HANA', 'HubSpot'] as ERPProvider[]).map((p) => (
                                     <button 
                                       key={p} 
-                                      onClick={() => setSelectedProvider(p)} 
+                                      onClick={() => { setSelectedProvider(p); setIsManualMode(false); }} 
                                       className={`flex-1 py-3 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all ${selectedProvider === p ? 'bg-white text-slate-900 shadow-md scale-100' : 'text-slate-400 hover:text-slate-600'}`}
                                     >
                                         {p}
@@ -203,24 +206,49 @@ const Scheduling: React.FC<SchedulingProps> = ({
                                         <div className="space-y-2">
                                             <h4 className="text-xl font-black text-slate-900">Sign in with HubSpot Breeze</h4>
                                             <p className="text-sm text-slate-500 leading-relaxed max-w-sm mx-auto">
-                                                Our AI agent will automatically discover your portal and sync CRM deals to your floor traffic predictions.
+                                                {isManualMode ? 'Enter your HubSpot Portal ID below to establish the operational data link.' : 'Our AI agent will automatically discover your portal and sync CRM deals to your floor traffic predictions.'}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <button 
-                                        onClick={handleBreezeDiscovery}
-                                        className="w-full py-6 bg-[#ff7a59] hover:bg-[#ff8f75] text-white font-black text-sm uppercase tracking-[0.3em] rounded-2xl shadow-2xl shadow-orange-500/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-4 group"
-                                    >
-                                        <Zap className="w-6 h-6 fill-white group-hover:rotate-12 transition-transform" />
-                                        Launch Breeze Discovery
-                                    </button>
+                                    {isManualMode ? (
+                                        <form onSubmit={handleManualEntry} className="space-y-6">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Portal ID (HUB-ID)</label>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="e.g. 8840212" 
+                                                    value={manualPortalId}
+                                                    onChange={(e) => setManualPortalId(e.target.value)}
+                                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none transition-all font-mono font-bold text-center text-lg" 
+                                                    required 
+                                                />
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <button type="button" onClick={() => setIsManualMode(false)} className="flex-1 py-4 border border-slate-200 text-slate-500 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all">Cancel</button>
+                                                <button type="submit" className="flex-[2] py-4 bg-[#ff7a59] hover:bg-[#ff8f75] text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl transition-all">Establish Link</button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <button 
+                                                onClick={handleBreezeDiscovery}
+                                                className="w-full py-6 bg-[#ff7a59] hover:bg-[#ff8f75] text-white font-black text-sm uppercase tracking-[0.3em] rounded-2xl shadow-2xl shadow-orange-500/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-4 group"
+                                            >
+                                                <Zap className="w-6 h-6 fill-white group-hover:rotate-12 transition-transform" />
+                                                Launch Breeze Discovery
+                                            </button>
 
-                                    <div className="text-center">
-                                        <button className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-[#ff7a59] transition-colors underline underline-offset-8 decoration-slate-200">
-                                            Enter Portal ID Manually
-                                        </button>
-                                    </div>
+                                            <div className="text-center">
+                                                <button 
+                                                    onClick={() => setIsManualMode(true)}
+                                                    className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-[#ff7a59] transition-colors underline underline-offset-8 decoration-slate-200"
+                                                >
+                                                    Enter Portal ID Manually
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ) : (
                                 <form onSubmit={handleConnect} className="space-y-6">
@@ -344,7 +372,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
                     {activeTab === 'heatmap' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ff7a59] rounded-t-full shadow-[0_-4px_10px_rgba(255,122,89,0.3)]" />}
                   </button>
                   <button onClick={() => setActiveTab('logs')} className={`flex items-center gap-3 px-6 py-4 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'logs' ? 'text-[#ff7a59]' : 'text-slate-400 hover:text-slate-600'}`}>
-                    <List className="w-4 h-4" /> Enterprise Audit Trail
+                    <List className="w-4 h-4" /> Labor Variance Log
                     {activeTab === 'logs' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#ff7a59] rounded-t-full shadow-[0_-4px_10px_rgba(255,122,89,0.3)]" />}
                   </button>
                </div>
@@ -370,7 +398,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
                             <div className="h-24 flex items-center justify-end">Predicted Traffic</div>
                             <div className="h-24 flex items-center justify-end">Capacity Goal</div>
                           </div>
-                          {HEATMAP_DATA.map((point, index) => (
+                          {heatmapData.map((point, index) => (
                               <div key={index} className="flex flex-col relative group">
                                 <div className="h-10 border-b border-slate-800 flex items-center justify-center text-slate-500 text-[10px] font-mono">{point.hour}</div>
                                 <div className={`h-24 transition-all duration-500 border-r border-slate-800/50 flex items-center justify-center text-white font-black text-xl ${activeProvider === 'HubSpot' ? 'bg-[#ff7a59]/20 group-hover:bg-[#ff7a59]/30' : 'bg-blue-600/20'}`}>
@@ -431,12 +459,20 @@ const Scheduling: React.FC<SchedulingProps> = ({
                     </div>
 
                     <div className="p-6 bg-slate-900/50 rounded-2xl border border-white/5 space-y-4">
-                        <p className="text-sm font-bold text-white/90 leading-relaxed">
-                            HubSpot signals indicate a <span className="text-orange-400">12% increase</span> in regional traffic probability due to the 'Spring Surge' campaign.
-                        </p>
+                        <div className="flex items-start justify-between">
+                          <p className="text-sm font-bold text-white/90 leading-relaxed">
+                              HubSpot signals indicate a <span className="text-orange-400">12% traffic surge</span> from campaign redemptions. Proactive adjustment advised to **prevent unplanned overtime**.
+                          </p>
+                          <div className="group relative cursor-help shrink-0 ml-2">
+                             <Info className="w-3 h-3 text-slate-600" />
+                             <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-800 text-white text-[8px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none border border-slate-700 font-mono leading-relaxed">
+                               TRAFFIC_SURGE Explanation: AI detection correlating digital deal redemptions with physical location check-ins via CRM Hub.
+                             </div>
+                          </div>
+                        </div>
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
                             <Check className="w-4 h-4 text-emerald-500" />
-                            Policy Alignment Verified
+                            Overtime Safeguard Active
                         </div>
                     </div>
 
@@ -455,7 +491,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
                             )}
                             {isAdjusting ? 'Reallocating...' : showAdjustmentSuccess ? 'Deployment Adjusted' : 'Adjust Staffing Now'}
                         </button>
-                        <p className="text-center text-[9px] text-slate-600 mt-4 uppercase font-black tracking-widest">Action will be logged in Sentinel Audit Trail</p>
+                        <p className="text-center text-[9px] text-slate-600 mt-4 uppercase font-black tracking-widest">Deployment logged in Labor Variance Audit</p>
                     </div>
                 </div>
             </div>

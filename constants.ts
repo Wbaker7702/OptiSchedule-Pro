@@ -1,4 +1,5 @@
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, FieldReport } from './types';
+
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog } from './types';
 
 // Helper for relative dates
 const getRelativeDate = (offsetDays: number) => {
@@ -26,7 +27,7 @@ export const SYSTEM_HEALTH = {
 export const FISCAL_METRICS = {
   avgPayRate: 14.00,
   targetWeeklyHoursRecapture: 186,
-  executionLeakage: 12500,
+  executionLeakage: 12500, // Weekly Labor Variance Gap
   currentROI: 12.4,
   annualRecoveryTarget: 4.68,
   vision2028: 491,
@@ -34,30 +35,30 @@ export const FISCAL_METRICS = {
 };
 
 export const OPERATIONAL_AUDITS: AuditLog[] = [
-  { id: 'aud-101', severity: 'info', code: 'POL-01', message: 'Protocol Check: Front End variance within tolerance (<2%)', file: 'Dept: Front End', file_path: 'Dept: Front End', fix: 'No action' },
+  { id: 'aud-101', severity: 'info', code: 'POL-01', message: 'Labor Variance: Front End within tolerance (<2%)', file: 'Dept: Front End', file_path: 'Dept: Front End', fix: 'No action' },
   { id: 'aud-102', severity: 'info', code: 'SEC-04', message: 'Sync Latency Nominal (24ms)', file: 'Node: D365_Ingress', file_path: 'Node: D365_Ingress', fix: 'No action' },
-  { id: 'aud-103', severity: 'info', code: 'OPT_09', message: 'Optimal staffing achieved for peak hour', file: 'Schedule: Current_Cycle', file_path: 'Schedule: Current_Cycle', fix: 'No action' },
-  { id: 'aud-104', severity: 'warning', code: 'FIS-02', message: 'Asset Depletion Risk: Restock advised', file: 'Dept: Grocery', file_path: 'Dept: Grocery', fix: 'Schedule Restock' },
-  { id: 'aud-105', severity: 'info', code: 'LAB-02', message: 'Protocol Adherence: 98.5%', file: 'Dept: Apparel', file_path: 'Dept: Apparel', fix: 'No action' },
+  { id: 'aud-103', severity: 'info', code: 'OPT_09', message: 'Optimal scheduling achieved for peak traffic', file: 'Schedule: Current_Cycle', file_path: 'Schedule: Current_Cycle', fix: 'No action' },
+  { id: 'aud-104', severity: 'warning', code: 'FIS-02', message: 'Inventory Drift: Restock advised', file: 'Dept: Grocery', file_path: 'Dept: Grocery', fix: 'Schedule Restock' },
+  { id: 'aud-105', severity: 'info', code: 'LAB-02', message: 'Overtime Guard: Active', file: 'Dept: Apparel', file_path: 'Dept: Apparel', fix: 'No action' },
   { id: 'aud-106', severity: 'info', code: 'CRM-01', message: 'HubSpot Data Ingress: 1250 Loyalty Signups Synced', file: 'Node: HubSpot_CRM', file_path: 'Node: HubSpot_CRM', fix: 'No action' },
 ];
 
 export const VULNERABILITY_DATA: Vulnerability[] = [
   { 
     id: 'vul-001', 
-    title: 'Workforce Leakage Vector', 
+    title: 'Labor Variance Vector', 
     severity: 'Medium', 
-    description: 'Minor labor surplus detected in Apparel zone during off-peak.', 
-    remediation: 'Sentinel-Redirect: Optimization scheduled.',
+    description: 'Minor labor surplus detected in Apparel zone; risk of inefficient allocation.', 
+    remediation: 'Shift-Redirect: Optimization advised.',
     status: 'Patching',
     category: 'Operational'
   },
   { 
     id: 'vul-003', 
-    title: 'Protocol Deviation', 
+    title: 'Scheduling Deviation', 
     severity: 'Low', 
     description: 'Manual schedule override detected in Electronics department.', 
-    remediation: 'Sentinel-Lock: Review pending.',
+    remediation: 'Manager Review: Verification required.',
     status: 'Detected',
     category: 'Personnel'
   }
@@ -98,7 +99,7 @@ export const EMPLOYEES: Employee[] = [
   { id: '9', name: 'Emma Wilson', role: 'Security Agent', department: 'Front End', status: 'Active', performance: 4.2, email: 'emma.w@optischedule.com', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop' },
   { id: '10', name: 'Michael Scott', role: 'Regional Oversight', department: 'Electronics', status: 'Active', performance: 3.9, email: 'michael.s@optischedule.com', avatar: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=100&h=100&fit=crop' },
   { id: '11', name: 'Pam Beesly', role: 'Admin Protocol', department: 'Front End', status: 'Active', performance: 4.7, email: 'pam.b@optischedule.com', avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop' },
-  { id: '12', name: 'Dwight Schrute', role: 'Director of Compliance', department: 'Operations', status: 'Active', performance: 5.0, email: 'dwight.s@optischedule.com', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop' },
+  { id: '12', name: 'Dwight Schrute', role: 'Director of Operations', department: 'Operations', status: 'Active', performance: 5.0, email: 'dwight.s@optischedule.com', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop' },
   { id: '13', name: 'Jim Halpert', role: 'Strategy Analyst', department: 'Home Goods', status: 'Active', performance: 4.5, email: 'jim.h@optischedule.com', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop' },
   { id: '14', name: 'Stanley Hudson', role: 'Efficiency Agent', department: 'Apparel', status: 'Active', performance: 3.2, email: 'stanley.h@optischedule.com', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=100&h=100&fit=crop' },
   { id: '15', name: 'Angela Martin', role: 'Audit Specialist', department: 'Pharmacy', status: 'Active', performance: 4.8, email: 'angela.m@optischedule.com', avatar: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?w=100&h=100&fit=crop' },
@@ -143,7 +144,7 @@ export const DEPARTMENT_METRICS: DepartmentMetric[] = [
     name: 'Electronics', 
     activeStaff: '4/5', 
     sales: '$28,920', 
-    extraMetricLabel: 'High-Ticket Ingress', 
+    extraMetricLabel: 'High-Ticket Traffic', 
     extraMetricValue: '28%',
     waitTime: '5m 45s' 
   },
@@ -159,7 +160,7 @@ export const DEPARTMENT_METRICS: DepartmentMetric[] = [
     name: 'Apparel', 
     activeStaff: '3/4', 
     sales: '$15,240', 
-    extraMetricLabel: 'Style Integrity', 
+    extraMetricLabel: 'Floor Readiness', 
     extraMetricValue: '92%',
     waitTime: '4m 15s'
   },
@@ -179,34 +180,4 @@ export const DEPARTMENT_METRICS: DepartmentMetric[] = [
     extraMetricValue: '142',
     waitTime: '8m 20s'
   },
-];
-
-export const INITIAL_FIELD_REPORTS: FieldReport[] = [
-  {
-    id: 'rep-001',
-    author: 'Sarah Johnson',
-    timestamp: '08:45 AM',
-    category: 'Safety',
-    urgency: 'High',
-    status: 'Escalated',
-    content: 'Spill detected in Aisle 4 (Chemicals). Cleanup protocol initiated but ventilation check required.'
-  },
-  {
-    id: 'rep-002',
-    author: 'Kevin Lee',
-    timestamp: '09:15 AM',
-    category: 'Asset',
-    urgency: 'Medium',
-    status: 'Logged',
-    content: 'POS Terminal #5 intermittent connectivity drops. Suspect local node interference.'
-  },
-  {
-    id: 'rep-003',
-    author: 'Maria Chen',
-    timestamp: '09:30 AM',
-    category: 'Process',
-    urgency: 'Low',
-    status: 'Analyzing',
-    content: 'Suggesting review of morning huddle timing. Overlap with delivery ingress causes minor congestion.'
-  }
 ];
