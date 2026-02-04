@@ -70,10 +70,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
         </button>
         <button 
           onClick={onLogout}
-          className="flex items-center gap-3 px-4 py-2 text-amber-400 hover:text-amber-300 w-full rounded-lg hover:bg-slate-800 transition-colors mt-1"
+          className="flex items-center gap-3 px-4 py-2 text-red-400 hover:text-red-300 w-full rounded-lg hover:bg-slate-800 transition-colors mt-1"
         >
-          <Power className="w-4 h-4" />
-          <span className="text-xs font-bold uppercase tracking-widest">Suspend Session</span>
+          <LogOut className="w-4 h-4" />
+          <span className="text-xs font-bold uppercase tracking-widest">Terminate Session</span>
         </button>
       </div>
     </div>
