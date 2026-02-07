@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, ExternalLink, Zap } from 'lucide-react';
+import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap } from 'lucide-react';
 import { IntegrationStatus } from '../types';
 
 interface SentinelAIProps {
@@ -93,6 +94,22 @@ const sentinelApiUrl = import.meta.env.VITE_SENTINEL_API_URL?.trim() || '/api/se
             const groundingChunks = Array.isArray(payload?.groundingChunks)
                 ? payload.groundingChunks
                 : undefined;
+            const res = await fetch('/api/sentinel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: userMsg.content,
+                    hubspotStatus,
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error(`Sentinel API error: ${res.status}`);
+            }
+
+            const data: { text?: string; groundingChunks?: any[] } = await res.json();
+            const aiContent = data.text || "Operational data not found.";
+            const groundingChunks = data.groundingChunks;
 
             setMessages(prev => [...prev, {
                 role: 'ai',

@@ -24,6 +24,8 @@ View your app in AI Studio: https://ai.studio/apps/drive/1t9N6qD-bsuD6OLWG_mKSU2
 4. Start the local proxy in a second terminal:
    `npm run ai-proxy`
 5. Run the app:
+2. Set the `GEMINI_API_KEY` in `.env.local` to your Gemini API key (this is read by the local API server, not bundled into the browser).
+3. Run the app (web + API):
    `npm run dev`
 
 The Gemini API key stays server-side in the proxy process and is never embedded in the client bundle.
