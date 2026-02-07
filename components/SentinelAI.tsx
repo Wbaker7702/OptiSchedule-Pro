@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, ExternalLink, Zap } from 'lucide-react';
 import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap } from 'lucide-react';
 import { IntegrationStatus } from '../types';
 
@@ -38,6 +39,25 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         }
     }, [messages, isTyping]);
 
+const sentinelApiUrl = import.meta.env.VITE_SENTINEL_API_URL?.trim() || '/api/sentinel';
+
+    const getSafeLink = (uri?: string) => {
+        if (!uri || typeof uri !== 'string') {
+            return null;
+        }
+
+        try {
+            const parsedUrl = new URL(uri, window.location.origin);
+            if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+                return parsedUrl.toString();
+            }
+        } catch (error) {
+            return null;
+        }
+
+        return null;
+    };
+
     const handleSend = async () => {
         if (!input.trim()) return;
 
@@ -52,6 +72,28 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         setIsTyping(true);
 
         try {
+            const response = await fetch(sentinelApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: userMsg.content,
+                    mode: hubspotStatus === 'connected' ? 'breeze' : 'sentinel',
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Sentinel API error: ${response.status}`);
+            }
+
+            const payload = await response.json();
+            const aiContent = typeof payload?.text === 'string' && payload.text.trim()
+                ? payload.text
+                : "Operational data not found.";
+            const groundingChunks = Array.isArray(payload?.groundingChunks)
+                ? payload.groundingChunks
+                : undefined;
             const res = await fetch('/api/sentinel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -158,14 +200,23 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                                                 <Sparkles className="w-3 h-3" /> Data Ingress
                                             </p>
                                             <div className="space-y-1.5">
-                                                {msg.groundingChunks.map((chunk, idx) => (
-                                                    chunk.web?.uri && (
-                                                        <a key={idx} href={chunk.web.uri} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-2 rounded bg-slate-950/50 border transition-colors group ${msg.isBreeze ? 'border-orange-500/20 hover:bg-orange-950/20' : 'border-slate-800 hover:bg-slate-800'}`}>
+                                                {msg.groundingChunks.map((chunk, idx) => {
+                                                    const safeHref = getSafeLink(chunk.web?.uri);
+                                                    if (!safeHref) {
+                                                        return null;
+                                                    }
+
+                                                    const title = typeof chunk.web?.title === 'string' && chunk.web.title.trim()
+                                                        ? chunk.web.title
+                                                        : safeHref;
+
+                                                    return (
+                                                        <a key={idx} href={safeHref} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-2 rounded bg-slate-950/50 border transition-colors group ${msg.isBreeze ? 'border-orange-500/20 hover:bg-orange-950/20' : 'border-slate-800 hover:bg-slate-800'}`}>
                                                             <ExternalLink className={`w-3 h-3 ${msg.isBreeze ? 'text-orange-400' : 'text-blue-500'}`} />
-                                                            <span className={`text-[10px] truncate font-medium underline decoration-current/30 ${msg.isBreeze ? 'text-orange-300' : 'text-blue-400'}`}>{chunk.web.title}</span>
+                                                            <span className={`text-[10px] truncate font-medium underline decoration-current/30 ${msg.isBreeze ? 'text-orange-300' : 'text-blue-400'}`}>{title}</span>
                                                         </a>
-                                                    )
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}

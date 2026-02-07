@@ -8,6 +8,8 @@
     "dev:web": "vite",
     "dev:api": "tsx watch server/index.ts",
     "build": "vite build",
+    "preview": "vite preview",
+    "ai-proxy": "node sentinel-proxy.js"
     "preview:web": "vite preview",
     "start": "NODE_ENV=production PORT=3000 tsx server/index.ts"
   },
