@@ -1,0 +1,15 @@
+name: Self-hosted CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  self_hosted:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Confirm runner
+        run: echo "Self-hosted runner is active."
