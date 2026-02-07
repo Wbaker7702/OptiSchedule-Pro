@@ -38,7 +38,7 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         }
     }, [messages, isTyping]);
 
-    const sentinelApiUrl = (import.meta.env.VITE_SENTINEL_API_URL || '/api/sentinel').trim() || '/api/sentinel';
+const sentinelApiUrl = import.meta.env.VITE_SENTINEL_API_URL?.trim() || '/api/sentinel';
 
     const getSafeLink = (uri?: string) => {
         if (!uri || typeof uri !== 'string') {
