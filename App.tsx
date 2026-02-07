@@ -29,6 +29,13 @@ const App: React.FC = () => {
   const [isERPConnected, setIsERPConnected] = useState(false);
   const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('disconnected');
 
+  useEffect(() => {
+    const shouldBeConnected = hubspotStatus === 'connected';
+    if (isERPConnected !== shouldBeConnected) {
+      setIsERPConnected(shouldBeConnected);
+    }
+  }, [hubspotStatus, isERPConnected]);
+
   const handleLogin = () => {
     setIsAuthenticated(true);
   };
