@@ -1,7 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { IntegrationStatus } from '../types';
 
 interface SentinelAIProps {
@@ -53,20 +52,22 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         setIsTyping(true);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-            const response = await ai.models.generateContent({
-                model: 'gemini-3-flash-preview',
-                contents: userMsg.content,
-                config: {
-                    systemInstruction: hubspotStatus === 'connected' 
-                        ? "You are the HubSpot Breeze Agent. You provide proactive intelligence on marketing campaigns and their impact on retail staffing. Be concise, professional, and data-driven."
-                        : "You are the Sentinel AI operational assistant. You focus on workforce optimization and system integrity.",
-                    tools: [{ googleSearch: {} }],
-                }
+            const res = await fetch('/api/sentinel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: userMsg.content,
+                    hubspotStatus,
+                }),
             });
 
-            const aiContent = response.text || "Operational data not found.";
-            const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+            if (!res.ok) {
+                throw new Error(`Sentinel API error: ${res.status}`);
+            }
+
+            const data: { text?: string; groundingChunks?: any[] } = await res.json();
+            const aiContent = data.text || "Operational data not found.";
+            const groundingChunks = data.groundingChunks;
 
             setMessages(prev => [...prev, {
                 role: 'ai',

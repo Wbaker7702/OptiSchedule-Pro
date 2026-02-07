@@ -95,6 +95,29 @@ const Scheduling: React.FC<SchedulingProps> = ({
                             </button>
                         </>
                     ) : (
+                        <div className="py-10 space-y-8">
+                            <div className="flex flex-col items-center justify-center gap-6">
+                                <div className="relative">
+                                    <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center border-2 border-orange-100">
+                                        <Search className="w-10 h-10 text-[#ff7a59] animate-pulse" />
+                                    </div>
+                                    <div className="absolute -top-2 -right-2">
+                                        <div className="h-8 w-8 bg-white rounded-full shadow-lg border border-orange-100 flex items-center justify-center">
+                                            <Loader2 className="w-4 h-4 text-[#ff7a59] animate-spin" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-lg font-black text-slate-900">{syncProgress}% Discovery Complete</p>
+                                    <p className="text-sm text-slate-500">Breeze is mapping your operational schema...</p>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-slate-950 rounded-2xl p-6 font-mono text-[10px] text-orange-400 h-40 overflow-hidden border border-orange-500/20 shadow-inner">
+                                <div className="space-y-2">
+                                  {terminalLogs.map((log, i) => (
+                                    <div key={i} className="animate-in fade-in slide-in-from-bottom-1 duration-200 truncate flex gap-3">
+                                      <span className="opacity-30">{'BZ>>'}</span> {log}
                         <div className="space-y-6">
                             <div className="bg-slate-950 rounded-2xl p-6 font-mono text-[10px] text-orange-400 h-40 overflow-hidden text-left border border-orange-500/20 shadow-inner">
                                 {terminalLogs.map((log, i) => (
