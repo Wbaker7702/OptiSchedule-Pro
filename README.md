@@ -15,6 +15,15 @@ View your app in AI Studio: https://ai.studio/apps/drive/1t9N6qD-bsuD6OLWG_mKSU2
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Set the `GEMINI_API_KEY` in `.env.local` (or `.env`) for the local proxy server.
+   - Optional: set `SENTINEL_ALLOWED_ORIGINS` (comma-separated) to control CORS.
+   - Optional: set `SENTINEL_API_PORT` to change the proxy port (default: 3001).
+3. If your API server is on a different origin, set `VITE_SENTINEL_API_URL` in `.env.local`.
+   Example: `VITE_SENTINEL_API_URL=http://localhost:3001/api/sentinel`
+   (Never put secrets in `VITE_` variables; they are exposed to the browser.)
+4. Start the local proxy in a second terminal:
+   `npm run ai-proxy`
+5. Run the app:
    `npm run dev`
+
+The Gemini API key stays server-side in the proxy process and is never embedded in the client bundle.
