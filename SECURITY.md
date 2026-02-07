@@ -37,6 +37,7 @@ Out of scope (examples):
 - Social engineering, phishing, or physical attacks
 - Denial of service (DoS) via excessive traffic volume
 - Reports that only describe missing security headers or best-practice recommendations without a demonstrated impact
+- Vulnerabilities in third-party dependencies (please report to the upstream project)
 
 ### Response timeline
 
