@@ -1,361 +1,229 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import Header from '../components/Header';
-import { FISCAL_METRICS } from '../constants';
-import { View } from '../types';
-import { Book, Shield, Scale, Zap, Info, ArrowRight, TrendingUp, Calculator, FileCheck, Users, Terminal, Database, Code, ShieldCheck, Loader2, ExternalLink, BellRing, Download, Lock, AlertCircle, PenTool, CheckCircle2, Activity } from 'lucide-react';
+import { FISCAL_METRICS, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
+import { 
+  ShieldCheck, 
+  MapPin, 
+  Globe, 
+  AlertCircle, 
+  Terminal, 
+  Activity, 
+  Clock, 
+  Scale, 
+  CheckCircle2, 
+  Lock, 
+  FileText, 
+  Users, 
+  Zap, 
+  ChevronRight, 
+  BookOpen
+} from 'lucide-react';
 
-interface PlaybookProps {
-  setCurrentView?: (view: any) => void;
-}
-
-const Playbook: React.FC<PlaybookProps> = ({ setCurrentView }) => {
-  const [recaptureInput, setRecaptureInput] = useState(FISCAL_METRICS.targetWeeklyHoursRecapture);
-  const [activeActions, setActiveActions] = useState<Record<string, boolean>>({});
-  const [lastAlert, setLastAlert] = useState<string | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
-  
-  // SOP State
-  const [signature, setSignature] = useState('');
-  const [managerTitle, setManagerTitle] = useState('');
-  const [isAcknowledged, setIsAcknowledged] = useState(false);
-  const [signing, setSigning] = useState(false);
-  
-  const projectedSavings = recaptureInput * FISCAL_METRICS.avgPayRate * 52;
-  const projectedProtection = projectedSavings * FISCAL_METRICS.currentROI;
-
-  const simulateAction = (id: string, duration = 1500) => {
-    setActiveActions(prev => ({ ...prev, [id]: true }));
-    setTimeout(() => {
-      setActiveActions(prev => ({ ...prev, [id]: false }));
-      if (id === 'alert') {
-        setLastAlert(`OPERATIONAL ALERT: Traffic surge detected at registers. Mitigating unplanned overtime risk.`);
-        setTimeout(() => setLastAlert(null), 4000);
-      }
-    }, duration);
-  };
-
-  const handleDownloadBriefing = () => {
-    setIsDownloading(true);
-    
-    const briefingContent = `
-SENTINEL OPERATIONAL POLICY (SOP) v3.1.0
-RETAIL MANAGEMENT DIRECTIVE: STORE 5065
-=====================================================
-
-1. MISSION STATEMENT
-Securing store profitability through absolute labor efficiency 
-and variance management. Variance represents a plan-to-actual 
-gap that impacts EBITDA.
-
-2. LABOR METRICS (STORE 5065)
-- Weekly Labor Variance (Gap): $${FISCAL_METRICS.executionLeakage.toLocaleString()}
-- Sentinel ROI Guard: ${FISCAL_METRICS.currentROI}x
-- Annual Efficiency Recovery: $${FISCAL_METRICS.annualRecoveryTarget}M
-- 2028 Strategic Valuation: $${FISCAL_METRICS.vision2028}M
-
-3. LABOR RECAPTURE PROJECTION
-- Targeted Overtime Mitigation: ${recaptureInput} hours/week
-- Projected Annual Savings: $${Math.round(projectedSavings).toLocaleString()}
-- EBITDA Value Safeguard: $${Math.round(projectedProtection).toLocaleString()}
-
-4. OPERATIONAL INFRASTRUCTURE
-- Data Ingress: Dynamics 365 / HubSpot Breeze
-- Audit Engine: Labor Variance Linter v3.1
-- Strategic Priority: Mitigate unplanned overtime through AI forecasting.
-
-5. POLICY MANDATE
-Labor variance is an operational inefficiency. Every unallocated 
-labor hour or unplanned overtime minute impacts our bottom line. 
-The Sentinel Protocol ensures scheduling accuracy is maintained.
-
-Efficiency is Profit.
-
-Document Generated: ${new Date().toLocaleString()}
-Validated by: Store Management Node-5065
-    `;
-
-    setTimeout(() => {
-      const blob = new Blob([briefingContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Store_5065_Labor_Policy.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      setIsDownloading(false);
-    }, 1200);
-  };
-
-  const handleAcknowledgment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if(!signature || !managerTitle) return;
-    
-    setSigning(true);
-    setTimeout(() => {
-        setIsAcknowledged(true);
-        setSigning(false);
-    }, 1500);
-  };
-
-  const engineRoomCards = [
-    {
-      id: 'lint',
-      title: "Labor Linter (Active)",
-      desc: "Real-time auditing of planned vs. actual labor spend.",
-      icon: <FileCheck className="w-5 h-5 text-blue-500" />,
-      code: "Sentinel::Audit.variance",
-      actionLabel: "Audit Variance",
-      action: () => simulateAction('lint'),
-      isAsync: true
-    },
-    {
-      id: 'sync',
-      title: "CRM Traffic Ingress",
-      desc: "Secure link to HubSpot CRM for traffic surge prediction.",
-      icon: <Database className="w-5 h-5 text-blue-400" />,
-      code: "Sentinel.forecast_traffic",
-      actionLabel: "Forecast Peak",
-      action: () => setCurrentView?.(View.SCHEDULING),
-      isAsync: false
-    },
-    {
-      id: 'audit',
-      title: "Efficiency Log",
-      desc: "History of all scheduling corrections and overtime events.",
-      icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />,
-      code: "EfficiencyLedger.record",
-      actionLabel: "View Efficiency",
-      action: () => setCurrentView?.(View.OPERATIONS),
-      isAsync: false
-    },
-    {
-      id: 'alert',
-      title: "Overtime Mitigator",
-      desc: "AI broadcast of resource shifts to prevent late-stay overtime.",
-      icon: <Zap className="w-5 h-5 text-amber-500" />,
-      code: "Sentinel.mitigate_overtime",
-      actionLabel: "Shift Resources",
-      action: () => simulateAction('alert'),
-      isAsync: true
-    }
-  ];
+const Playbook: React.FC = () => {
+  const reg = LABOR_REGULATIONS[CURRENT_STATE];
 
   return (
-    <div className="flex-1 bg-slate-950 overflow-auto">
-      <Header title="Labor Efficiency Policy" subtitle="Retail Operations Protocol v3.1.0" />
+    <div className="flex-1 bg-slate-950 overflow-auto custom-scrollbar">
+      <Header title="Sentinel Policy Playbook" subtitle={`Jurisdictional Compliance Matrix • Region: ${reg.state}`} />
       
-      <div className="p-8 max-w-7xl mx-auto space-y-8">
-        
-        {/* Interactive Scenario Planner */}
-        <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-          <div className="bg-slate-950 p-6 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-slate-800">
-            <div>
-              <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] flex items-center gap-3">
-                <Calculator className="w-5 h-5 text-blue-500" />
-                Labor Recapture Simulator
-              </h3>
-              <p className="text-slate-500 text-[10px] font-mono mt-1 uppercase">Modeling ROI through mitigation of unplanned overtime and scheduling gaps.</p>
-            </div>
-            <div className="flex items-center gap-4 bg-slate-900 p-2 rounded-xl border border-slate-800">
-               <span className="text-slate-500 text-[9px] font-black uppercase tracking-widest px-2">Weekly Overtime Goal (Hrs)</span>
-               <input 
-                 type="number" 
-                 value={recaptureInput}
-                 onChange={(e) => setRecaptureInput(parseInt(e.target.value) || 0)}
-                 className="w-24 bg-slate-950 text-blue-400 font-mono font-bold text-center py-2 rounded-lg border border-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-               />
-            </div>
+      <div className="p-8 max-w-7xl mx-auto space-y-8 pb-24">
+        {/* Active Jurisdiction Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 bg-slate-900 rounded-2xl border-l-4 border-blue-600 p-8 shadow-2xl relative overflow-hidden group">
+             <div className="absolute -right-8 -top-8 opacity-5 group-hover:scale-110 transition-transform duration-1000">
+                <MapPin className="w-48 h-48 text-white" />
+             </div>
+             <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-8">
+                   <div className="p-3 bg-blue-600 rounded-2xl shadow-xl shadow-blue-600/20">
+                      <ShieldCheck className="w-8 h-8 text-white" />
+                   </div>
+                   <div>
+                      <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Active Jurisdiction: {reg.state}</h2>
+                      <p className="text-[10px] text-blue-400 font-mono font-black uppercase tracking-[0.2em] mt-1">Status: Fully Compliant Node</p>
+                   </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-8 font-mono">
+                   <div className="space-y-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="w-4 h-4 text-orange-500" />
+                        <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Minor (Under 18) Protocol</h4>
+                      </div>
+                      <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
+                         <div className="flex justify-between border-b border-slate-800/50 pb-3">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">Daily Limit (16-17)</span>
+                            <span className="text-xs text-white font-black">{reg.maxShiftMinor1617} Hours</span>
+                         </div>
+                         <div className="flex justify-between border-b border-slate-800/50 pb-3">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">Curfew (Sun-Thu)</span>
+                            <span className="text-xs text-orange-400 font-black">{reg.curfewMinor1617}</span>
+                         </div>
+                         <div className="flex justify-between border-b border-slate-800/50 pb-3">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">Daily Limit (14-15)</span>
+                            <span className="text-xs text-white font-black">{reg.maxShiftMinor1415} Hours</span>
+                         </div>
+                         <div className="flex justify-between">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">Curfew (14-15)</span>
+                            <span className="text-xs text-orange-400 font-black">{reg.curfewMinor1415}</span>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="space-y-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Scale className="w-4 h-4 text-emerald-500" />
+                        <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Adult (18+) Protocol</h4>
+                      </div>
+                      <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
+                         <div className="flex justify-between border-b border-slate-800/50 pb-3">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">Daily Max Shift</span>
+                            <span className="text-xs text-white font-black">{reg.maxShiftAdult} Hours</span>
+                         </div>
+                         <div className="flex justify-between border-b border-slate-800/50 pb-3">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">OT Threshold</span>
+                            <span className="text-xs text-blue-400 font-black">40 Hrs / Week</span>
+                         </div>
+                         <div className="flex justify-between border-b border-slate-800/50 pb-3">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">Min Recovery Gap</span>
+                            <span className="text-xs text-white font-black">8.0 Hours</span>
+                         </div>
+                         <div className="flex justify-between">
+                            <span className="text-[10px] text-slate-500 uppercase font-black">Break Policy</span>
+                            <span className="text-xs text-emerald-400 font-black">30m / 5h Work</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
           </div>
-          
-          <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Annual Labor Savings</p>
-              <h4 className="text-3xl font-black text-white tracking-tighter">${Math.round(projectedSavings).toLocaleString()}</h4>
-              <p className="text-xs text-slate-500 font-mono">Recovered via Efficiency Guard</p>
-            </div>
-            <div className="space-y-2 border-x border-slate-800 px-8">
-              <p className="text-[10px] text-blue-500 uppercase tracking-widest font-black">Profit Guard ROI</p>
-              <h4 className="text-3xl font-black text-blue-500 tracking-tighter">${Math.round(projectedProtection).toLocaleString()}</h4>
-              <p className="text-xs text-slate-500 font-mono">EBITDA Growth Multiplier Enabled</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-[10px] text-emerald-500 uppercase tracking-widest font-black">2028 Store Valuation</p>
-              <h4 className="text-3xl font-black text-emerald-500 tracking-tighter">${FISCAL_METRICS.vision2028}M</h4>
-              <p className="text-xs text-slate-500 font-mono">Profitability Integrity Safeguard</p>
-            </div>
+
+          {/* Regional Expansion Placeholder - THE WHITE SPACE */}
+          <div className="bg-slate-900 rounded-2xl border-2 border-dashed border-slate-800 p-8 flex flex-col items-center justify-center text-center relative group hover:border-blue-500/20 transition-all">
+             <div className="w-16 h-16 rounded-full bg-slate-950 flex items-center justify-center mb-6 border border-slate-800">
+                <Globe className="w-8 h-8 text-slate-700 group-hover:text-blue-500 transition-colors" />
+             </div>
+             <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Future Jurisdictions</h3>
+             <p className="text-[10px] text-slate-600 font-mono mt-2 uppercase max-w-[180px] leading-relaxed">
+                Expansion modules for neighboring nodes (OH, IN, IL) awaiting fiscal verification.
+             </p>
+             <div className="mt-8 flex flex-wrap justify-center gap-2">
+                {["OH", "IN", "IL", "WI"].map(state => (
+                   <div key={state} className="px-3 py-1 bg-slate-950 border border-slate-800 rounded-lg text-[9px] font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                      <Lock className="w-2.5 h-2.5" /> {state}
+                   </div>
+                ))}
+             </div>
+             <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-2xl" />
           </div>
         </div>
 
-        {/* Engine Room Section */}
-        <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-xl overflow-hidden relative">
-           <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-             <Scale className="w-64 h-64 text-blue-500" />
-           </div>
-           
-           <div className="relative z-10 flex flex-col lg:flex-row gap-12">
-              <div className="lg:w-1/3 space-y-6">
-                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
-                    {/* Fixed: Added missing Activity icon */}
-                    <Activity className="w-3 h-3 text-blue-500" />
-                    <span className="text-[9px] text-blue-500 font-black uppercase tracking-widest">Profit Guard Protocol</span>
-                 </div>
-                 <h2 className="text-3xl font-black text-white leading-tight uppercase tracking-tighter">The Efficiency Engine</h2>
-                 <p className="text-slate-400 text-xs leading-relaxed font-mono">
-                   Our framework analyzes the labor gap—the variance between planned staffing and actual spend. Unexpected overtime is detected early by the Breeze AI and mitigated through proactive resource shifting.
-                 </p>
-                 <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">OT PROTECTION</span>
-                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">PLAN ACCURACY</span>
-                    <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono font-bold text-slate-400">VARIANCE MAPPING</span>
-                 </div>
-
-                 {lastAlert && (
-                   <div className="p-4 bg-orange-950/40 border border-orange-500/30 rounded-xl animate-in slide-in-from-left-4 fade-in duration-300">
-                      <div className="flex items-center gap-3">
-                         <AlertCircle className="w-5 h-5 text-orange-500 animate-pulse" />
-                         <p className="text-[10px] font-mono text-orange-100 font-bold uppercase tracking-widest">{lastAlert}</p>
-                      </div>
-                   </div>
-                 )}
+        {/* Math & Allocation Rules */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+           <div className="bg-slate-900 rounded-2xl border border-slate-800 p-8 shadow-xl">
+              <div className="flex items-center gap-3 mb-6">
+                 <Terminal className="w-5 h-5 text-blue-500" />
+                 <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">Compliance Allocation Algorithm</h3>
               </div>
+              <div className="space-y-6">
+                 <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl font-mono text-[11px] leading-relaxed">
+                    <p className="text-blue-400"># Michigan Youth Employment Standards Act (P.A. 90)</p>
+                    <p className="text-slate-500 mt-2">def validate_minor_shift(minor_age, start_time, end_time, total_weekly_hours):</p>
+                    <p className="text-slate-400 ml-4">if minor_age &lt; 16:</p>
+                    <p className="text-slate-300 ml-8">curfew = "19:00"</p>
+                    <p className="text-slate-300 ml-8">weekly_max = 18 if school_in_session else 40</p>
+                    <p className="text-slate-400 ml-4">elif minor_age &lt; 18:</p>
+                    <p className="text-slate-300 ml-8">curfew = "22:30"</p>
+                    <p className="text-slate-300 ml-8">weekly_max = 24 if school_in_session else 48</p>
+                    <p className="text-slate-400 ml-4"># Check Break Logic</p>
+                    <p className="text-slate-300 ml-4">if shift_duration &gt; 5.0 and not has_30m_break:</p>
+                    <p className="text-red-400 ml-8">return COMPLIANCE_ERROR("Mandatory Lunch Required")</p>
+                 </div>
+                 <div className="flex items-center gap-4 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                    <Zap className="w-5 h-5 text-blue-400 shrink-0" />
+                    <p className="text-[10px] text-slate-300 font-mono leading-relaxed">
+                       Sentinel's scheduler automatically injects a <span className="text-blue-400 font-black">30-minute unpaid lunch</span> at exactly the 4.5-hour mark for all minor associates to ensure zero breach of MI state labor standards.
+                    </p>
+                 </div>
+              </div>
+           </div>
 
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                 {engineRoomCards.map((box, i) => (
-                   <div key={i} className="bg-slate-950/50 p-6 rounded-xl border border-slate-800 hover:border-blue-500/30 transition-all group flex flex-col">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">{box.icon}</div>
-                        <span className="text-[9px] font-mono text-slate-600 font-bold uppercase tracking-widest">{box.code}</span>
+           <div className="bg-slate-900 rounded-2xl border border-slate-800 p-8 shadow-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                   <FileText className="w-5 h-5 text-emerald-500" />
+                   <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">Operational Constraints</h3>
+                </div>
+                <div className="space-y-4">
+                   <div className="flex items-start gap-4 p-4 hover:bg-slate-800/40 transition-colors rounded-xl group cursor-help">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                         <Clock className="w-4 h-4" />
                       </div>
-                      <h4 className="text-white font-black text-xs uppercase tracking-widest mb-2">{box.title}</h4>
-                      <p className="text-slate-500 text-[10px] leading-relaxed mb-6 font-mono">{box.desc}</p>
-                      
-                      <button 
-                        onClick={box.action}
-                        disabled={activeActions[box.id]}
-                        className={`mt-auto w-full py-3 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${
-                          box.isAsync 
-                            ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 hover:bg-blue-600 hover:text-white' 
-                            : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700 hover:text-white'
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                      >
-                        {activeActions[box.id] ? (
-                          <>
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            Analyzing...
-                          </>
-                        ) : (
-                          <>
-                            {box.isAsync ? <Terminal className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                            {box.actionLabel}
-                          </>
-                        )}
-                      </button>
+                      <div>
+                         <p className="text-[11px] font-black text-white uppercase tracking-widest">Restoration Gap</p>
+                         <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">Sentinel enforces 8 hours between shifts for adult associates to prevent fatigue leakage.</p>
+                      </div>
                    </div>
-                 ))}
+                   <div className="flex items-start gap-4 p-4 hover:bg-slate-800/40 transition-colors rounded-xl group cursor-help">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 group-hover:scale-110 transition-transform">
+                         <AlertCircle className="w-4 h-4" />
+                      </div>
+                      <div>
+                         <p className="text-[11px] font-black text-white uppercase tracking-widest">Overtime Mitigation</p>
+                         <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">Predictive OT alerts trigger at 36.5 hours to allow 3.5 hour buffer for end-of-week reconciliation.</p>
+                      </div>
+                   </div>
+                   <div className="flex items-start gap-4 p-4 hover:bg-slate-800/40 transition-colors rounded-xl group cursor-help">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20 group-hover:scale-110 transition-transform">
+                         <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                         <p className="text-[11px] font-black text-white uppercase tracking-widest">Audit Readiness</p>
+                         <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">Full digital trail maintained for 7 years per federal retention policy. Exportable via Sentinel D365 Bridge.</p>
+                      </div>
+                   </div>
+                </div>
+              </div>
+              <div className="mt-8 pt-6 border-t border-slate-800 flex items-center justify-between">
+                 <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Linter State: NOMINAL</span>
+                 </div>
+                 <button className="text-[9px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors flex items-center gap-2">
+                    Download Policy Frame <ChevronRight className="w-3 h-3" />
+                 </button>
               </div>
            </div>
         </div>
 
-        {/* SOP Digital Acknowledgment Section */}
-        <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl relative animate-in slide-in-from-bottom-8 duration-700">
-            <div className="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
-            <div className="p-8 md:p-12">
-                <div className="flex flex-col items-center text-center mb-10">
-                    <ShieldCheck className="w-12 h-12 text-blue-500 mb-4" />
-                    <h2 className="text-2xl font-black text-white uppercase tracking-[0.2em] mb-2">Standard Operating Procedure (SOP): Labor Control</h2>
-                    <p className="text-sm font-mono text-slate-500 uppercase tracking-widest">Store 5065 Efficiency Protocol</p>
-                </div>
-
-                <div className="max-w-3xl mx-auto space-y-8 text-slate-300">
-                    <div className="space-y-4 font-mono text-sm leading-relaxed border-l-2 border-slate-800 pl-6">
-                        <p>This SOP establishes the mandatory management of labor variance via OptiSchedule Pro.</p>
-                        <p><span className="text-orange-400 font-bold">Unmanaged labor variance impacts store EBITDA directly.</span></p>
-                        <p>Managers must review AI-generated traffic alerts to shift resources and prevent unplanned overtime.</p>
-                        <p>Variance corrections must be logged to maintain the integrity of the store's fiscal plan.</p>
-                        <p>Overtime oversight is a primary KPI for all Store Management staff.</p>
-                    </div>
-
-                    <div className="bg-slate-950 p-8 rounded-xl border border-slate-800 mt-8">
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <PenTool className="w-4 h-4 text-blue-500" />
-                            Management Acknowledgment
-                        </h3>
-                        
-                        {!isAcknowledged ? (
-                            <form onSubmit={handleAcknowledgment} className="space-y-6">
-                                <p className="text-sm italic text-slate-400">
-                                    "I acknowledge that managing labor variance and overtime is critical to store health. I will use Breeze AI to proactively manage staffing peaks."
-                                </p>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Signed</label>
-                                        <input 
-                                            type="text" 
-                                            value={signature}
-                                            onChange={(e) => setSignature(e.target.value)}
-                                            placeholder="Full Name"
-                                            className="w-full bg-transparent border-b-2 border-slate-700 py-2 text-white font-serif italic text-xl focus:border-blue-500 focus:outline-none placeholder-slate-700"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Date</label>
-                                        <div className="w-full border-b-2 border-slate-700 py-3 text-slate-400 font-mono text-sm">
-                                            {new Date().toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Title</label>
-                                        <input 
-                                            type="text" 
-                                            value={managerTitle}
-                                            onChange={(e) => setManagerTitle(e.target.value)}
-                                            placeholder="Store Manager / Assistant Manager"
-                                            className="w-full bg-transparent border-b-2 border-slate-700 py-2 text-white font-mono text-sm focus:border-blue-500 focus:outline-none uppercase placeholder-slate-700"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <button 
-                                    type="submit" 
-                                    disabled={signing}
-                                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                >
-                                    {signing ? (
-                                        <><Loader2 className="w-4 h-4 animate-spin" /> Submitting Acknowledgment...</>
-                                    ) : (
-                                        <>Confirm Policy Alignment</>
-                                    )}
-                                </button>
-                            </form>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-8 space-y-4 animate-in fade-in zoom-in duration-500">
-                                <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/30">
-                                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-                                </div>
-                                <div className="text-center">
-                                    <h4 className="text-xl font-black text-white uppercase tracking-widest mb-1">SOP Signed</h4>
-                                    <p className="text-emerald-500 font-mono text-xs uppercase tracking-wider">Audit Ref: {Math.random().toString(36).substr(2, 12).toUpperCase()}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-8 text-center mt-6 w-full max-w-md border-t border-slate-800 pt-6">
-                                    <div>
-                                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Signed By</p>
-                                        <p className="text-white font-serif italic text-lg">{signature}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Timestamp</p>
-                                        <p className="text-white font-mono text-sm">{new Date().toLocaleDateString()}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+        {/* Expansion Map Visualization */}
+        <div className="bg-slate-900 rounded-3xl p-12 border border-slate-800 relative overflow-hidden text-center">
+            <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+            <div className="relative z-10 max-w-2xl mx-auto">
+               <Globe className="w-12 h-12 text-slate-800 mx-auto mb-6" />
+               <h2 className="text-xl font-black text-white uppercase tracking-[0.2em] mb-4">Enterprise Rollout Architecture</h2>
+               <p className="text-xs text-slate-500 font-mono leading-relaxed uppercase tracking-widest mb-10">
+                  Node 5065 is the first jurisdictional anchor. Modular policy frames allow rapid sync with neighboring state regulations without system downtime.
+               </p>
+               <div className="flex items-center justify-center gap-6">
+                  <div className="flex flex-col items-center gap-3">
+                     <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg shadow-blue-600/20 border border-blue-400/30">MI</div>
+                     <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Deployed</span>
+                  </div>
+                  <div className="w-12 h-px bg-slate-800 relative">
+                     <div className="absolute top-1/2 left-0 w-full h-px bg-blue-500/30 animate-pulse" />
+                  </div>
+                  <div className="flex flex-col items-center gap-3 opacity-30 grayscale">
+                     <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 font-black border border-slate-700">OH</div>
+                     <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Phase 2</span>
+                  </div>
+                  <div className="w-12 h-px bg-slate-800" />
+                  <div className="flex flex-col items-center gap-3 opacity-30 grayscale">
+                     <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 font-black border border-slate-700">IN</div>
+                     <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Phase 3</span>
+                  </div>
+               </div>
             </div>
         </div>
       </div>
