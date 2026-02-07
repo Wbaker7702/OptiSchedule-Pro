@@ -17,9 +17,7 @@ Please report security issues privately using GitHub Security Advisories:
 2. Navigate to the **Security** tab.
 3. Click **Report a vulnerability** and submit the details.
 
-If the Security tab is unavailable, open a new issue and state that you have
-a security report; we will follow up to move the discussion to a private
-channel.
+If the Security tab is unavailable, please report the vulnerability to us via email at `security@example.com`.
 
 ### What to include
 
