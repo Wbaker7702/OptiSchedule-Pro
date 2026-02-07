@@ -122,7 +122,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
                             <div className="bg-slate-950 rounded-2xl p-6 font-mono text-[10px] text-orange-400 h-40 overflow-hidden text-left border border-orange-500/20 shadow-inner">
                                 {terminalLogs.map((log, i) => (
                                     <div key={i} className="animate-in fade-in slide-in-from-bottom-1 truncate">
-                                        <span className="opacity-30">BZ>></span> {log}
+                                        <span className="opacity-30">{'BZ>>'}</span> {log}
                                     </div>
                                 ))}
                                 <div ref={logEndRef} />
