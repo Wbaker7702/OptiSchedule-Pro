@@ -23,6 +23,19 @@ export interface Employee {
   performance: number;
   email: string;
   avatar: string;
+  age: number; // Added for labor law logic
+  isMinor: boolean;
+}
+
+export interface LaborLawConfig {
+  state: string;
+  maxShiftAdult: number;
+  maxShiftMinor1617: number;
+  maxShiftMinor1415: number;
+  curfewMinor1617: string;
+  curfewMinor1415: string;
+  mandatoryBreakThreshold: number; // Hours
+  mandatoryBreakDuration: number; // Minutes
 }
 
 export interface Product {

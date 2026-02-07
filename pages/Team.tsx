@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { EMPLOYEES as INITIAL_EMPLOYEES } from '../constants';
@@ -35,6 +36,7 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
 
     // Simulate Sentinel Personnel Handshake
     setTimeout(() => {
+      // Fixed: Added missing 'age' and 'isMinor' properties to satisfy the Employee interface
       const newEmployee: Employee = {
         id: Math.random().toString(36).substr(2, 9),
         name: formData.name,
@@ -43,7 +45,9 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
         department: formData.department,
         status: 'Active',
         performance: 4.0,
-        avatar: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000000)}?w=100&h=100&fit=crop`
+        avatar: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000000)}?w=100&h=100&fit=crop`,
+        age: 25,
+        isMinor: false
       };
 
       setEmployees([newEmployee, ...employees]);
@@ -79,7 +83,7 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
       {/* Add Employee Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-2xl max-md w-full overflow-hidden border border-gray-100">
             <div className="bg-slate-900 p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-600 rounded-lg">
