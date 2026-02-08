@@ -14,6 +14,7 @@ import Marketplace from './pages/Marketplace';
 import MetricsReport from './pages/MetricsReport';
 import RoyaltyDashboard from './pages/RoyaltyDashboard';
 import StoreRatings from './pages/StoreRatings';
+import Logistics from './pages/Logistics';
 import Login from './components/Login';
 import SentinelAI from './components/SentinelAI';
 import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint } from './types';
@@ -55,6 +56,7 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case View.DASHBOARD: return <Dashboard setCurrentView={setCurrentView} />;
+      case View.LOGISTICS: return <Logistics />;
       case View.MARKETPLACE: return <Marketplace />;
       case View.METRICS_REPORT: return <MetricsReport />;
       case View.ROYALTY_DASHBOARD: return <RoyaltyDashboard />;

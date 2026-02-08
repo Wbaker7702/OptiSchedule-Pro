@@ -28,6 +28,18 @@ export const MOCK_STORES: StoreRatingData[] = [
   { id: "4040", location: "Indianapolis", state: "IN", overallScore: 81, customerExperience: 79, operationalEfficiency: 83, laborCompliance: 88, fiscalROI: 74, safetyScore: 85, lastAudit: "2024-03-12" },
 ];
 
+export const HOURLY_LOGISTICS = [
+  { hour: '8 AM', inbound: 4, outbound: 12, pickRate: 98 },
+  { hour: '9 AM', inbound: 8, outbound: 22, pickRate: 96 },
+  { hour: '10 AM', inbound: 12, outbound: 45, pickRate: 94 },
+  { hour: '11 AM', inbound: 6, outbound: 68, pickRate: 92 },
+  { hour: '12 PM', inbound: 2, outbound: 85, pickRate: 88 },
+  { hour: '1 PM', inbound: 5, outbound: 72, pickRate: 89 },
+  { hour: '2 PM', inbound: 9, outbound: 55, pickRate: 93 },
+  { hour: '3 PM', inbound: 15, outbound: 42, pickRate: 95 },
+  { hour: '4 PM', inbound: 12, outbound: 38, pickRate: 97 },
+];
+
 export const ROYALTY_METRICS = {
   baselineLaborSalesPct: 25.0,
   currentLaborSalesPct: 21.8,
