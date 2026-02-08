@@ -122,6 +122,10 @@ export const FISCAL_METRICS = {
 
 export const EMPLOYEES: Employee[] = [
   { id: '1', name: 'Sarah Jenkins', role: 'Front End Coach', department: 'Front End', status: 'Active', performance: 4.8, email: 's.jenkins@walmart-5065.com', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop', age: 34, isMinor: false },
+  { id: '2', name: 'Marcus Chen', role: 'Inventory Specialist', department: 'Grocery', status: 'Active', performance: 4.5, email: 'm.chen@walmart-5065.com', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', age: 28, isMinor: false },
+  { id: '3', name: 'Chloe Miller', role: 'Sales Associate', department: 'Apparel', status: 'Active', performance: 4.1, email: 'c.miller@walmart-5065.com', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop', age: 17, isMinor: true },
+  { id: '4', name: 'James Wilson', role: 'Stock Associate', department: 'Electronics', status: 'Training', performance: 3.9, email: 'j.wilson@walmart-5065.com', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', age: 15, isMinor: true },
+  { id: '5', name: 'Emily Davis', role: 'Pharmacy Tech', department: 'Pharmacy', status: 'Active', performance: 4.9, email: 'e.davis@walmart-5065.com', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop', age: 42, isMinor: false },
   { id: '11', name: 'Leo Thompson', role: 'Front End Associate', department: 'Front End', status: 'Active', performance: 4.2, email: 'l.thompson@walmart-5065.com', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop', age: 16, isMinor: true },
 ];
 

@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
-import { DEPARTMENT_METRICS, OPERATIONAL_AUDITS as INITIAL_AUDITS, VULNERABILITY_DATA as INITIAL_VULNERABILITIES } from '../constants';
-import { RefreshCcw, Users, DollarSign, TrendingUp, Clock, ShieldAlert, CheckCircle, Info, Terminal, Search, AlertCircle, Play, Download, Loader2, ChevronRight, Activity, TerminalSquare, Eye, Maximize2, Radio, Shield, Bug, Zap, Fingerprint, Wifi, ShieldCheck, Camera, ScanLine, Box, Aperture, ArrowRight, Share2, Tag, X, ShieldX, List, Wrench } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label, CartesianGrid } from 'recharts';
-import { Vulnerability, DepartmentMetric } from '../types';
+import { DEPARTMENT_METRICS, OPERATIONAL_AUDITS as INITIAL_AUDITS, VULNERABILITY_DATA as INITIAL_VULNERABILITIES, EMPLOYEES, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
+import { RefreshCcw, Users, DollarSign, TrendingUp, Clock, ShieldAlert, CheckCircle, Info, Terminal, Search, AlertCircle, Play, Download, Loader2, ChevronRight, Activity, TerminalSquare, Eye, Maximize2, Radio, Shield, Bug, Zap, Fingerprint, Wifi, ShieldCheck, Camera, ScanLine, Box, Aperture, ArrowRight, Share2, Tag, X, ShieldX, List, Wrench, BarChart2, History, AlertTriangle, Scale } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, Label, CartesianGrid, ComposedChart, Line } from 'recharts';
+import { Vulnerability, DepartmentMetric, Employee } from '../types';
 
 interface LinterLog {
   id: string;
@@ -17,7 +17,7 @@ interface LinterLog {
 }
 
 interface OperationsProps {
-  defaultTab?: 'metrics' | 'audit' | 'vision' | 'scanner';
+  defaultTab?: 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance';
   externalTrigger?: string | null;
   onClearTrigger?: () => void;
 }
@@ -29,7 +29,20 @@ interface ScannedItem {
   status: 'Verified' | 'Unknown';
 }
 
-// Completed the Operations component and added the default export
+interface VarianceData {
+  date: string;
+  scheduled: number; // hrs
+  actual: number; // hrs
+  gap: number; // mins
+}
+
+const CLOSING_VARIANCE_DATA: VarianceData[] = [
+  { date: 'Week -3', scheduled: 420, actual: 442, gap: 22 },
+  { date: 'Week -2', scheduled: 420, actual: 445, gap: 25 },
+  { date: 'Week -1', scheduled: 420, actual: 441, gap: 21 },
+  { date: 'Current', scheduled: 420, actual: 442, gap: 22 },
+];
+
 const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externalTrigger, onClearTrigger }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [liveMetrics, setLiveMetrics] = useState<DepartmentMetric[]>(DEPARTMENT_METRICS);
@@ -43,6 +56,12 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
   const [crmSignals, setCrmSignals] = useState<{id: string, text: string, time: string}[]>([]);
   const [scanning, setScanning] = useState(false);
   const [remediatingId, setRemediatingId] = useState<string | null>(null);
+
+  const reg = LABOR_REGULATIONS[CURRENT_STATE];
+
+  // Closing Variance State
+  const [isRecalibrating, setIsRecalibrating] = useState(false);
+  const [recalibrateComplete, setRecalibrateComplete] = useState(false);
 
   // Vision State
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -119,56 +138,20 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
     return () => clearInterval(interval);
   }, [isLive]);
 
-  useEffect(() => {
-    if (cameraActive) {
-        const interval = setInterval(() => {
-            const mockDetections = [
-                { id: 1, x: 20 + Math.random() * 60, y: 20 + Math.random() * 60, label: 'Entity_Personnel' },
-                { id: 2, x: 10 + Math.random() * 80, y: 10 + Math.random() * 80, label: 'Asset_HighValue' }
-            ];
-            setDetections(mockDetections);
-        }, 1000);
-        return () => clearInterval(interval);
-    }
-  }, [cameraActive]);
-
-  const handleRemediate = (id: string) => {
-    setRemediatingId(id);
+  const handleRecalibrateClosing = () => {
+    setIsRecalibrating(true);
     setTimeout(() => {
-      setVulnerabilities(prev => prev.filter(v => v.id !== id));
-      setRemediatingId(null);
+      setIsRecalibrating(false);
+      setRecalibrateComplete(true);
       setLinterLogs(prev => [{
         id: Date.now().toString(),
         timestamp: new Date().toLocaleTimeString(),
-        code: 'VULN_PATCH',
-        message: 'Security Variance Resolved by Manager Wesleyan',
+        code: 'CLOSING_SYNC',
+        message: 'Closing Protocols Synced: 22m Gap Absorbed into Policy Frame',
         status: 'Pass'
       }, ...prev]);
-    }, 1500);
-  };
-
-  const handleFixLog = (id: string) => {
-    setLinterLogs(prev => prev.map(log => log.id === id ? { ...log, isPatching: true } : log));
-    
-    setTimeout(() => {
-      setLinterLogs(prev => prev.map(log => {
-        if (log.id === id) {
-          return {
-            ...log,
-            status: 'Pass' as const,
-            message: log.message.replace('Detected', 'Mitigated - Sentinel Secure'),
-            fixAction: undefined,
-            isPatching: false
-          };
-        }
-        return log;
-      }));
-      
-      // If it was the labor leakage log, sync with vulnerabilities
-      if (id === '3') {
-        setVulnerabilities(prev => prev.filter(v => v.id !== 'vul-001'));
-      }
-    }, 1800);
+      setTimeout(() => setRecalibrateComplete(false), 4000);
+    }, 2000);
   };
 
   const startCamera = async () => {
@@ -204,15 +187,44 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
     setScannerInput('');
   };
 
+  const handleFixLog = (id: string) => {
+    setLinterLogs(prev => prev.map(log => log.id === id ? { ...log, isPatching: true } : log));
+    setTimeout(() => {
+      setLinterLogs(prev => prev.map(log => {
+        if (log.id === id) {
+          return {
+            ...log,
+            status: 'Pass' as const,
+            message: log.message.replace('Detected', 'Mitigated - Sentinel Secure'),
+            fixAction: undefined,
+            isPatching: false
+          };
+        }
+        return log;
+      }));
+    }, 1800);
+  };
+
+  const handleRemediate = (id: string) => {
+    setRemediatingId(id);
+    setTimeout(() => {
+      setVulnerabilities(prev => prev.filter(v => v.id !== id));
+      setRemediatingId(null);
+    }, 1500);
+  };
+
   const chartData = liveMetrics.map(m => ({
     name: m.name,
     sales: parseInt(m.sales.replace(/[^0-9]/g, '')),
     target: 25000
   }));
 
+  const minorEmployees = EMPLOYEES.filter(e => e.isMinor);
+  const adultEmployees = EMPLOYEES.filter(e => !e.isMinor);
+
   return (
-    <div className="flex-1 bg-slate-950 overflow-auto text-slate-200 font-mono">
-      <Header title="Operational Hub" subtitle="Real-time Store Operations & Sentinel Linter Log" />
+    <div className="flex-1 bg-slate-950 overflow-auto text-slate-200 font-mono custom-scrollbar">
+      <Header title="Operational Hub" subtitle={`Real-time Store Operations • Node #5065 • ${reg.state}`} />
 
       <div className="bg-blue-900/20 border-b border-blue-900/50 px-8 py-2 flex items-center justify-between sticky top-0 z-30 backdrop-blur-md">
         <div className="flex items-center gap-4">
@@ -228,6 +240,8 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
         <div className="flex border-b border-slate-800 space-x-8">
            {[
              { id: 'metrics', label: 'Floor Metrics', icon: Activity }, 
+             { id: 'compliance', label: 'Labor Compliance', icon: Scale },
+             { id: 'variance', label: 'Variance Analysis', icon: BarChart2 },
              { id: 'audit', label: 'Sentinel Audit', icon: ShieldCheck }, 
              { id: 'vision', label: 'Vision Core', icon: Eye }, 
              { id: 'scanner', label: 'Barcode Stream', icon: Maximize2 }
@@ -238,6 +252,213 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
              </button>
            ))}
         </div>
+
+        {activeTab === 'compliance' && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl relative overflow-hidden group">
+                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Registry Adults</p>
+                   <h2 className="text-4xl font-black text-white">{adultEmployees.length}</h2>
+                   <p className="text-[10px] text-blue-400 font-bold mt-2 uppercase">Standard Capacity</p>
+                </div>
+                <div className="bg-slate-900 rounded-2xl p-6 border border-orange-500/30 shadow-xl relative overflow-hidden group">
+                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Registry Minors</p>
+                   <h2 className="text-4xl font-black text-orange-500">{minorEmployees.length}</h2>
+                   <p className="text-[10px] text-orange-400 font-bold mt-2 uppercase">P.A. 90 Watch-list</p>
+                </div>
+                <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl relative overflow-hidden group col-span-2">
+                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">MI Jurisdiction Active</p>
+                   <div className="flex gap-4 items-center">
+                      <div className="bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                        <span className="text-[9px] font-black uppercase text-slate-500">14-15 Curfew</span>
+                        <p className="text-xs font-black text-orange-400">{reg.curfewMinor1415}</p>
+                      </div>
+                      <div className="bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                        <span className="text-[9px] font-black uppercase text-slate-500">16-17 Curfew</span>
+                        <p className="text-xs font-black text-amber-500">{reg.curfewMinor1617}</p>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+                <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+                   <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                      <Users className="w-4 h-4 text-orange-500" />
+                      Personnel Watch-list: Minor Compliance
+                   </h3>
+                   <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                      <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Auto-Guard Active</span>
+                   </div>
+                </div>
+                <div className="overflow-x-auto">
+                   <table className="w-full text-left text-[11px] font-mono">
+                      <thead className="bg-slate-950 text-slate-500 uppercase font-black">
+                         <tr>
+                            <th className="px-6 py-4">Employee Signature</th>
+                            <th className="px-6 py-4 text-center">Age</th>
+                            <th className="px-6 py-4">Constraint Framework ({reg.state})</th>
+                            <th className="px-6 py-4">Curfew Guard</th>
+                            <th className="px-6 py-4 text-right">Sentinel Status</th>
+                         </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                         {minorEmployees.map(emp => (
+                            <tr key={emp.id} className="hover:bg-slate-800/30 transition-colors">
+                               <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                     <img src={emp.avatar} className="w-8 h-8 rounded-lg border border-slate-700" />
+                                     <div>
+                                        <p className="text-white font-black uppercase text-xs">{emp.name}</p>
+                                        <p className="text-[9px] text-slate-500 font-bold uppercase">{emp.role}</p>
+                                     </div>
+                                  </div>
+                               </td>
+                               <td className="px-6 py-4 text-center font-black text-orange-400">{emp.age}</td>
+                               <td className="px-6 py-4">
+                                  <div className="flex flex-col gap-1">
+                                     <span className="text-[10px] text-slate-300 font-bold uppercase">Max Shift: {emp.age < 16 ? reg.maxShiftMinor1415 : reg.maxShiftMinor1617}h</span>
+                                     <span className="text-[9px] text-slate-500 font-black uppercase">Mandatory Break: {reg.mandatoryBreakDuration}m @ {reg.mandatoryBreakThreshold}h</span>
+                                  </div>
+                               </td>
+                               <td className="px-6 py-4">
+                                  <div className="flex items-center gap-2">
+                                     <Clock className="w-3 h-3 text-amber-500" />
+                                     <span className="text-[10px] text-amber-500 font-black uppercase">
+                                        {emp.age < 16 ? reg.curfewMinor1415 : reg.curfewMinor1617}
+                                     </span>
+                                  </div>
+                               </td>
+                               <td className="px-6 py-4 text-right">
+                                  <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded text-[9px] font-black uppercase tracking-widest">Secured</span>
+                               </td>
+                            </tr>
+                         ))}
+                      </tbody>
+                   </table>
+                </div>
+                <div className="p-4 bg-slate-950 border-t border-slate-800 text-[9px] text-slate-500 flex justify-between items-center uppercase font-black">
+                   <span>Syncing with {reg.state} P.A. 90 Frame v1.0.4</span>
+                   <span className="text-blue-400">Total Minors: {minorEmployees.length}</span>
+                </div>
+             </div>
+          </div>
+        )}
+
+        {activeTab === 'variance' && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+             {/* Hero Cards for Variance */}
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-slate-900 rounded-2xl p-6 border border-red-500/20 shadow-xl relative overflow-hidden group">
+                   <div className="absolute -right-4 -top-4 opacity-5 group-hover:scale-110 transition-transform">
+                      <Clock className="w-24 h-24 text-red-500" />
+                   </div>
+                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Avg. Closing Gap</p>
+                   <h2 className="text-4xl font-black text-white">22m</h2>
+                   <p className="text-[10px] text-red-400 font-bold mt-2 uppercase">Unscheduled Labor (Daily)</p>
+                </div>
+                <div className="bg-slate-900 rounded-2xl p-6 border border-blue-500/20 shadow-xl relative overflow-hidden group">
+                   <div className="absolute -right-4 -top-4 opacity-5 group-hover:scale-110 transition-transform">
+                      <DollarSign className="w-24 h-24 text-blue-500" />
+                   </div>
+                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Weekly Leakage</p>
+                   <h2 className="text-4xl font-black text-white">$420.50</h2>
+                   <p className="text-[10px] text-blue-400 font-bold mt-2 uppercase">Fiscal Extraction Potential</p>
+                </div>
+                <div className="bg-slate-900 rounded-2xl p-6 border border-emerald-500/20 shadow-xl relative overflow-hidden group">
+                   <div className="absolute -right-4 -top-4 opacity-5 group-hover:scale-110 transition-transform">
+                      <ShieldCheck className="w-24 h-24 text-emerald-500" />
+                   </div>
+                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">OT Trigger Risk</p>
+                   <h2 className="text-4xl font-black text-white">High</h2>
+                   <p className="text-[10px] text-emerald-400 font-bold mt-2 uppercase">Sentinel Alert Threshold</p>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Variance Chart */}
+                <div className="lg:col-span-2 bg-slate-900 rounded-2xl border border-slate-800 p-8 shadow-2xl">
+                   <div className="flex justify-between items-center mb-8">
+                      <div>
+                         <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                            <History className="w-4 h-4 text-blue-500" />
+                            3-Week Closing Lookback
+                         </h3>
+                         <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase">Actual Out-Time vs Policy Target</p>
+                      </div>
+                   </div>
+                   <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                         <ComposedChart data={CLOSING_VARIANCE_DATA}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} />
+                            <YAxis hide />
+                            <Tooltip contentStyle={{backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '12px'}} />
+                            <Bar dataKey="gap" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} name="Gap (Minutes)" />
+                            <Line type="monotone" dataKey="actual" stroke="#3b82f6" strokeWidth={3} dot={{r: 4}} name="Actual Hours" />
+                         </ComposedChart>
+                      </ResponsiveContainer>
+                   </div>
+                </div>
+
+                {/* Recommendations */}
+                <div className="bg-slate-900 rounded-2xl border border-slate-800 p-8 shadow-2xl flex flex-col justify-between">
+                   <div className="space-y-6">
+                      <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3 border-b border-slate-800 pb-4">
+                         <Zap className="w-4 h-4 text-amber-500" />
+                         Strategy Insight
+                      </h3>
+                      <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl space-y-3">
+                         <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-red-400" />
+                            <span className="text-[10px] font-black text-red-400 uppercase">Unscheduled Gap Detected</span>
+                         </div>
+                         <p className="text-[11px] text-slate-400 leading-relaxed italic">
+                            Closers average <span className="text-white font-bold">22 minutes</span> of cleaning post-lock. This unscheduled block triggers weekly OT alerts.
+                         </p>
+                      </div>
+                      <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-3">
+                         <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                            <span className="text-[10px] font-black text-emerald-400 uppercase">Proposed Recalibration</span>
+                         </div>
+                         <p className="text-[11px] text-slate-400 leading-relaxed">
+                            Shift scheduled end time from <span className="text-white">9:00 PM</span> to <span className="text-emerald-400">9:30 PM</span> to absorb the gap and prevent emergency OT alerts.
+                         </p>
+                      </div>
+                   </div>
+                   
+                   <button 
+                      onClick={handleRecalibrateClosing}
+                      disabled={isRecalibrating}
+                      className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 mt-8 shadow-2xl ${
+                         recalibrateComplete 
+                         ? 'bg-emerald-500 text-white' 
+                         : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 active:scale-95'
+                      }`}
+                   >
+                      {isRecalibrating ? (
+                         <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Processing Synapses...
+                         </>
+                      ) : recalibrateComplete ? (
+                         <>
+                            <CheckCircle className="w-4 h-4" />
+                            Protocol Hardened
+                         </>
+                      ) : (
+                         <>
+                            <Wrench className="w-4 h-4" />
+                            Recalibrate Protocols
+                         </>
+                      )}
+                   </button>
+                </div>
+             </div>
+          </div>
+        )}
 
         {activeTab === 'metrics' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-500">
