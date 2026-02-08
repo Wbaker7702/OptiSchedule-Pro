@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap, Cloud, Database, ShieldCheck, Cpu } from 'lucide-react';
+import { Bot, Send, X, Minimize2, Maximize2, Loader2, Zap, Cloud, Database, ShieldCheck, Cpu } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { IntegrationStatus } from '../types';
 
@@ -29,7 +29,10 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         }
     ]);
     const [isLoading, setIsLoading] = useState(false);
+    const [apiKey, setApiKey] = useState('');
+    const [showApiKey, setShowApiKey] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const hasApiKey = apiKey.trim().length > 0;
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,11 +44,20 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || isLoading) return;
+        const trimmedInput = input.trim();
+        if (!trimmedInput || isLoading) return;
+        if (!hasApiKey) {
+            setMessages(prev => [...prev, {
+                role: 'ai',
+                content: "Sentinel requires a Gemini API key to activate. Paste a key below to proceed (stored only in memory).",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }]);
+            return;
+        }
 
         const userMessage: Message = {
             role: 'user',
-            content: input,
+            content: trimmedInput,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
@@ -54,7 +66,7 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         setIsLoading(true);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+            const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
             const chat = ai.chats.create({
                 model: 'gemini-3-flash-preview',
                 config: {
@@ -72,7 +84,7 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
             });
 
             let fullResponse = "";
-            const result = await chat.sendMessageStream({ message: input });
+            const result = await chat.sendMessageStream({ message: trimmedInput });
             
             setMessages(prev => [...prev, { 
                 role: 'ai', 
@@ -181,6 +193,49 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                                 <Database className="w-3 h-3 text-blue-500" />
                                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter">D365</span>
                             </div>
+                        </div>
+
+                        {/* API Key */}
+                        <div className="px-4 py-3 border-t border-slate-800 bg-slate-900/70">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck className="w-3 h-3 text-blue-400" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Gemini API Key</span>
+                                </div>
+                                <span className={`text-[8px] font-black uppercase tracking-widest ${hasApiKey ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                    {hasApiKey ? 'Loaded' : 'Required'}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type={showApiKey ? 'text' : 'password'}
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    placeholder="Paste API key for this session"
+                                    autoComplete="off"
+                                    spellCheck={false}
+                                    className="flex-1 bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-[10px] text-slate-200 font-mono focus:border-blue-500 outline-none transition-all placeholder:text-slate-700"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowApiKey(prev => !prev)}
+                                    className="px-2.5 py-2 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white border border-slate-800 rounded-lg transition-colors"
+                                    aria-label={showApiKey ? 'Hide API key' : 'Show API key'}
+                                >
+                                    {showApiKey ? 'Hide' : 'Show'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setApiKey('')}
+                                    className="px-2.5 py-2 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white border border-slate-800 rounded-lg transition-colors"
+                                    aria-label="Clear API key"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                            <p className="mt-1 text-[8px] text-slate-500 uppercase tracking-widest font-black">
+                                Stored only in memory. Use a backend proxy for production.
+                            </p>
                         </div>
 
                         {/* Input Area */}
