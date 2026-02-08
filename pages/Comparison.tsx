@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowLeftRight, TrendingDown, TrendingUp, Store, Globe, Activity, Scale, Zap, Target, CheckCircle2, RefreshCw, ShieldCheck, AlertCircle } from 'lucide-react';
@@ -29,15 +29,36 @@ const Comparison: React.FC = () => {
   const [syncProgress, setSyncProgress] = useState(0);
   const [syncPhase, setSyncPhase] = useState('Initializing');
   const [isApplied, setIsApplied] = useState(false);
+  const syncIntervalRef = useRef<number | null>(null);
+  const syncTimeoutRef = useRef<number | null>(null);
 
   const reg = LABOR_REGULATIONS[CURRENT_STATE];
 
+  const clearSyncTimers = () => {
+    if (syncIntervalRef.current !== null) {
+      clearInterval(syncIntervalRef.current);
+      syncIntervalRef.current = null;
+    }
+    if (syncTimeoutRef.current !== null) {
+      clearTimeout(syncTimeoutRef.current);
+      syncTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      clearSyncTimers();
+    };
+  }, []);
+
   const handleApplyBaseline = () => {
+    if (isSyncing || isApplied) return;
+    clearSyncTimers();
     setIsSyncing(true);
     setSyncProgress(0);
     setSyncPhase('Initializing Handshake...');
     
-    const interval = setInterval(() => {
+    syncIntervalRef.current = window.setInterval(() => {
       setSyncProgress(prev => {
         if (prev < 30) setSyncPhase('Mapping Fiscal Data...');
         else if (prev < 60) setSyncPhase(`Applying ${reg.state} Labor Linter...`);
@@ -45,14 +66,17 @@ const Comparison: React.FC = () => {
         else setSyncPhase('Finalizing Optimization...');
 
         if (prev >= 100) {
-          clearInterval(interval);
+          if (syncIntervalRef.current !== null) {
+            clearInterval(syncIntervalRef.current);
+            syncIntervalRef.current = null;
+          }
           return 100;
         }
         return prev + 2;
       });
     }, 50);
 
-    setTimeout(() => {
+    syncTimeoutRef.current = window.setTimeout(() => {
       const optimizedData = chartData.map(d => ({
         ...d,
         store5065: Math.round((d.store5065 + d.store2080) / 2)
@@ -60,6 +84,14 @@ const Comparison: React.FC = () => {
       setChartData(optimizedData);
       setIsSyncing(false);
       setIsApplied(true);
+      if (syncIntervalRef.current !== null) {
+        clearInterval(syncIntervalRef.current);
+        syncIntervalRef.current = null;
+      }
+      if (syncTimeoutRef.current !== null) {
+        clearTimeout(syncTimeoutRef.current);
+        syncTimeoutRef.current = null;
+      }
     }, 3000);
   };
 
@@ -141,10 +173,16 @@ const Comparison: React.FC = () => {
              </div>
              <button 
                 onClick={handleApplyBaseline}
-                disabled={isApplied}
-                className={`text-[10px] font-black uppercase tracking-widest transition-all py-3 px-6 rounded-xl flex items-center gap-3 ${isApplied ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20'}`}
+                disabled={isApplied || isSyncing}
+                className={`text-[10px] font-black uppercase tracking-widest transition-all py-3 px-6 rounded-xl flex items-center gap-3 ${isApplied ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : isSyncing ? 'bg-slate-800 text-slate-400 border border-slate-700' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20'}`}
               >
-                {isApplied ? <><CheckCircle2 className="w-4 h-4" /> Policy Mirrored</> : <><RefreshCw className="w-4 h-4" /> Apply Global Baseline</>}
+                {isApplied ? (
+                  <><CheckCircle2 className="w-4 h-4" /> Policy Mirrored</>
+                ) : isSyncing ? (
+                  <><RefreshCw className="w-4 h-4 animate-spin" /> Syncing Baseline</>
+                ) : (
+                  <><RefreshCw className="w-4 h-4" /> Apply Global Baseline</>
+                )}
               </button>
           </div>
           <div className="h-72">

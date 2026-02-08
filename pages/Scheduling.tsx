@@ -40,9 +40,14 @@ const Scheduling: React.FC<SchedulingProps> = ({
 
   const reg = LABOR_REGULATIONS[CURRENT_STATE];
 
+  useEffect(() => {
+    setIsModalOpen(!isConnected);
+  }, [isConnected]);
+
   const handleBreezeDiscovery = () => {
     setIsScanning(true);
     setSyncProgress(0);
+    setTerminalLogs([]);
     const steps = ["Auth Handshake...", "Parsing HS Deals...", "Validating MI Labor Laws...", "Mapping Personas..."];
     let stepIdx = 0;
     

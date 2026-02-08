@@ -52,7 +52,7 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
         isMinor: ageNum < 18
       };
 
-      setEmployees([newEmployee, ...employees]);
+      setEmployees(prev => [newEmployee, ...prev]);
       setIsSubmitting(false);
       setIsModalOpen(false);
       setShowSuccess(true);

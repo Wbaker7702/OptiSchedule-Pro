@@ -73,9 +73,23 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
   const [scannerInput, setScannerInput] = useState('');
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
 
+  const stopCameraStream = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  };
+
   useEffect(() => {
     if (defaultTab) setActiveTab(defaultTab);
   }, [defaultTab]);
+
+  useEffect(() => {
+    return () => {
+      stopCameraStream();
+    };
+  }, []);
 
   useEffect(() => {
     if (externalTrigger === 'NEW_ASSET_SCAN') {
@@ -166,11 +180,7 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
   };
 
   const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
+    stopCameraStream();
     setCameraActive(false);
   };
 
