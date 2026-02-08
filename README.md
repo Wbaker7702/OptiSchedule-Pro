@@ -15,6 +15,8 @@ View your app in AI Studio: https://ai.studio/apps/drive/1t9N6qD-bsuD6OLWG_mKSU2
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app:
    `npm run dev`
+3. Open the app and paste your Gemini API key into the Sentinel AI panel.
+   Keys are stored only in memory. For production, use a backend proxy
+   and keep secrets off the client.
