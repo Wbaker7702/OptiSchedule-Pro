@@ -7,57 +7,101 @@ on:
 
 permissions:
   contents: write
-  issues: read
-  security-events: read
   actions: read
+  security-events: read
+
+env:
+  TRUST_THRESHOLD: "75"
 
 jobs:
-  calculate:
+  score:
     runs-on: ubuntu-latest
     outputs:
-      score: ${{ steps.score.outputs.score }}
+      score: ${{ steps.calc.outputs.score }}
 
     steps:
       - uses: actions/checkout@v4
-      - name: Setup GH CLI
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
 
-      - name: Initialize Score
-        id: score
+      - name: Auth GH CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      # NOTE: Dependabot alerts API needs a token with "Dependabot alerts: read"
+      # Use a Fine-grained PAT stored as GH_PAT_DEPENDABOT (recommended).
+      - name: Calculate Trust Score
+        id: calc
+        env:
+          GH_PAT_DEPENDABOT: ${{ secrets.GH_PAT_DEPENDABOT }}
         run: |
+          set -euo pipefail
+
           SCORE=100
 
-          echo "Base Score: $SCORE"
+          OWNER="${{ github.repository_owner }}"
+          REPO="$(echo "${{ github.repository }}" | cut -d/ -f2)"
 
-          # CI Status Check
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "CI assumed passing for now"
+          echo "Base SCORE=$SCORE"
+
+          # 1) CI health (last workflow runs for this repo)
+          # Penalty: -10 if latest run conclusion != success
+          LATEST_CONCLUSION=$(gh api -H "Accept: application/vnd.github+json" \
+            "/repos/${OWNER}/${REPO}/actions/runs?per_page=1" \
+            --jq '.workflow_runs[0].conclusion // "unknown"' || echo unknown)
+
+          if [ "$LATEST_CONCLUSION" != "success" ]; then
+            SCORE=$((SCORE - 10))
+            echo "CI penalty applied (latest conclusion=$LATEST_CONCLUSION)"
           fi
 
-          # Count open issues labeled high
-          HIGH_ISSUES=$(gh issue list --label "high" --state open --json number --jq length || echo 0)
-          SCORE=$((SCORE - (HIGH_ISSUES * 10)))
+          # 2) Code scanning alerts (CodeQL)
+          # Penalties: critical -20 each, high -10 each, medium -3 each
+          CS=$(gh api -H "Accept: application/vnd.github+json" \
+            "/repos/${OWNER}/${REPO}/code-scanning/alerts?state=open&per_page=100" || echo "[]")
 
-          # Count security alerts (if any)
-          ALERTS=0
-          SCORE=$((SCORE - (ALERTS * 15)))
+          CS_CRIT=$(echo "$CS" | jq '[.[] | select(.rule.security_severity_level=="critical")] | length' || echo 0)
+          CS_HIGH=$(echo "$CS" | jq '[.[] | select(.rule.security_severity_level=="high")] | length' || echo 0)
+          CS_MED=$(echo "$CS"  | jq '[.[] | select(.rule.security_severity_level=="medium")] | length' || echo 0)
 
+          SCORE=$((SCORE - (CS_CRIT * 20) - (CS_HIGH * 10) - (CS_MED * 3)))
+          echo "Code scanning open: critical=$CS_CRIT high=$CS_HIGH medium=$CS_MED"
+
+          # 3) Dependabot alerts (requires GH_PAT_DEPENDABOT with Dependabot alerts: read)
+          # Penalties: critical -15 each, high -8 each, medium -2 each
+          if [ -n "${GH_PAT_DEPENDABOT:-}" ]; then
+            DB=$(gh api -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_PAT_DEPENDABOT" \
+              "/repos/${OWNER}/${REPO}/dependabot/alerts?state=open&per_page=100" || echo "[]")
+
+            DB_CRIT=$(echo "$DB" | jq '[.[] | select(.security_vulnerability.severity=="critical")] | length' || echo 0)
+            DB_HIGH=$(echo "$DB" | jq '[.[] | select(.security_vulnerability.severity=="high")] | length' || echo 0)
+            DB_MED=$(echo "$DB"  | jq '[.[] | select(.security_vulnerability.severity=="medium")] | length' || echo 0)
+
+            SCORE=$((SCORE - (DB_CRIT * 15) - (DB_HIGH * 8) - (DB_MED * 2)))
+            echo "Dependabot open: critical=$DB_CRIT high=$DB_HIGH medium=$DB_MED"
+          else
+            # No token -> apply a small penalty + note in badge
+            SCORE=$((SCORE - 5))
+            echo "Dependabot token missing -> applied -5 (set secrets.GH_PAT_DEPENDABOT)"
+          fi
+
+          # Clamp 0..100
           if [ $SCORE -lt 0 ]; then SCORE=0; fi
+          if [ $SCORE -gt 100 ]; then SCORE=100; fi
 
-          echo "Final Score: $SCORE"
+          echo "Final SCORE=$SCORE"
+          echo "score=$SCORE" >> "$GITHUB_OUTPUT"
 
-          echo "score=$SCORE" >> $GITHUB_OUTPUT
-
-      - name: Generate Badge
+      - name: Update badge file
         run: |
-          SCORE=${{ steps.score.outputs.score }}
-          echo "![Trust Score](https://img.shields.io/badge/Trust%20Score-$SCORE-blue)" > TRUST_BADGE.md
+          SCORE="${{ steps.calc.outputs.score }}"
+          echo "![Trust Score](https://img.shields.io/badge/Trust%20Score-${SCORE}-blue)" > TRUST_BADGE.md
+          echo "" >> TRUST_BADGE.md
+          echo "- Threshold: ${{ env.TRUST_THRESHOLD }}" >> TRUST_BADGE.md
+          echo "- Updated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> TRUST_BADGE.md
 
-      - name: Commit Badge
+      - name: Commit badge
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add TRUST_BADGE.md
-          git commit -m "Update Trust Score" || echo "No changes"
-          git push || echo "No push needed"
+          git commit -m "Update Trust Score" || exit 0
+          git push
