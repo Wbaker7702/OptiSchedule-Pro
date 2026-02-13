@@ -81,3 +81,9 @@ I am particularly interested in features that improve **workflow efficiency** an
 As a leader who has spent years **building positive client relationships** and **promoting team cohesion**, I expect all contributors to maintain a professional, supportive, and respectful tone.
 
 
+* **Dynamic Budget Guardian:** A manager-controlled financial logic layer that monitors the Labor-to-Sales ratio. 
+* **Customizable Thresholds:** Provides a restricted settings range (10% - 25%) to ensure stores maintain a healthy profit margin based on industry standards I observed while managing departments with **over $1M in annual sales**.
+* **Data Persistence:** Utilizes LocalStorage to ensure manager preferences are saved across sessions, improving workflow efficiency.
+
+
+  
