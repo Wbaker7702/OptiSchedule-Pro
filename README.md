@@ -33,7 +33,7 @@ OptiSchedule-pro is built for scale, utilizing a decoupled architecture to separ
 **A Compliance-First Labor Optimization Engine**
 
 ### 📝 Overview
-(start_span)OptiSchedule Pro is a scheduling solution designed to solve the real-world operational gaps I witnessed while managing departments with **over $1M in annual sales**(end_span). (start_span)(start_span)Unlike standard calendars, this tool focuses on **regulatory compliance** and **resource matching** for high-volume environments like retail, food service, and casinos(end_span)(end_span).
+OptiSchedule Pro is a scheduling solution designed to solve the real-world operational gaps I witnessed while managing departments with **over $1M in annual sales**. Unlike standard calendars, this tool focuses on **regulatory compliance** and **resource matching** for high-volume environments like retail, food service, and casinos.
 
 ### ✨ Key Features
 * **Hybrid Data Ingestion:** Supports both live database queries and CSV file uploads for maximum flexibility.
@@ -44,10 +44,10 @@ OptiSchedule-pro is built for scale, utilizing a decoupled architecture to separ
 ### 🛠️ Technical Stack
 * **Language:** Python / JavaScript
 * **Logic Framework:** Built on the **Single Responsibility Principle** to ensure data validation and business logic are decoupled for high scalability.
-* **[span_4](start_span)[span_5](start_span)Data Processing:** Specialized in handling high-volume transactions and detailed compliance logs[span_4](end_span)[span_5](end_span).
+* **Data Processing:** Specialized in handling high-volume transactions and detailed compliance logs.
 
 ### 🧠 The "Why"
-[span_6](start_span)With a professional background that includes **Assistant Management at McDonald's**[span_6](end_span) [span_7](start_span)and processing **$150K in daily transactions at FireKeepers Casino**[span_7](end_span)[span_8](start_span), I’ve seen how workflow inefficiency can impact a team[span_8](end_span). [span_9](start_span)I built this tool to automate the tedious "compliance check" and allow managers to focus on what matters: their people[span_9](end_span).
+With a professional background that includes **Assistant Management at McDonald's**and processing **$150K in daily transactions at FireKeepers Casino**, I’ve seen how workflow inefficiency can impact a team. I built this tool to automate the tedious "compliance check" and allow managers to focus on what matters: their people.
 
 ### 🚀 Installation & Usage
 1. Clone the repository.
