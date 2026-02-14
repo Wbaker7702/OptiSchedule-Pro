@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, LineChart, Line } from 'recharts';
-import { DollarSign, Clock, Target, TrendingUp, ArrowUpRight, ArrowDownRight, Zap, Cloud, Database, ShieldCheck, Filter, Download, ListChecks, Loader2, CheckCircle, FileText, Calendar, BarChart3, PieChart, Activity, RefreshCw, Layers, ChevronRight, FileDown, ShieldAlert } from 'lucide-react';
+import { DollarSign, Clock, Target, TrendingUp, ArrowUpRight, ArrowDownRight, Zap, Cloud, Database, ShieldCheck, Filter, Download, ListChecks, Loader2, CheckCircle, FileText, Calendar, BarChart3, PieChart, Activity, RefreshCw, Layers, ChevronRight, FileDown, ShieldAlert, Brain } from 'lucide-react';
 import { FISCAL_METRICS, AZURE_TELEMETRY, ROYALTY_METRICS } from '../constants';
+import { budgetGuardian, checkFatigue } from '../validators';
 
 const otTrendData = [
   { day: 'Mon', hours: 14 },
@@ -47,6 +48,18 @@ const MetricsReport: React.FC = () => {
   const [generationStep, setGenerationStep] = useState('');
   const [showReport, setShowReport] = useState(false);
   const [pivotComplete, setPivotComplete] = useState(false);
+
+  // State for Scenario Forecaster ("Battle Creek Test")
+  const [scenario, setScenario] = useState({
+    sales: 10000,
+    hours: 120,
+    rate: 15,
+    target: 15,
+    fatigueHours: 12,
+  });
+
+  const budgetResult = budgetGuardian(scenario.hours, scenario.rate, scenario.sales, scenario.target);
+  const fatigueResult = checkFatigue(scenario.fatigueHours);
 
   // Hardened download function to ensure file is actually saved
   const downloadReportFile = (id: string) => {
@@ -160,6 +173,55 @@ SENTINEL STATUS: NOMINAL
              </div>
           </div>
         )}
+
+        {/* New Scenario Forecaster */}
+        <div className="bg-slate-900 rounded-3xl p-8 border border-indigo-500/30 shadow-2xl relative overflow-hidden">
+           <div className="absolute -right-12 -top-12 opacity-5 pointer-events-none">
+              <Brain className="w-64 h-64 text-indigo-400" />
+           </div>
+           <div className="relative z-10">
+              <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-3 mb-8">
+                 <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                 Sentinel Scenario Forecaster
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                 {/* Money Rule Tester */}
+                 <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-300">"Money Rule" - Budget Guardian</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div>
+                          <label className="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Projected Sales ($)</label>
+                          <input type="number" value={scenario.sales} onChange={e => setScenario(s => ({...s, sales: +e.target.value}))} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white" />
+                       </div>
+                       <div>
+                          <label className="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Labor Hours</label>
+                          <input type="number" value={scenario.hours} onChange={e => setScenario(s => ({...s, hours: +e.target.value}))} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white" />
+                       </div>
+                    </div>
+                    <div>
+                       <label className="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Manager Target - "Golden Zone" ({scenario.target}%)</label>
+                       <input type="range" min="10" max="25" value={scenario.target} onChange={e => setScenario(s => ({...s, target: +e.target.value}))} className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
+                    </div>
+                    <div className={`p-4 rounded-lg text-xs font-mono font-bold text-center ${budgetResult.startsWith('🚨') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : budgetResult.startsWith('🟠') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+                       {budgetResult}
+                    </div>
+                 </div>
+                 {/* Fatigue Check Tester */}
+                 <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4 flex flex-col justify-between">
+                    <div>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-300">14-Hour Fatigue Check</h4>
+                        <div>
+                           <label className="block text-[8px] font-black text-slate-500 uppercase tracking-widest my-2">Longest Planned Shift (Hours)</label>
+                           <input type="number" value={scenario.fatigueHours} onChange={e => setScenario(s => ({...s, fatigueHours: +e.target.value}))} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white" />
+                        </div>
+                    </div>
+                    <div className={`p-4 rounded-lg text-xs font-mono font-bold text-center ${fatigueResult.startsWith('🚨') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : fatigueResult.startsWith('🟠') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+                       {fatigueResult}
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            
@@ -342,42 +404,6 @@ SENTINEL STATUS: NOMINAL
                  )}
               </div>
            </div>
-        </div>
-
-        {/* Global Strategy Bar */}
-        <div className="bg-[#0078d4]/5 border border-[#0078d4]/20 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
-           <div className="absolute top-0 right-0 p-8 opacity-10">
-              <Zap className="w-32 h-32 text-[#ff7a59]" />
-           </div>
-           <div className="flex items-center gap-6 relative z-10">
-              <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl backdrop-blur-md">
-                 <ShieldCheck className="w-8 h-8 text-blue-400" />
-              </div>
-              <div className="max-w-xl">
-                 <h4 className="text-sm font-black text-white uppercase tracking-widest mb-2">Sentinel Strategy recalibration</h4>
-                 <p className="text-xs text-slate-400 leading-relaxed font-mono uppercase tracking-tight">
-                    Every report generated above is cross-referenced with the <span className="text-emerald-400 font-black">Creator Royalty Agreement</span>. Execute a pivot below to align staffing vectors with the current fiscal period's optimized targets.
-                 </p>
-              </div>
-           </div>
-           <button 
-            onClick={handlePivot}
-            disabled={isGenerating}
-            className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl relative z-10 flex items-center gap-3 active:scale-95 ${
-              isGenerating 
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' 
-                : 'bg-white text-slate-900 hover:bg-slate-100 hover:shadow-white/10'
-            }`}
-           >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing Pivot
-                </>
-              ) : (
-                <>Execute Strategy Pivot</>
-              )}
-           </button>
         </div>
       </div>
     </div>

@@ -59,7 +59,7 @@ SENTINEL LINTER OVERRIDE:
 [ENABLED] All schedules are automatically gated by 
 these parameters to ensure zero-breach compliance.
 
-(c) 2024-Present OptiSchedule Pro Enterprise Systems
+(c) 2024 OptiSchedule Pro Enterprise Systems
         `.trim();
 
         const blob = new Blob([content], { type: 'text/plain' });
