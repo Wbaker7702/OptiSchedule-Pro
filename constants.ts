@@ -114,7 +114,7 @@ export const PLUGIN_REGISTRY: SystemPlugin[] = [
     provider: 'Microsoft Azure',
     description: 'Edge-based computer vision for inventory & safety.',
     version: '3.1.0',
-    status: 'Available',
+    status: 'Mounted',
     iconName: 'Eye'
   }
 ];
@@ -147,7 +147,9 @@ export const DATE_STRING = new Date().toLocaleDateString('en-US', { weekday: 'lo
 export const FISCAL_METRICS = {
   avgPayRate: 14.00,
   targetWeeklyHoursRecapture: 186,
+  initialWeeklyLoss: 90000,
   executionLeakage: 12500,
+  previousROI: 10.3,
   currentROI: 12.4,
   annualRecoveryTarget: 4.68,
   vision2028: 491,
@@ -164,16 +166,16 @@ export const EMPLOYEES: Employee[] = [
 ];
 
 export const HEATMAP_DATA: HeatmapDataPoint[] = [
-  { hour: '8 AM', transactionVolume: 45, staffing: 8, efficiency: 85 },
-  { hour: '9 AM', transactionVolume: 70, staffing: 9, efficiency: 75 },
-  { hour: '10 AM', transactionVolume: 110, staffing: 10, efficiency: 70 },
-  { hour: '11 AM', transactionVolume: 150, staffing: 12, efficiency: 55 },
-  { hour: '12 PM', transactionVolume: 180, staffing: 14, efficiency: 25 },
-  { hour: '1 PM', transactionVolume: 165, staffing: 15, efficiency: 45 },
-  { hour: '2 PM', transactionVolume: 170, staffing: 16, efficiency: 40 },
-  { hour: '3 PM', transactionVolume: 190, staffing: 12, efficiency: 20 },
-  { hour: '4 PM', transactionVolume: 160, staffing: 12, efficiency: 60 },
-  { hour: '5 PM', transactionVolume: 130, staffing: 10, efficiency: 78 },
+  { hour: '8 AM', transactionVolume: 16, staffing: 5, efficiency: 98 },
+  { hour: '9 AM', transactionVolume: 30, staffing: 6, efficiency: 96 },
+  { hour: '10 AM', transactionVolume: 57, staffing: 8, efficiency: 94 },
+  { hour: '11 AM', transactionVolume: 74, staffing: 10, efficiency: 92 },
+  { hour: '12 PM', transactionVolume: 87, staffing: 14, efficiency: 88 },
+  { hour: '1 PM', transactionVolume: 77, staffing: 12, efficiency: 89 },
+  { hour: '2 PM', transactionVolume: 64, staffing: 10, efficiency: 93 },
+  { hour: '3 PM', transactionVolume: 57, staffing: 8, efficiency: 95 },
+  { hour: '4 PM', transactionVolume: 50, staffing: 7, efficiency: 97 },
+  { hour: '5 PM', transactionVolume: 40, staffing: 6, efficiency: 98 },
 ];
 
 export const AZURE_TELEMETRY = {

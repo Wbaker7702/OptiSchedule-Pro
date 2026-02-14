@@ -18,7 +18,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
     { id: View.ROYALTY_DASHBOARD, label: 'Royalty Node', icon: Coins },
     { id: View.METRICS_REPORT, label: 'Fiscal Performance', icon: TrendingUp },
     { id: View.STORE_RATINGS, label: 'Store Ratings', icon: Star },
-    { id: View.MARKETPLACE, label: 'Module Manager', icon: Grid3X3 },
     { id: View.COMPARISON, label: 'Market Comparison', icon: ArrowLeftRight },
     { id: View.SCHEDULING, label: 'Deployment Center', icon: CalendarDays },
     { id: View.OPERATIONS, label: 'Operational Hub', icon: Activity },

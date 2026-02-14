@@ -10,7 +10,6 @@ import Analytics from './pages/Analytics';
 import Playbook from './pages/Playbook';
 import Settings from './pages/Settings';
 import Comparison from './pages/Comparison';
-import Marketplace from './pages/Marketplace';
 import MetricsReport from './pages/MetricsReport';
 import RoyaltyDashboard from './pages/RoyaltyDashboard';
 import StoreRatings from './pages/StoreRatings';
@@ -59,7 +58,6 @@ const App: React.FC = () => {
       case View.DASHBOARD: return <Dashboard setCurrentView={setCurrentView} />;
       case View.LOGISTICS: return <Logistics />;
       case View.GHOST_INVENTORY: return <GhostInventory />;
-      case View.MARKETPLACE: return <Marketplace />;
       case View.METRICS_REPORT: return <MetricsReport />;
       case View.ROYALTY_DASHBOARD: return <RoyaltyDashboard />;
       case View.STORE_RATINGS: return <StoreRatings />;

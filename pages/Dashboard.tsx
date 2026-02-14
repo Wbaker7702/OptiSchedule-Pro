@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle2, ShieldCheck, Activity, Terminal, Server, Globe, Lock, Loader2, Shield, Cloud, Database, Zap, Cpu, Network, Target, Flag, TrendingUp, ChevronRight, Binary, Rocket, Brain, Layers, Milestone } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Activity, Terminal, Server, Globe, Lock, Loader2, Shield, Cloud, Database, Zap, Cpu, Network, Target, Flag, TrendingUp, ChevronRight, Binary, Rocket, Brain, Layers, Milestone, ArrowUpRight } from 'lucide-react';
 import { DATE_STRING, FISCAL_METRICS, APP_VERSION, SYSTEM_HEALTH, CURRENT_STATE, LABOR_REGULATIONS, AZURE_TELEMETRY } from '../constants';
 import { View } from '../types';
 
@@ -138,6 +138,82 @@ const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = () => {
                  <span className="text-[9px] font-black text-white uppercase tracking-widest">Campaign Delta Stream Enabled</span>
               </div>
            </div>
+        </div>
+
+        {/* ROI Recapture Initiative Section */}
+        <div className="bg-slate-900 rounded-3xl p-8 border border-slate-800 shadow-2xl relative overflow-hidden">
+            <div className="absolute -right-12 -top-12 opacity-5 pointer-events-none">
+                <TrendingUp className="w-64 h-64 text-emerald-400" />
+            </div>
+            <div className="relative z-10">
+                <h2 className="text-xl font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                    <Rocket className="w-5 h-5 text-emerald-400" />
+                    ROI Recapture Initiative
+                </h2>
+                <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">Sentinel-Driven Financial Optimization • Node #5065</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                    {/* Weekly Loss Reduction */}
+                    <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800">
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-red-400 mb-4">Weekly Execution Leakage</h3>
+                        <div className="flex justify-between items-baseline mb-2">
+                            <span className="text-xs text-slate-500 font-bold uppercase">Initial Loss</span>
+                            <span className="text-lg font-black text-red-400/70">${FISCAL_METRICS.initialWeeklyLoss.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline mb-4">
+                            <span className="text-xs text-slate-300 font-bold uppercase">Current Loss</span>
+                            <span className="text-lg font-black text-white">${FISCAL_METRICS.executionLeakage.toLocaleString()}</span>
+                        </div>
+                        <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800 flex">
+                            <div 
+                                className="h-full bg-emerald-500" 
+                                title={`Recaptured: ${((FISCAL_METRICS.initialWeeklyLoss - FISCAL_METRICS.executionLeakage) / FISCAL_METRICS.initialWeeklyLoss * 100).toFixed(1)}%`}
+                                style={{ width: `${((FISCAL_METRICS.initialWeeklyLoss - FISCAL_METRICS.executionLeakage) / FISCAL_METRICS.initialWeeklyLoss) * 100}%` }}
+                            />
+                            <div 
+                                className="h-full bg-red-500" 
+                                title={`Remaining: ${(FISCAL_METRICS.executionLeakage / FISCAL_METRICS.initialWeeklyLoss * 100).toFixed(1)}%`}
+                                style={{ width: `${(FISCAL_METRICS.executionLeakage / FISCAL_METRICS.initialWeeklyLoss) * 100}%` }}
+                            />
+                        </div>
+                        <div className="flex justify-between items-center mt-2">
+                            <span className="text-[9px] font-black text-emerald-400 uppercase">
+                                Recaptured: ${(FISCAL_METRICS.initialWeeklyLoss - FISCAL_METRICS.executionLeakage).toLocaleString()}
+                            </span>
+                            <span className="text-[9px] font-black text-red-400 uppercase">
+                                Remaining: ${FISCAL_METRICS.executionLeakage.toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* ROI Growth */}
+                    <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800">
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-4">Return on Investment (ROI)</h3>
+                        <div className="flex justify-between items-baseline mb-4">
+                            <span className="text-xs text-slate-500 font-bold uppercase">Previous ROI</span>
+                            <span className="text-lg font-black text-slate-500/70">{FISCAL_METRICS.previousROI}x</span>
+                        </div>
+                        <div className="flex justify-between items-baseline mb-4">
+                            <span className="text-xs text-slate-300 font-bold uppercase">Current ROI</span>
+                            <div className="flex items-baseline gap-2">
+                                <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+                                <span className="text-lg font-black text-white">{FISCAL_METRICS.currentROI}x</span>
+                            </div>
+                        </div>
+                        <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                            <div 
+                                className="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                                style={{ width: `${(FISCAL_METRICS.currentROI / 15) * 100}%` }}
+                            />
+                        </div>
+                        <div className="mt-2 text-right">
+                            <span className="text-[9px] font-black text-emerald-400 uppercase">
+                                Growth: +{(FISCAL_METRICS.currentROI - FISCAL_METRICS.previousROI).toFixed(1)}x
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {/* Sentinel Strategic Roadmap Section */}

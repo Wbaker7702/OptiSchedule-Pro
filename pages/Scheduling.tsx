@@ -18,6 +18,33 @@ interface SchedulingProps {
   onAdjustStaffing: () => void;
 }
 
+const providerConfigs = {
+    'HubSpot': {
+        name: 'HubSpot Breeze',
+        color: '#ff7a59',
+        icon: Sparkles,
+        title: 'Authorize HubSpot Sync',
+        description: "Discovering portal 'Walmart_MI_Ops_Sec' for marketing velocity signals.",
+        buttonText: 'Launch Breeze Discovery'
+    },
+    'Dynamics 365': {
+        name: 'Dynamics 365',
+        color: '#0078d4',
+        icon: Database,
+        title: 'Connect Dynamics 365',
+        description: 'Establishing secure node handshake for fiscal ledger and supply chain data.',
+        buttonText: 'Connect Secure Node'
+    },
+    'SAP S/4HANA': {
+        name: 'SAP S/4HANA',
+        color: '#008fd3',
+        icon: Server,
+        title: 'Link SAP S/4HANA',
+        description: 'Opening RFC to link S/4HANA instance for cost center and personnel mapping.',
+        buttonText: 'Link S/4HANA Instance'
+    }
+};
+
 const Scheduling: React.FC<SchedulingProps> = ({ 
   setCurrentView, 
   onFinalize,
@@ -61,23 +88,36 @@ const Scheduling: React.FC<SchedulingProps> = ({
 
   const reg = LABOR_REGULATIONS[CURRENT_STATE];
 
-  const handleBreezeDiscovery = () => {
+  const handleConnect = () => {
     setIsScanning(true);
     setSyncProgress(0);
-    const steps = ["Auth Handshake...", "Parsing HS Deals...", "Validating MI Labor Laws...", "Mapping Personas..."];
+    setTerminalLogs([]);
+
+    const providerDetails = {
+        'HubSpot': { prefix: 'BZ', steps: ["Auth Handshake...", "Parsing HS Deals...", "Validating MI Labor Laws...", "Mapping Personas..."] },
+        'Dynamics 365': { prefix: 'D365', steps: ["Initializing Secure Node...", "Authenticating Azure AD...", "Fetching Fiscal Ledger...", "Syncing D365 Entities..."] },
+        'SAP S/4HANA': { prefix: 'SAP', steps: ["Opening RFC Connection...", "Querying S/4HANA Instance...", "Mapping Cost Centers...", "Finalizing Data Bridge..."] }
+    };
+    
+    // Fallback for other ERPProvider types not in the UI
+    const currentProviderKey = selectedProvider in providerDetails ? selectedProvider : 'HubSpot';
+    const currentProvider = providerDetails[currentProviderKey as keyof typeof providerDetails];
+    const steps = currentProvider.steps;
     let stepIdx = 0;
     
     const interval = setInterval(() => {
         if (stepIdx < steps.length) {
-            setTerminalLogs(prev => [...prev, `[BZ] ${steps[stepIdx]}`]);
-            setSyncProgress(prev => prev + 25);
+            setTerminalLogs(prev => [...prev, `[${currentProvider.prefix}] ${steps[stepIdx]}`]);
+            setSyncProgress(prev => prev + (100 / steps.length));
             stepIdx++;
         } else {
             clearInterval(interval);
             setIsModalOpen(false);
             setIsConnected(true);
-            setActiveProvider('HubSpot');
-            setHubspotStatus('connected');
+            setActiveProvider(selectedProvider);
+            if (selectedProvider === 'HubSpot') {
+                setHubspotStatus('connected');
+            }
             setIsScanning(false);
         }
     }, 600);
@@ -220,21 +260,24 @@ const Scheduling: React.FC<SchedulingProps> = ({
     }
   };
 
-  const getHeatmapColorClass = (efficiency: number): string => {
-    if (efficiency >= 85) return 'bg-emerald-500/5 border-emerald-500/20';
-    if (efficiency >= 70) return 'bg-emerald-500/10 border-emerald-500/30';
-    if (efficiency >= 50) return 'bg-amber-500/10 border-amber-500/30';
-    if (efficiency >= 30) return 'bg-orange-500/10 border-orange-500/30';
-    return 'bg-red-500/10 border-red-500/30';
+  const getHeatmapColorClass = (pickRate: number): string => {
+    if (pickRate >= 96) return 'bg-emerald-500/5 border-emerald-500/20'; // Elite
+    if (pickRate >= 92) return 'bg-emerald-500/10 border-emerald-500/30'; // Good
+    if (pickRate >= 89) return 'bg-amber-500/10 border-amber-500/30'; // Okay
+    if (pickRate >= 85) return 'bg-orange-500/10 border-orange-500/30'; // Warning
+    return 'bg-red-500/10 border-red-500/30'; // Critical
   };
 
-  const getEfficiencyBadgeClass = (efficiency: number): string => {
-      if (efficiency >= 85) return 'bg-emerald-100 text-emerald-700';
-      if (efficiency >= 70) return 'bg-emerald-100/80 text-emerald-600';
-      if (efficiency >= 50) return 'bg-amber-100 text-amber-700';
-      if (efficiency >= 30) return 'bg-orange-100 text-orange-700';
+  const getEfficiencyBadgeClass = (pickRate: number): string => {
+      if (pickRate >= 96) return 'bg-emerald-100 text-emerald-700';
+      if (pickRate >= 92) return 'bg-emerald-100/80 text-emerald-600';
+      if (pickRate >= 89) return 'bg-amber-100 text-amber-700';
+      if (pickRate >= 85) return 'bg-orange-100 text-orange-700';
       return 'bg-red-100 text-red-700';
   };
+
+  const CurrentIcon = (providerConfigs[selectedProvider as keyof typeof providerConfigs] || providerConfigs['HubSpot']).icon;
+  const currentConfig = (providerConfigs[selectedProvider as keyof typeof providerConfigs] || providerConfigs['HubSpot']);
 
   return (
     <div className="flex-1 bg-gray-50 overflow-auto relative text-gray-900 custom-scrollbar">
@@ -242,13 +285,13 @@ const Scheduling: React.FC<SchedulingProps> = ({
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-md">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200">
-                <div className={`p-8 flex items-center justify-between transition-colors duration-500 ${selectedProvider === 'HubSpot' ? 'bg-[#ff7a59]' : 'bg-[#002050]'}`}>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200">
+                <div className="p-8 flex items-center justify-between bg-slate-50 border-b border-slate-100">
                     <div className="flex items-center gap-4">
-                        <ShieldCheck className="w-8 h-8 text-white" />
+                        <ShieldCheck className="w-8 h-8 text-slate-500" />
                         <div>
-                            <h3 className="text-white font-black text-2xl uppercase tracking-tighter">Breeze Protocol</h3>
-                            <p className="text-white/70 text-[10px] font-mono uppercase tracking-widest">{reg.state} Labor Compliant Node</p>
+                            <h3 className="text-slate-900 font-black text-2xl uppercase tracking-tighter">ERP Integration Gateway</h3>
+                            <p className="text-slate-500 text-[10px] font-mono uppercase tracking-widest">{reg.state} Labor Compliant Node</p>
                         </div>
                     </div>
                 </div>
@@ -256,30 +299,51 @@ const Scheduling: React.FC<SchedulingProps> = ({
                 <div className="p-10 text-center">
                     {!isScanning ? (
                         <>
-                            <div className="mb-8">
-                                <Sparkles className="w-12 h-12 text-[#ff7a59] mx-auto mb-4" />
-                                <h4 className="text-xl font-black text-slate-900">Authorize HubSpot Sync</h4>
-                                <p className="text-sm text-slate-500 mt-2">Discovering portal 'Walmart_MI_Ops_Sec'...</p>
+                            <h4 className="text-lg font-black text-slate-900 mb-2">Select Integration Provider</h4>
+                            <p className="text-sm text-slate-500 mb-8">Choose your primary ERP system to synchronize scheduling data.</p>
+                            
+                            <div className="grid grid-cols-3 gap-4 mb-8">
+                                {Object.keys(providerConfigs).map(key => {
+                                    const provider = providerConfigs[key as keyof typeof providerConfigs];
+                                    const Icon = provider.icon;
+                                    return (
+                                        <button 
+                                            key={key}
+                                            onClick={() => setSelectedProvider(key as ERPProvider)}
+                                            className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-3 ${selectedProvider === key ? 'border-indigo-500 bg-indigo-50 shadow-md' : 'border-gray-200 hover:border-gray-300 bg-gray-50'}`}
+                                        >
+                                            <Icon className={`w-8 h-8`} style={{ color: provider.color }} />
+                                            <span className="text-xs font-black text-slate-700 uppercase tracking-widest">{provider.name}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
+
+                            <div className="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <h4 className="text-sm font-black text-slate-900">{currentConfig.title}</h4>
+                                <p className="text-xs text-slate-500 mt-1">{currentConfig.description}</p>
+                            </div>
+                            
                             <button 
-                                onClick={handleBreezeDiscovery}
-                                className="w-full py-5 bg-[#ff7a59] hover:bg-[#ff8f75] text-white font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-xl transition-all flex items-center justify-center gap-4"
+                                onClick={handleConnect}
+                                className="w-full py-5 text-white font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-xl transition-all flex items-center justify-center gap-4"
+                                style={{ backgroundColor: currentConfig.color }}
                             >
-                                <Zap className="w-5 h-5 fill-white" /> Launch Breeze Discovery
+                                <Zap className="w-5 h-5 fill-white" /> {currentConfig.buttonText}
                             </button>
                         </>
                     ) : (
                         <div className="space-y-6">
-                            <div className="bg-slate-900 rounded-2xl p-6 font-mono text-[10px] text-orange-400 h-40 overflow-hidden text-left border border-orange-500/20 shadow-inner">
+                            <div className="bg-slate-900 rounded-2xl p-6 font-mono text-[10px] text-orange-400 h-40 overflow-auto custom-scrollbar text-left border border-orange-500/20 shadow-inner">
                                 {terminalLogs.map((log, i) => (
                                     <div key={i} className="animate-in fade-in slide-in-from-bottom-1 truncate">
-                                        <span className="opacity-30">BZ>></span> {log}
+                                        <span className="opacity-30">&gt;&gt;</span> {log}
                                     </div>
                                 ))}
                                 <div ref={logEndRef} />
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                                <div className="h-full bg-[#ff7a59] transition-all duration-300" style={{ width: `${syncProgress}%` }}></div>
+                                <div className="h-full transition-all duration-300" style={{ width: `${syncProgress}%`, backgroundColor: currentConfig.color }}></div>
                             </div>
                         </div>
                     )}
@@ -491,7 +555,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
            <div className="flex justify-between items-center mb-8">
               <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-3">
                  <Activity className="w-5 h-5 text-blue-600" />
-                 Optimized Labor Heatmap
+                 Fulfillment Labor Heatmap
               </h3>
               <div className="flex gap-2">
                  <button onClick={() => simulateDisruption('callout')} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-100 rounded-lg text-[9px] font-black uppercase hover:bg-red-100 transition-colors">Simulate Call-out</button>
@@ -506,18 +570,18 @@ const Scheduling: React.FC<SchedulingProps> = ({
                        <div className="flex justify-between items-center mb-3">
                           <span className="text-xs font-bold text-gray-500">{point.hour}</span>
                           <span className={`text-[10px] font-black px-2 py-0.5 rounded ${getEfficiencyBadgeClass(point.efficiency)}`}>
-                             {point.efficiency}% Eff
+                             {point.efficiency}% Pick Rate
                           </span>
                        </div>
                        
                        <div className="space-y-3">
                           <div>
                              <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase mb-1">
-                                <span>Traffic</span>
+                                <span>Transaction Volume</span>
                                 <span>{point.transactionVolume}</span>
                              </div>
                              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (point.transactionVolume/250)*100)}%` }}></div>
+                                <div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (point.transactionVolume/100)*100)}%` }}></div>
                              </div>
                           </div>
                           <div>
