@@ -220,6 +220,22 @@ const Scheduling: React.FC<SchedulingProps> = ({
     }
   };
 
+  const getHeatmapColorClass = (efficiency: number): string => {
+    if (efficiency >= 85) return 'bg-emerald-500/5 border-emerald-500/20';
+    if (efficiency >= 70) return 'bg-emerald-500/10 border-emerald-500/30';
+    if (efficiency >= 50) return 'bg-amber-500/10 border-amber-500/30';
+    if (efficiency >= 30) return 'bg-orange-500/10 border-orange-500/30';
+    return 'bg-red-500/10 border-red-500/30';
+  };
+
+  const getEfficiencyBadgeClass = (efficiency: number): string => {
+      if (efficiency >= 85) return 'bg-emerald-100 text-emerald-700';
+      if (efficiency >= 70) return 'bg-emerald-100/80 text-emerald-600';
+      if (efficiency >= 50) return 'bg-amber-100 text-amber-700';
+      if (efficiency >= 30) return 'bg-orange-100 text-orange-700';
+      return 'bg-red-100 text-red-700';
+  };
+
   return (
     <div className="flex-1 bg-gray-50 overflow-auto relative text-gray-900 custom-scrollbar">
       <Header title="Deployment Center" subtitle={`Scheduling Node Store #5065 • ${reg.state} Jurisdiction • Finite Logic Active`} />
@@ -486,12 +502,12 @@ const Scheduling: React.FC<SchedulingProps> = ({
            <div className="overflow-x-auto">
               <div className="grid grid-cols-5 gap-4 min-w-[800px]">
                  {localHeatmap.map((point, i) => (
-                    <div key={i} className="bg-gray-50 rounded-xl p-4 border border-gray-100 relative group hover:shadow-md transition-all">
+                    <div key={i} className={`rounded-xl p-4 border relative group hover:shadow-md transition-all ${getHeatmapColorClass(point.efficiency)}`}>
                        <div className="flex justify-between items-center mb-3">
                           <span className="text-xs font-bold text-gray-500">{point.hour}</span>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded ${
-                             point.efficiency < 70 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'
-                          }`}>{point.efficiency}% Eff</span>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded ${getEfficiencyBadgeClass(point.efficiency)}`}>
+                             {point.efficiency}% Eff
+                          </span>
                        </div>
                        
                        <div className="space-y-3">
@@ -501,7 +517,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
                                 <span>{point.transactionVolume}</span>
                              </div>
                              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (point.transactionVolume/200)*100)}%` }}></div>
+                                <div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (point.transactionVolume/250)*100)}%` }}></div>
                              </div>
                           </div>
                           <div>

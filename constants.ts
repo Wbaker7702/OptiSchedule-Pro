@@ -165,9 +165,15 @@ export const EMPLOYEES: Employee[] = [
 
 export const HEATMAP_DATA: HeatmapDataPoint[] = [
   { hour: '8 AM', transactionVolume: 45, staffing: 8, efficiency: 85 },
+  { hour: '9 AM', transactionVolume: 70, staffing: 9, efficiency: 75 },
+  { hour: '10 AM', transactionVolume: 110, staffing: 10, efficiency: 70 },
+  { hour: '11 AM', transactionVolume: 150, staffing: 12, efficiency: 55 },
   { hour: '12 PM', transactionVolume: 180, staffing: 14, efficiency: 25 },
-  { hour: '6 PM', transactionVolume: 130, staffing: 10, efficiency: 50 },
-  { hour: '10 PM', transactionVolume: 50, staffing: 6, efficiency: 95 },
+  { hour: '1 PM', transactionVolume: 165, staffing: 15, efficiency: 45 },
+  { hour: '2 PM', transactionVolume: 170, staffing: 16, efficiency: 40 },
+  { hour: '3 PM', transactionVolume: 190, staffing: 12, efficiency: 20 },
+  { hour: '4 PM', transactionVolume: 160, staffing: 12, efficiency: 60 },
+  { hour: '5 PM', transactionVolume: 130, staffing: 10, efficiency: 78 },
 ];
 
 export const AZURE_TELEMETRY = {
