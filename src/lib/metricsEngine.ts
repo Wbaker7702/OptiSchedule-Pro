@@ -21,7 +21,7 @@ export const initialState: MetricsState = {
 };
 
 export function applyEvent(
-  state: MetricsState,
+  state: Readonly<MetricsState>,
   event: EventType
 ): MetricsState {
   const newState = { ...state };
