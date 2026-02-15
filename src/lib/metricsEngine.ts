@@ -13,12 +13,12 @@ export interface MetricsState {
 const clamp = (num: number, min: number, max: number) =>
   Math.min(Math.max(num, min), max);
 
-export const initialState: MetricsState = {
+export const initialState: Readonly<MetricsState> = Object.freeze({
   totalShifts: 0,
   missedShifts: 0,
   complianceViolations: 0,
   trustScore: 100,
-};
+});
 
 export function applyEvent(
   state: Readonly<MetricsState>,
