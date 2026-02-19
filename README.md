@@ -3,6 +3,26 @@
 Backend API for OptiSchedule Pro, built with Node.js, Express, and Prisma.
 This service is currently intended for Walmart-only internal use.
 
+## What is OptiSchedule Pro?
+
+OptiSchedule Pro is a Walmart-focused scheduling and labor-compliance platform.
+It helps store teams build shifts with clear, policy-aware decisions so schedules can be created faster and with fewer manual checks.
+
+## What it can do
+
+- Manage core scheduling data for stores, employees, and shifts
+- Evaluate shifts against state-specific labor rules (currently Michigan and Florida rule engines are included)
+- Support secure auth workflows with JWT-based login/register routes
+- Provide API endpoints for shift operations and service health monitoring
+
+## How quick it can do it
+
+OptiSchedule Pro is designed for near real-time scheduling feedback:
+
+- Core API calls are lightweight and return quickly under normal load
+- Compliance checks run in-request using rule logic, so teams get immediate pass/fail feedback
+- Typical single-shift validation workflows are intended to complete in seconds, not minutes
+
 ## Tech Stack
 
 - Node.js + Express
