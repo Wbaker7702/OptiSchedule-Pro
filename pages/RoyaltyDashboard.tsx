@@ -342,7 +342,7 @@ const RoyaltyDashboard: React.FC = () => {
                        <div className="space-y-1 h-[40px] overflow-hidden">
                           {syncLogs.map(log => (
                              <div key={log.id} className="text-[7px] font-mono text-slate-400 uppercase tracking-tighter truncate opacity-70">
-                                > {log.log}
+                                &gt; {log.log}
                              </div>
                           ))}
                        </div>

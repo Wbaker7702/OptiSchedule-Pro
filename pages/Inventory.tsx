@@ -17,6 +17,8 @@ const Inventory: React.FC = () => {
   const [isReplenishing, setIsReplenishing] = useState(false);
   const [replenishmentStep, setReplenishmentStep] = useState<string>('');
   const [d365Logs, setD365Logs] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'All' | Product['status']>('All');
 
   // Form State
   const [orderForm, setOrderForm] = useState({
@@ -47,6 +49,27 @@ const Inventory: React.FC = () => {
 
   const criticalCount = items.filter(i => i.status === 'Critical').length;
   const lowCount = items.filter(i => i.status === 'Low').length;
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const visibleItems = items.filter((item) => {
+    const matchesFilter = statusFilter === 'All' || item.status === statusFilter;
+    if (!matchesFilter) return false;
+    if (!normalizedSearch) return true;
+
+    return (
+      item.name.toLowerCase().includes(normalizedSearch) ||
+      item.sku.toLowerCase().includes(normalizedSearch) ||
+      item.category.toLowerCase().includes(normalizedSearch)
+    );
+  });
+
+  const handleCycleFilter = () => {
+    const filters: Array<'All' | Product['status']> = ['All', 'Critical', 'Low', 'Good'];
+    setStatusFilter((prev) => {
+      const idx = filters.indexOf(prev);
+      return filters[(idx + 1) % filters.length];
+    });
+  };
 
   const triggerActiveProcurement = () => {
     const targetItems = items.filter(i => i.status !== 'Good');
@@ -308,14 +331,25 @@ const Inventory: React.FC = () => {
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
            <div className="p-5 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <h3 className="font-black text-gray-900 uppercase tracking-widest text-xs">Inventory Assets • Store 5065</h3>
+              <h3 className="font-black text-gray-900 uppercase tracking-widest text-xs">
+                Inventory Assets • Store 5065 ({visibleItems.length} shown)
+              </h3>
               <div className="flex items-center gap-3">
                  <div className="relative">
                     <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                    <input type="text" placeholder="Search products..." className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400 font-medium" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search products, SKU, or category..."
+                      className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400 font-medium"
+                    />
                  </div>
-                 <button className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 font-bold uppercase tracking-widest text-[10px]">
-                    <Filter className="w-4 h-4" /> Filter
+                 <button
+                    onClick={handleCycleFilter}
+                    className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 font-bold uppercase tracking-widest text-[10px]"
+                 >
+                    <Filter className="w-4 h-4" /> {statusFilter}
                  </button>
               </div>
            </div>
@@ -334,7 +368,7 @@ const Inventory: React.FC = () => {
                  </tr>
                </thead>
                <tbody className="divide-y divide-gray-100">
-                 {items.map((item) => (
+                 {visibleItems.map((item) => (
                    <tr key={item.id} className="hover:bg-gray-50/50">
                      <td className="px-6 py-4 font-bold text-gray-900">{item.name}</td>
                      <td className="px-6 py-4 font-mono text-[10px] font-black text-gray-400">{item.sku}</td>
@@ -362,6 +396,13 @@ const Inventory: React.FC = () => {
                      </td>
                    </tr>
                  ))}
+                 {visibleItems.length === 0 && (
+                   <tr>
+                     <td colSpan={7} className="px-6 py-8 text-center text-gray-500 text-xs font-black uppercase tracking-widest">
+                       No assets match current search and filter
+                     </td>
+                   </tr>
+                 )}
                </tbody>
              </table>
            </div>

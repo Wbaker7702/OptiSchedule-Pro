@@ -10,6 +10,13 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 0, type: 'success', text: 'System Restoration Complete. Sentinel Online.', time: 'Just now', read: false },
+    { id: 1, type: 'info', text: 'Optimization protocol running normally', time: '5 min ago', read: false },
+    { id: 2, type: 'info', text: 'New inventory shipment arrived', time: '1 hour ago', read: false },
+    { id: 3, type: 'success', text: 'Weekly schedule published successfully', time: '2 hours ago', read: true },
+    { id: 4, type: 'alert', text: '3 employees called out sick', time: '4 hours ago', read: true },
+  ]);
   const notificationRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -25,13 +32,17 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
     };
   }, []);
 
-  const notifications = [
-    { id: 0, type: 'success', text: 'System Restoration Complete. Sentinel Online.', time: 'Just now' },
-    { id: 1, type: 'info', text: 'Optimization protocol running normally', time: '5 min ago' },
-    { id: 2, type: 'info', text: 'New inventory shipment arrived', time: '1 hour ago' },
-    { id: 3, type: 'success', text: 'Weekly schedule published successfully', time: '2 hours ago' },
-    { id: 4, type: 'alert', text: '3 employees called out sick', time: '4 hours ago' },
-  ];
+  const unreadCount = notifications.filter((notif) => !notif.read).length;
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
+  };
+
+  const markNotificationRead = (id: number) => {
+    setNotifications((prev) =>
+      prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif)),
+    );
+  };
 
   return (
     <header className="bg-[#0f172a] border-b border-slate-800 px-8 py-5 flex items-center justify-between sticky top-0 z-40 shadow-sm backdrop-blur-sm bg-opacity-90">
@@ -53,10 +64,15 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
         <div className="relative" ref={notificationRef}>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
+            aria-label="Toggle notifications"
             className={`relative p-2 rounded-full transition-colors ${showNotifications ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[#0f172a]"></span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-red-500 rounded-full border border-[#0f172a] text-[9px] leading-4 text-center text-white font-black">
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           {/* Notifications Dropdown */}
@@ -64,11 +80,15 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
             <div className="absolute right-0 mt-3 w-80 bg-slate-900 rounded-xl shadow-2xl border border-slate-800 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
               <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
                 <h3 className="font-bold text-white text-xs uppercase tracking-widest">Notifications</h3>
-                <button className="text-[10px] font-bold text-blue-400 hover:text-blue-300 uppercase">Mark all read</button>
+                <button onClick={markAllRead} disabled={unreadCount === 0} className="text-[10px] font-bold text-blue-400 hover:text-blue-300 uppercase disabled:opacity-40 disabled:cursor-default">Mark all read</button>
               </div>
               <div className="max-h-96 overflow-y-auto custom-scrollbar">
                 {notifications.map((notif) => (
-                  <div key={notif.id} className="p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors cursor-pointer flex gap-3">
+                  <button
+                    key={notif.id}
+                    onClick={() => markNotificationRead(notif.id)}
+                    className={`w-full p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors text-left flex gap-3 ${notif.read ? 'opacity-60' : 'opacity-100'}`}
+                  >
                     <div className="mt-1 shrink-0">
                       {notif.type === 'alert' && <AlertCircle className="w-4 h-4 text-red-500" />}
                       {notif.type === 'info' && <Info className="w-4 h-4 text-blue-500" />}
@@ -78,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
                       <p className="text-xs text-slate-200 leading-snug font-medium">{notif.text}</p>
                       <p className="text-[10px] text-slate-500 mt-1 font-mono">{notif.time}</p>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
               <div className="p-2 bg-slate-950 text-center border-t border-slate-800">

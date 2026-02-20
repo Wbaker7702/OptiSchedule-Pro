@@ -15,6 +15,6 @@ View your app in AI Studio: https://ai.studio/apps/13ff1b28-ad24-48b9-bd3e-7d364
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. (Optional) Set `VITE_SENTINEL_PROXY_URL` in `.env.local` to your secured backend AI endpoint
 3. Run the app:
    `npm run dev`
