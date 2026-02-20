@@ -1,5 +1,7 @@
 require("dotenv").config();
 
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 const express = require("express");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -19,10 +21,60 @@ const IS_PROD = process.env.NODE_ENV === "production";
 if (!JWT_SECRET || JWT_SECRET.length < 32) {
   throw new Error("JWT_SECRET must be set and at least 32 characters long.");
 }
+const aiRouter = require("./routes/ai");
+
+const app = express();
+app.disable("x-powered-by");
+
+const trustProxy = Number.parseInt(process.env.TRUST_PROXY || "1", 10);
+app.set("trust proxy", Number.isNaN(trustProxy) ? 1 : trustProxy);
+
+const NODE_ENV = process.env.NODE_ENV || "development";
+const IS_PROD = NODE_ENV === "production";
+
+const configuredJwtSecret = process.env.JWT_SECRET;
+if (IS_PROD && (!configuredJwtSecret || configuredJwtSecret.length < 32)) {
+  throw new Error("JWT_SECRET must be set to at least 32 characters in production.");
+}
+const JWT_SECRET =
+  configuredJwtSecret && configuredJwtSecret.length >= 32
+    ? configuredJwtSecret
+    : crypto.randomBytes(48).toString("hex");
+
+if (!configuredJwtSecret || configuredJwtSecret.length < 32) {
+  console.warn(
+    "Using ephemeral JWT secret for this process. Set JWT_SECRET (>=32 chars) for stable sessions."
+  );
+}
+
+const COOKIE_NAME = "opti_session";
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: IS_PROD,
+  sameSite: "strict",
+  maxAge: 8 * 60 * 60 * 1000,
+  path: "/",
+};
+
+const DEMO_USERNAME = (process.env.DEMO_USERNAME || "").trim();
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD || "";
+const DEMO_PASSWORD_HASH = process.env.DEMO_PASSWORD_HASH || "";
+const HAS_SECURE_LOGIN_CONFIG = Boolean(DEMO_USERNAME) && Boolean(DEMO_PASSWORD || DEMO_PASSWORD_HASH);
+
+if (IS_PROD && !HAS_SECURE_LOGIN_CONFIG) {
+  console.warn(
+    "Login credentials are not configured. Set DEMO_USERNAME and DEMO_PASSWORD or DEMO_PASSWORD_HASH."
+  );
+}
+
+const simulationState = {
+  mode: "NORMAL",
+  updatedAt: new Date().toISOString(),
+};
 
 // Body parsing
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false, limit: "10kb" }));
+app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
 
 // Security headers
@@ -42,15 +94,27 @@ app.use(
         "form-action": ["'self'"],
       },
     },
+        defaultSrc: ["'self'"],
+        baseUri: ["'self'"],
+        connectSrc: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+        imgSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
+    crossOriginOpenerPolicy: { policy: "same-origin" },
     referrerPolicy: { policy: "no-referrer" },
   })
 );
 
-// Rate limiting (global, demo-safe)
+// Rate limiting
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 600,
+    max: 300,
     standardHeaders: true,
     legacyHeaders: false,
   })
@@ -62,6 +126,10 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: "Too many login attempts. Please try again later.",
+  max: 12,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Too many login attempts. Try again in a few minutes.",
 });
 
 // ---------- helpers ----------
@@ -102,6 +170,11 @@ function rejectUnauthorized(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   return res.redirect("/");
+  res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+}
+
+function clearSessionCookie(res) {
+  res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
 }
 
 function requireAuth(req, res, next) {
@@ -110,16 +183,91 @@ function requireAuth(req, res, next) {
 
   try {
     req.user = jwt.verify(token, JWT_SECRET);
+    res.setHeader("Cache-Control", "no-store");
     return next();
-  } catch (e) {
+  } catch (error) {
     clearSessionCookie(res);
     return rejectUnauthorized(req, res);
   }
 }
 
+function requireSameOrigin(req, res, next) {
+  const origin = req.get("origin");
+  if (!origin) return next();
+
+  const host = req.get("host");
+  if (!host) {
+    return res.status(403).send("Request blocked.");
+  }
+
+  const expectedOrigin = `${req.protocol}://${host}`;
+  if (origin !== expectedOrigin) {
+    return res.status(403).send("Cross-site request blocked.");
+  }
+
+  return next();
+}
+
+function safeEqual(a, b) {
+  const aBuffer = Buffer.from(String(a));
+  const bBuffer = Buffer.from(String(b));
+
+  if (aBuffer.length !== bBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(aBuffer, bBuffer);
+}
+
+async function isAuthorizedLogin(username, password) {
+  if (!username || !password) {
+    return false;
+  }
+
+  if (!HAS_SECURE_LOGIN_CONFIG) {
+    return !IS_PROD;
+  }
+
+  if (!safeEqual(username.trim().toLowerCase(), DEMO_USERNAME.toLowerCase())) {
+    return false;
+  }
+
+  if (DEMO_PASSWORD_HASH) {
+    return bcrypt.compare(password, DEMO_PASSWORD_HASH);
+  }
+
+  return safeEqual(password, DEMO_PASSWORD);
+}
+
+function setSimulationMode(mode) {
+  simulationState.mode = mode;
+  simulationState.updatedAt = new Date().toISOString();
+}
+
+function formatTimestamp(isoValue) {
+  const parsed = new Date(isoValue);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Unknown";
+  }
+  return parsed.toLocaleString("en-US", { hour12: false });
+}
+
+function respondSimulationResult(req, res, payload, notice) {
+  const acceptHeader = req.get("accept") || "";
+  const wantsJson =
+    acceptHeader.includes("application/json") ||
+    req.get("x-requested-with") === "XMLHttpRequest";
+
+  if (wantsJson) {
+    return res.json(payload);
+  }
+
+  return res.redirect(`/dashboard?notice=${encodeURIComponent(notice)}`);
+}
+
 // ---------- health ----------
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", env: process.env.NODE_ENV || "production" });
+  res.json({ status: "ok" });
 });
 
 // ---------- APIs ----------
@@ -135,6 +283,7 @@ app.get("/api/session", requireAuth, (req, res) => {
     expiresAt: user.exp ? new Date(user.exp * 1000).toISOString() : null,
   });
 });
+app.use("/api/ai", requireAuth, requireSameOrigin, aiRouter);
 
 // ---------- UI: Login ----------
 app.get("/", (req, res) => {
@@ -417,11 +566,25 @@ app.post("/login", loginLimiter, (req, res) => {
     role: "manager",
     name: username.slice(0, 80),
   });
+app.post("/login", loginLimiter, async (req, res) => {
+  const username = String(req.body?.username || "").trim();
+  const password = String(req.body?.password || "");
+
+  if (!username || username.length > 64 || !password || password.length > 256) {
+    return res.redirect("/");
+  }
+
+  const authorized = await isAuthorizedLogin(username, password);
+  if (!authorized) {
+    return res.redirect("/");
+  }
+
+  const token = signSession({ userId: 1, role: "manager", name: username });
   setSessionCookie(res, token);
   return res.redirect(303, "/dashboard");
 });
 
-app.post("/logout", (req, res) => {
+app.post("/logout", requireSameOrigin, (req, res) => {
   clearSessionCookie(res);
   res.redirect(303, "/");
 });
@@ -429,6 +592,13 @@ app.post("/logout", (req, res) => {
 // ---------- dashboard ----------
 app.get("/dashboard", requireAuth, (req, res) => {
   const user = req.user || { name: "Manager" };
+  const notice = typeof req.query.notice === "string" ? req.query.notice.slice(0, 140) : "";
+  const currentMode = simulationState.mode === "BLACK_FRIDAY" ? "Black Friday Surge" : "Normal Operations";
+  const modeClass = simulationState.mode === "BLACK_FRIDAY" ? "toneDanger" : "toneOk";
+  const noticeMarkup = notice
+    ? `<div class="notice" role="status" aria-live="polite">${escapeHtml(notice)}</div>`
+    : "";
+
   res.send(`<!doctype html>
 <html lang="en">
 <head>
@@ -588,6 +758,42 @@ app.get("/dashboard", requireAuth, (req, res) => {
     .wrap{padding:18px}
     .metricGrid{grid-template-columns:1fr}
   }
+  body{margin:0;background:#0b1220;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  .h1{font-size:22px;font-weight:900}
+  .sub{color:#94a3b8;font-size:13px;margin-top:4px}
+  .notice{
+    margin-top:12px;
+    background:rgba(34,197,94,.12);
+    border:1px solid rgba(34,197,94,.30);
+    color:#86efac;
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:13px;
+  }
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  .card{background:#0f172a;border:1px solid rgba(148,163,184,.18);border-radius:14px;padding:14px}
+  .k{color:#94a3b8;font-size:12px}
+  .v{font-size:22px;font-weight:900;margin-top:6px}
+  .panel{margin-top:14px;display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+  .btn{
+    padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,.25);
+    background:#111c33;color:#e5e7eb;cursor:pointer;font-weight:800
+  }
+  .btnPrimary{background:linear-gradient(135deg,#c62828,#ef4444);border:none}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .row form{margin:0}
+  .tag{font-size:11px;color:#93c5fd;border:1px solid rgba(147,197,253,.25);padding:6px 10px;border-radius:999px;background:rgba(59,130,246,.10)}
+  .logout{background:transparent;border:1px solid rgba(148,163,184,.25);padding:10px 12px;border-radius:10px;color:#e5e7eb;cursor:pointer;font-weight:800}
+  .statusLine{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:13px;color:#cbd5e1}
+  .dot{width:10px;height:10px;border-radius:999px;display:inline-block}
+  .toneOk{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.16)}
+  .toneDanger{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.16)}
+  .muted{margin-top:8px;color:#94a3b8;font-size:12px}
+  .inlineLink{display:inline-block;margin-top:10px;color:#93c5fd;text-decoration:none;font-size:12px}
+  .inlineLink:hover{text-decoration:underline}
+  @media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}.panel{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -596,6 +802,7 @@ app.get("/dashboard", requireAuth, (req, res) => {
       <div>
         <div class="title">Operations Dashboard — Store #2080</div>
         <div class="sub">Welcome, ${escapeHtml(user.name || "Manager")} • Enterprise demo mode</div>
+        ${noticeMarkup}
       </div>
       <div class="topRight">
         <span class="pill">Session Active</span>
@@ -644,6 +851,19 @@ app.get("/dashboard", requireAuth, (req, res) => {
           <button id="resetBtn" class="btn" type="button">
             Reset Simulation
           </button>
+        <div class="statusLine">
+          <span class="dot ${modeClass}" aria-hidden="true"></span>
+          <span>Current mode: <strong>${escapeHtml(currentMode)}</strong></span>
+        </div>
+        <div class="muted">Last update: ${escapeHtml(formatTimestamp(simulationState.updatedAt))}</div>
+        <a class="inlineLink" href="/api/sim/status">View simulation status (JSON)</a>
+        <div class="row" style="margin-top:14px;">
+          <form method="POST" action="/api/sim/black-friday">
+            <button class="btn btnPrimary" type="submit">Activate Black Friday Mode</button>
+          </form>
+          <form method="POST" action="/api/sim/reset">
+            <button class="btn" type="submit">Reset Simulation</button>
+          </form>
         </div>
         <div id="simStatus" class="status" role="status" aria-live="polite">
           No simulation actions executed yet.
@@ -657,6 +877,11 @@ app.get("/dashboard", requireAuth, (req, res) => {
           <li>Actions are monitored and recorded for traceability.</li>
           <li>Use reset after simulation to return to baseline mode.</li>
         </ul>
+        <div class="k">Executive Notes</div>
+        <div style="margin-top:10px;color:#cbd5e1;font-size:13px;line-height:1.5">
+          This pilot runs in parallel with existing systems (no disruption). Events are logged for accountability and continuous improvement.
+          Controls now provide persistent mode status to reduce operator uncertainty after action changes.
+        </div>
       </div>
     </section>
 
@@ -760,6 +985,32 @@ app.use((req, res) => {
     return res.status(404).json({ error: "Not found" });
   }
   return res.status(404).send("Not found");
+app.get("/api/sim/status", requireAuth, (req, res) => {
+  res.json({
+    ok: true,
+    mode: simulationState.mode,
+    updatedAt: simulationState.updatedAt,
+  });
+});
+
+app.post("/api/sim/black-friday", requireAuth, requireSameOrigin, (req, res) => {
+  setSimulationMode("BLACK_FRIDAY");
+  return respondSimulationResult(
+    req,
+    res,
+    { ok: true, mode: "BLACK_FRIDAY", updatedAt: simulationState.updatedAt },
+    "Black Friday mode activated."
+  );
+});
+
+app.post("/api/sim/reset", requireAuth, requireSameOrigin, (req, res) => {
+  setSimulationMode("NORMAL");
+  return respondSimulationResult(
+    req,
+    res,
+    { ok: true, mode: "NORMAL", updatedAt: simulationState.updatedAt },
+    "Simulation reset to normal mode."
+  );
 });
 
 // ---- tiny escape helper for HTML injection safety ----
