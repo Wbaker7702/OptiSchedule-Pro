@@ -191,7 +191,7 @@ const Settings: React.FC<SettingsProps> = ({ hubspotStatus, setHubspotStatus }) 
                         <div className="flex items-center justify-between mb-2">
                            <div className="flex items-center gap-2">
                               <ShieldCheck className="w-4 h-4 text-blue-600" />
-                              <span className="text-[10px] font-black text-blue-900 uppercase tracking-widest">Sentinel Secure Node</span>
+                              <span className="text-[10px] font-black text-blue-900 uppercase tracking-widest">Microsoft Sentinel Secure Node</span>
                            </div>
                            <span className="text-[9px] font-black text-white bg-blue-600 px-2 py-0.5 rounded uppercase tracking-wider">Active</span>
                         </div>
@@ -237,7 +237,7 @@ const Settings: React.FC<SettingsProps> = ({ hubspotStatus, setHubspotStatus }) 
                   {[
                     { id: 'ERP', label: 'ERP Strict', desc: 'Financial compliance above all else.' },
                     { id: 'CRM', label: 'Breeze Priority', desc: 'Staff for traffic signals first.' },
-                    { id: 'Hybrid', label: 'Sentinel Hybrid', desc: 'AI-balanced weighted resolution.' }
+                    { id: 'Hybrid', label: 'Microsoft Sentinel Hybrid', desc: 'AI-balanced weighted resolution.' }
                   ].map((strategy) => (
                     <div 
                       key={strategy.id}
@@ -289,7 +289,7 @@ const Settings: React.FC<SettingsProps> = ({ hubspotStatus, setHubspotStatus }) 
 
   return (
     <div className="flex-1 bg-gray-50 overflow-auto custom-scrollbar">
-      <Header title="System Configuration" subtitle={`Triple-Engine Node ${APP_VERSION} • Sentinel Secured`} />
+      <Header title="System Configuration" subtitle={`Triple-Engine Node ${APP_VERSION} • Microsoft Sentinel Secured`} />
       
       <div className="p-8 max-w-6xl mx-auto space-y-8 pb-24">
         

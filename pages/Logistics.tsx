@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Truck, Activity, ShieldCheck, Package, CheckCircle2, Loader2, Zap, Database, Download, Brain, Sparkles, Command, Terminal, Cpu, Radio } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
+import { Truck, Box, Clock, Activity, ArrowUpRight, ShieldCheck, MapPin, Package, AlertTriangle, CheckCircle2, Loader2, Zap, Database, Cloud, FileDown, Download, Brain, Sparkles, Command, MessageSquareText, Terminal, Cpu, Radio, Shield } from 'lucide-react';
 import { HOURLY_LOGISTICS, STORE_NUMBER } from '../constants';
-import { requestLogisticsInsights } from '../services/sentinelAiService';
+import { GoogleGenAI } from "@google/genai";
 
 const Logistics: React.FC = () => {
+  const [activeDock, setActiveDock] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportSuccess, setShowExportSuccess] = useState(false);
@@ -42,21 +43,28 @@ const Logistics: React.FC = () => {
     }, 400);
 
     try {
-      const dockContext = docks
-        .filter((dock) => dock.status !== 'Clear')
-        .map((dock) => `Dock ${dock.id}: ${dock.status} (${dock.truck} - ${dock.eta})`);
-
-      const response = await requestLogisticsInsights({
-        logisticsData: HOURLY_LOGISTICS,
-        dockContext,
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Analyze the following logistics data for Store #5065 and provide 3 high-impact management directives in a narrative, "cyber-ops" terminal style.
+        
+        Logistics Data: ${JSON.stringify(HOURLY_LOGISTICS)}
+        Docks Context: Dock 1 (Occupied - Unloading), Dock 2 (Awaiting - FED-2201), Dock 4 (Occupied - Staging).
+        
+        Requirements:
+        1. Use a gritty, authoritative command-line tone.
+        2. Identify specific bottlenecks (e.g., the 85-unit outbound spike at 12 PM).
+        3. Recommend specific labor reallocations (e.g., moving staff from low-inbound morning hours to peak outbound windows).
+        4. Format the output with clear [DIRECTIVE], [OBSERVATION], and [STATUS] headers.
+        5. Keep the total word count under 120 words.`,
       });
 
       clearInterval(stepInterval);
-      setAiInsight(response);
+      setAiInsight(response.text || "Insight generation failed. Azure Handshake Timeout.");
     } catch (error) {
       clearInterval(stepInterval);
       console.error("AI Insight Error:", error);
-      setAiInsight("CRITICAL ERROR: Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
+      setAiInsight("CRITICAL ERROR: Microsoft Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
     } finally {
       setIsGeneratingInsights(false);
       setInsightStep('');
@@ -71,7 +79,7 @@ const Logistics: React.FC = () => {
         const timestamp = new Date().toLocaleString();
         const content = `
 =====================================================
-SENTINEL LOGISTICS COMMAND - MANIFEST EXPORT
+MICROSOFT SENTINEL LOGISTICS COMMAND - MANIFEST EXPORT
 =====================================================
 NODE ID: #5065
 TIMESTAMP: ${timestamp}
@@ -92,7 +100,7 @@ HOURLY THROUGHPUT (PEAK):
 RECONCILIATION:
 - Dynamics 365 Supply Chain: SYNCED
 - HubSpot Breeze Delivery Node: ACTIVE
-- Sentinel Policy Guard: NOMINAL
+- Microsoft Sentinel Policy Guard: NOMINAL
 
 (c) 2024 OptiSchedule Pro Enterprise Logistics
 =====================================================
@@ -155,7 +163,7 @@ RECONCILIATION:
               <div>
                  <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
-                    Sentinel Insight Engine
+                    Microsoft Sentinel Insight Engine
                  </h3>
                  <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">Neural Logistics Analysis • Node #5065</p>
               </div>

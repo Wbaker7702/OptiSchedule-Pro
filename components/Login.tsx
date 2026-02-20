@@ -32,11 +32,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-slate-600 rounded-full opacity-30"></div>
       </div>
 
-      <div className="bg-slate-900 w-full max-w-md rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden relative z-10">
+      <div className="bg-slate-900 w-full max-md rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden relative z-10 max-w-md">
         <div className="bg-slate-900 p-8 text-center relative border-b border-slate-800">
           <div className="absolute top-4 right-4 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20 flex items-center gap-1">
              <ShieldCheck className="w-3 h-3 text-blue-500" />
-             <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Sentinel Active</span>
+             <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Microsoft Sentinel Active</span>
           </div>
           <div className="inline-flex items-center justify-center p-4 bg-slate-800 rounded-2xl mb-6 shadow-xl border border-slate-700">
             <Activity className="w-10 h-10 text-blue-500" />
@@ -48,7 +48,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="p-8">
           <div className="mb-8">
             <h2 className="text-lg font-bold text-white uppercase tracking-wider">Authentication Required</h2>
-            <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest">Sentinel Security Protocol Enforcement</p>
+            <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest">Microsoft Sentinel Security Protocol Enforcement</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -62,7 +62,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
                   placeholder="ID@optischedule.com"
                   required
@@ -80,7 +79,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
                   placeholder="••••••••"
                   required
@@ -114,7 +112,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div className="mt-8 pt-6 border-t border-slate-800">
             <div className="flex items-center justify-center gap-2 text-[10px] text-slate-600 font-mono font-bold uppercase tracking-widest">
               <ShieldAlert className="w-3 h-3" />
-              <span>Sentinel Security Standard • {APP_VERSION}</span>
+              <span>Microsoft Sentinel Security Standard • {APP_VERSION}</span>
             </div>
           </div>
         </div>

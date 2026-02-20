@@ -18,7 +18,7 @@ const initialChartData = [
 
 const strategyComparison = [
   { sector: 'Front End', s5065: 'Fixed Shift (8hr)', s2080: 'Dynamic Flex (4-6hr)', recommendation: 'Deploy Flex Model' },
-  { sector: 'Inventory', s5065: 'Daily Audit', s2080: 'Sentinel Real-time', recommendation: 'Upgrade Node Ingress' },
+  { sector: 'Inventory', s5065: 'Daily Audit', s2080: 'Microsoft Sentinel Real-time', recommendation: 'Upgrade Node Ingress' },
   { sector: 'Overtime', s5065: 'Manager Override', s2080: 'Breeze Predictive', recommendation: 'Automate OT Mitigation' },
   { sector: 'Minor Compliance', s5065: 'Manual Tracking', s2080: 'Automated Curfew Guard', recommendation: 'Apply MI Policy 432' },
 ];

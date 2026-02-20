@@ -106,6 +106,19 @@ const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = () => {
             </div>
           </div>
 
+          <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800 hover:border-[#ff7a59]/50 transition-colors group">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <Zap className="w-3 h-3 text-[#ff7a59]" /> HubSpot Breeze AI
+            </p>
+            <div className="flex items-center gap-3">
+              <h2 className="text-3xl font-black text-white">Active</h2>
+              <span className="flex items-center text-[10px] font-bold text-[#ff7a59] bg-[#ff7a59]/10 border border-[#ff7a59]/20 px-2 py-1 rounded-full">
+                 4 Campaigns
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-600 font-mono mt-2 uppercase tracking-wide">Revenue Attr: $15.4k</p>
+          </div>
+
           <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800 hover:border-slate-700 transition-colors">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Active Stores</p>
             <div className="flex items-center gap-3">

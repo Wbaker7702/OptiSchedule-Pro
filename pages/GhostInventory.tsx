@@ -165,7 +165,7 @@ const GhostInventory: React.FC = () => {
            item: 'Simulated Asset',
            sku: `SIM-${1000 + steps}`,
            strikes: 2,
-           reportedBy: ['Auto-Sim', 'Sentinel'],
+           reportedBy: ['Auto-Sim', 'Microsoft Sentinel'],
            timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
            status: 'Frozen'
         };
@@ -369,7 +369,7 @@ const GhostInventory: React.FC = () => {
                <div className="lg:col-span-4 space-y-6">
                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl h-full flex flex-col">
                      <h3 className="text-[10px] font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <Terminal className="w-4 h-4 text-emerald-500" /> Sentinel Event Stream
+                        <Terminal className="w-4 h-4 text-emerald-500" /> Microsoft Sentinel Event Stream
                      </h3>
                      <div className="bg-slate-950 rounded-xl border border-slate-800 p-4 flex-1 overflow-hidden flex flex-col">
                         <div className="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-2" ref={scrollRef}>

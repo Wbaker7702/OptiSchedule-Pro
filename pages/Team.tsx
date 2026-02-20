@@ -127,7 +127,7 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
             <form onSubmit={handleAddEmployee} className="p-8 space-y-4">
               <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mb-2 text-center">
                  <p className="text-[9px] text-blue-800 font-black uppercase tracking-widest">
-                    Sentinel Linter will auto-apply {reg.state} constraints based on Age.
+                    Microsoft Sentinel Linter will auto-apply {reg.state} constraints based on Age.
                  </p>
               </div>
 

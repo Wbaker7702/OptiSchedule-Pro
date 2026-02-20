@@ -85,7 +85,7 @@ export interface DepartmentMetric {
 export interface IngressDataPoint {
   date: string;
   volume: number;
-  source: 'Dynamics 365' | 'HubSpot' | 'Sentinel Node' | 'Azure Edge';
+  source: 'Dynamics 365' | 'HubSpot' | 'Microsoft Sentinel' | 'Azure Edge';
   growth: number;
   status: 'Verified' | 'Syncing' | 'Hardened';
 }

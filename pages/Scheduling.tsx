@@ -1,25 +1,25 @@
 
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { RefreshCw, Download, Zap, Edit2, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, Download, Zap, Edit2, AlertCircle, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
 import { WEEKLY_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
-import { ERPProvider, HeatmapDataPoint, IntegrationStatus, ScheduleLogEntry, View } from '../types';
-import { requestScheduleForecast, ScheduleHeatmapRow } from '../services/sentinelAiService';
+import { ScheduleLogEntry } from '../types';
+import { GoogleGenAI, Type } from "@google/genai";
 
 interface SchedulingProps {
-  setCurrentView?: (view: View) => void;
-  onFinalize?: () => void;
-  activeProvider?: ERPProvider;
-  setActiveProvider?: (provider: ERPProvider) => void;
-  isConnected?: boolean;
-  setIsConnected?: (isConnected: boolean) => void;
-  setHubspotStatus?: (status: IntegrationStatus) => void;
-  heatmapData?: HeatmapDataPoint[];
-  onAdjustStaffing?: () => void;
+  setCurrentView?: any;
+  onFinalize?: any;
+  activeProvider?: any;
+  setActiveProvider?: any;
+  isConnected?: any;
+  setIsConnected?: any;
+  setHubspotStatus?: any;
+  heatmapData?: any;
+  onAdjustStaffing?: any;
 }
 
 const Scheduling: React.FC<SchedulingProps> = () => {
-  const [scheduleData, setScheduleData] = useState<ScheduleHeatmapRow[]>(WEEKLY_HEATMAP);
+  const [scheduleData, setScheduleData] = useState(WEEKLY_HEATMAP);
   const [logs, setLogs] = useState<ScheduleLogEntry[]>(MOCK_SCHEDULE_LOGS);
   
   // Loading States
@@ -105,7 +105,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
       const newLog: ScheduleLogEntry = {
         id: `SL-OPT-${Date.now()}`,
         timestamp: new Date().toLocaleString(),
-        manager: 'Sentinel Optimizer',
+        manager: 'Microsoft Sentinel Optimizer',
         action: 'Auto-Balanced Staffing Levels',
         reason: 'Coverage Compliance Check',
         impact: 'Risk Eliminated'
@@ -118,28 +118,57 @@ const Scheduling: React.FC<SchedulingProps> = () => {
   const handleAIForecast = async () => {
     setIsForecasting(true);
     try {
-      const forecast = await requestScheduleForecast(scheduleData);
-      setScheduleData(forecast);
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Using HubSpot Breeze customer traffic signals, generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm). 
+        Traffic is projected to be heavy on Friday and Saturday. 
+        Staffing levels per slot should range between 4 and 14. 
+        Output strictly valid JSON matching this schema.`,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              heatmap: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    day: { type: Type.STRING },
+                    hours: { 
+                      type: Type.ARRAY,
+                      items: { type: Type.INTEGER }
+                    }
+                  },
+                  required: ["day", "hours"]
+                }
+              }
+            }
+          }
+        }
+      });
 
-      const newLog: ScheduleLogEntry = {
-        id: `SL-AI-${Date.now()}`,
-        timestamp: new Date().toLocaleString(),
-        manager: 'Sentinel AI',
-        action: 'Generated Demand Forecast',
-        reason: 'Traffic and historical coverage model',
-        impact: 'Efficiency +14%'
-      };
-      setLogs(prev => [newLog, ...prev]);
+      const text = response.text;
+      if (text) {
+        const data = JSON.parse(text);
+        if (data.heatmap && Array.isArray(data.heatmap)) {
+          setScheduleData(data.heatmap);
+          
+          const newLog: ScheduleLogEntry = {
+            id: `SL-AI-${Date.now()}`,
+            timestamp: new Date().toLocaleString(),
+            manager: 'Microsoft Sentinel AI',
+            action: 'Generated Breeze Demand Forecast',
+            reason: 'High Traffic Probability',
+            impact: 'Efficiency +14%'
+          };
+          setLogs(prev => [newLog, ...prev]);
+        }
+      }
     } catch (error) {
       console.error("Forecast Error:", error);
-      setLogs(prev => [{
-        id: `SL-AI-ERR-${Date.now()}`,
-        timestamp: new Date().toLocaleString(),
-        manager: 'Sentinel AI',
-        action: 'Forecast fallback applied',
-        reason: 'Proxy unavailable',
-        impact: 'Coverage stabilized'
-      }, ...prev]);
+      // Fallback/Error handling could go here, but logs warn user
     } finally {
       setIsForecasting(false);
     }

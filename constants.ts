@@ -140,7 +140,7 @@ export const PLUGIN_REGISTRY: SystemPlugin[] = [
     id: 'plg-lab-mi',
     name: 'Michigan Labor Frame',
     category: 'Jurisdiction',
-    provider: 'Sentinel Legal',
+    provider: 'Microsoft Sentinel Legal',
     description: 'MI P.A. 90 Compliance (Minors & Mandatory Breaks).',
     version: '1.0.4',
     status: 'Mounted',
