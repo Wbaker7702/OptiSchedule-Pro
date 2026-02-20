@@ -1,26 +1,24 @@
 {
-  "name": "optischedule-api",
-  "version": "1.0.0",
-  "description": "OptiSchedule Pro Backend API",
-  "main": "server.js",
+  "name": "optischedule-pro---walmart-store-5065,-2080-pilot",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^1.41.0",
-    "@prisma/client": "^5.22.0",
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.2.1",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.3",
-    "prisma": "^5.22.0",
-    "zod": "^4.3.6"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "recharts": "2.15.0",
+    "lucide-react": "0.469.0",
+    "@google/genai": "^1.39.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
   }
 }

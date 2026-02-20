@@ -1,75 +1,20 @@
-# OptiSchedule API
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-Backend API for OptiSchedule Pro, built with Node.js, Express, and Prisma.
+# Run and deploy your AI Studio app
 
-## What is OptiSchedule Pro?
+This contains everything you need to run your app locally.
 
-OptiSchedule Pro is a scheduling and labor-compliance platform.
-It helps teams build shifts with clear, policy-aware decisions so schedules can be created faster and with fewer manual checks.
+View your app in AI Studio: https://ai.studio/apps/drive/1t9N6qD-bsuD6OLWG_mKSU2RdZlj1jyCD
 
-## What it can do
+## Run Locally
 
-- Manage core scheduling data for stores, employees, and shifts
-- Evaluate shifts against state-specific labor rules (currently Michigan and Florida rule engines are included)
-- Support secure auth workflows with JWT-based login/register routes
-- Provide API endpoints for shift operations and service health monitoring
+**Prerequisites:**  Node.js
 
-## How quick it can do it
 
-OptiSchedule Pro is designed for near real-time scheduling feedback:
-
-- Core API calls are lightweight and return quickly under normal load
-- Compliance checks run in-request using rule logic, so teams get immediate pass/fail feedback
-- Typical single-shift validation workflows are intended to complete in seconds, not minutes
-
-## Tech Stack
-
-- Node.js + Express
-- Prisma ORM
-- PostgreSQL
-- JSON Web Tokens (JWT)
-
-## Project Structure
-
-```text
-.
-├── config/
-│   └── env.js
-├── middleware/
-│   └── auth.js
-├── prisma/
-│   ├── migrations/
-│   └── schema.prisma
-├── routes/
-│   ├── auth.js
-│   └── shifts.js
-├── rules/
-│   ├── index.js
-│   ├── MI.js
-│   ├── mi.js
-│   └── server.js
-├── server.js
-├── seed.js
-└── FL.js
-```
-
-## Available Routes
-
-Route paths (base URL is environment-specific):
-
-- `GET /health`  
-  Returns API health status.
-
-- `GET /api/protected`  
-  Test protected route response.
-
-- `GET /api/shifts/test`  
-  Test shift route wiring.
-
-- `POST /api/shifts`  
-  Echo endpoint for shift POST payload testing.
-
-## Notes
-
-- `routes/auth.js` and `middleware/auth.js` are present, but auth routes are not currently mounted in `server.js`.
-- State compliance rule engines are located in `rules/` (for example, `MI.js` and `FL.js`).
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

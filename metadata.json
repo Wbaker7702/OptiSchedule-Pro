@@ -1,0 +1,8 @@
+{
+  "name": "OptiSchedule Pro - Walmart Store 5065, 2080 Pilot",
+  "description": "Interactive retail management dashboard for Walmart Store 5065, featuring Microsoft Dynamics 365 ERP integration, staffing heatmaps, and operational analytics.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
