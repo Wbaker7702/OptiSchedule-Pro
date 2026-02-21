@@ -6,8 +6,4 @@ This project is currently in a pre-release stage. As such, there are no versions
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+We take security vulnerabilities seriously. If you discover a security issue, please report it to us by emailing `security@example.com`. We will do our best to respond within 48 hours of receiving your report.
