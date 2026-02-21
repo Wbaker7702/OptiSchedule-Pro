@@ -1,5 +1,5 @@
 
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, SecurityThreat, SecurityIncident, SecurityPolicy, SecurityMetricTimeline, ComplianceFramework, NetworkSegment } from './types';
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
@@ -263,3 +263,80 @@ export const MOCK_SCHEDULE_LOGS: ScheduleLogEntry[] = [
   { id: 'SL-001', timestamp: '2026-02-15 08:32', manager: 'Wesley Baker', action: 'Increased 9:00 AM Front End Staffing', reason: 'Unplanned High Traffic', impact: 'Efficiency +4%' },
   { id: 'SL-002', timestamp: '2026-02-15 07:15', manager: 'System (Auto)', action: 'Reduced 7:00 AM Grocery Staffing', reason: 'Low Ingress Volume', impact: 'Labor Cost -0.2%' },
 ];
+
+export const SECURITY_THREATS: SecurityThreat[] = [
+  { id: 'THR-001', title: 'Credential Stuffing Attack on POS Gateway', severity: 'Critical', category: 'Unauthorized Access', status: 'Active', source: '185.220.101.xx (TOR Exit)', target: 'POS-Gateway-5065', detectedAt: '2026-02-21 09:14', description: 'Automated credential stuffing detected against POS authentication endpoint. 12,400 attempts in 8 minutes from rotating TOR exit nodes.', mitreTactic: 'T1110 - Brute Force', confidenceScore: 97 },
+  { id: 'THR-002', title: 'Anomalous Data Transfer to External S3 Bucket', severity: 'High', category: 'Data Exfiltration', status: 'Investigating', source: 'WORKSTATION-HR-04', target: 's3://ext-bucket-9x2k', detectedAt: '2026-02-21 07:42', description: 'Unusual outbound data transfer of 2.4 GB to unregistered external S3 bucket detected from HR workstation.', mitreTactic: 'T1567 - Exfiltration Over Web Service', confidenceScore: 89 },
+  { id: 'THR-003', title: 'Phishing Campaign Targeting Store Managers', severity: 'High', category: 'Phishing', status: 'Contained', source: 'spoofed@wmart-hr.com', target: 'Management Distribution List', detectedAt: '2026-02-20 16:30', description: 'Spear phishing campaign detected using cloned HR portal. 3 of 12 targeted users clicked the link. Credentials rotated.', mitreTactic: 'T1566 - Phishing', confidenceScore: 95 },
+  { id: 'THR-004', title: 'Lateral Movement via Compromised Service Account', severity: 'Critical', category: 'Insider Threat', status: 'Investigating', source: 'SVC-INVENTORY-SYNC', target: 'DC-EAST-02', detectedAt: '2026-02-21 03:18', description: 'Service account SVC-INVENTORY-SYNC performing LDAP queries and accessing file shares outside normal scope. Possible credential compromise.', mitreTactic: 'T1021 - Remote Services', confidenceScore: 92 },
+  { id: 'THR-005', title: 'Suspicious PowerShell Execution on Edge Server', severity: 'Medium', category: 'Malware', status: 'Resolved', source: 'EDGE-NODE-12', target: 'Local System', detectedAt: '2026-02-19 22:05', description: 'Encoded PowerShell command detected on Azure Edge node. Investigation confirmed false positive from scheduled patching script.', mitreTactic: 'T1059 - Command and Scripting', confidenceScore: 64 },
+  { id: 'THR-006', title: 'DDoS Volumetric Spike on API Gateway', severity: 'Medium', category: 'DDoS', status: 'Resolved', source: 'Distributed (Botnet)', target: 'API-GW-PROD', detectedAt: '2026-02-19 14:22', description: 'SYN flood peaking at 4.2 Gbps targeting API gateway. Azure DDoS Protection mitigated within 90 seconds.', mitreTactic: 'T1498 - Network Denial of Service', confidenceScore: 99 },
+  { id: 'THR-007', title: 'Policy Violation: Unencrypted PII in Transit', severity: 'High', category: 'Policy Violation', status: 'Active', source: 'APP-LEGACY-03', target: 'DB-ANALYTICS-01', detectedAt: '2026-02-21 06:50', description: 'Legacy application transmitting customer PII over unencrypted HTTP channel to analytics database. GDPR/CCPA exposure risk.', mitreTactic: 'T1040 - Network Sniffing', confidenceScore: 100 },
+  { id: 'THR-008', title: 'Anomalous Login Pattern from Geographically Dispersed IPs', severity: 'Low', category: 'Anomalous Behavior', status: 'Resolved', source: 'Multiple GeoIPs', target: 'USER: w.baker', detectedAt: '2026-02-18 11:30', description: 'User account accessed from Michigan and California within 30-minute window. Confirmed VPN usage by legitimate user.', mitreTactic: 'T1078 - Valid Accounts', confidenceScore: 42 },
+];
+
+export const SECURITY_INCIDENTS: SecurityIncident[] = [
+  { id: 'INC-2026-001', title: 'POS Gateway Credential Attack', severity: 'Critical', status: 'Active', assignee: 'Sentinel AI Auto-Response', createdAt: '2026-02-21 09:15', updatedAt: '2026-02-21 09:45', affectedAssets: 4, alertCount: 12, category: 'Unauthorized Access' },
+  { id: 'INC-2026-002', title: 'HR Workstation Data Exfiltration', severity: 'High', status: 'Investigating', assignee: 'SOC Analyst - T. Rodriguez', createdAt: '2026-02-21 07:45', updatedAt: '2026-02-21 08:30', affectedAssets: 2, alertCount: 5, category: 'Data Exfiltration' },
+  { id: 'INC-2026-003', title: 'Manager Phishing Campaign', severity: 'High', status: 'Contained', assignee: 'Sentinel AI Auto-Response', createdAt: '2026-02-20 16:32', updatedAt: '2026-02-21 06:00', affectedAssets: 3, alertCount: 8, category: 'Phishing' },
+  { id: 'INC-2026-004', title: 'Service Account Lateral Movement', severity: 'Critical', status: 'Investigating', assignee: 'SOC Lead - M. Patel', createdAt: '2026-02-21 03:20', updatedAt: '2026-02-21 09:00', affectedAssets: 6, alertCount: 15, category: 'Insider Threat' },
+  { id: 'INC-2026-005', title: 'Unencrypted PII Transmission', severity: 'High', status: 'Active', assignee: 'Compliance Team', createdAt: '2026-02-21 06:52', updatedAt: '2026-02-21 07:15', affectedAssets: 2, alertCount: 3, category: 'Policy Violation' },
+];
+
+export const SECURITY_POLICIES: SecurityPolicy[] = [
+  { id: 'POL-001', name: 'Zero Trust Network Access', category: 'Network', status: 'Enforced', lastEvaluated: '2026-02-21 09:00', complianceRate: 98.2, scope: 'All Endpoints' },
+  { id: 'POL-002', name: 'Multi-Factor Authentication', category: 'Identity', status: 'Enforced', lastEvaluated: '2026-02-21 09:00', complianceRate: 99.8, scope: 'All Users' },
+  { id: 'POL-003', name: 'Data Loss Prevention (DLP)', category: 'Data', status: 'Enforced', lastEvaluated: '2026-02-21 08:45', complianceRate: 94.5, scope: 'PII/PCI Endpoints' },
+  { id: 'POL-004', name: 'Endpoint Detection & Response', category: 'Endpoint', status: 'Enforced', lastEvaluated: '2026-02-21 09:00', complianceRate: 97.1, scope: 'All Devices' },
+  { id: 'POL-005', name: 'Encryption at Rest (AES-256)', category: 'Data', status: 'Enforced', lastEvaluated: '2026-02-20 23:00', complianceRate: 100.0, scope: 'All Databases' },
+  { id: 'POL-006', name: 'Privileged Access Management', category: 'Identity', status: 'Monitoring', lastEvaluated: '2026-02-21 08:30', complianceRate: 91.3, scope: 'Admin Accounts' },
+  { id: 'POL-007', name: 'Cloud Security Posture (CSPM)', category: 'Cloud', status: 'Enforced', lastEvaluated: '2026-02-21 09:00', complianceRate: 96.7, scope: 'Azure Tenant' },
+  { id: 'POL-008', name: 'Legacy System Isolation', category: 'Network', status: 'Monitoring', lastEvaluated: '2026-02-21 07:00', complianceRate: 85.0, scope: 'Legacy Applications' },
+];
+
+export const SECURITY_TIMELINE: SecurityMetricTimeline[] = [
+  { time: '00:00', threats: 2, blocked: 12, incidents: 0 },
+  { time: '02:00', threats: 1, blocked: 8, incidents: 0 },
+  { time: '04:00', threats: 5, blocked: 22, incidents: 1 },
+  { time: '06:00', threats: 3, blocked: 18, incidents: 1 },
+  { time: '08:00', threats: 8, blocked: 45, incidents: 2 },
+  { time: '10:00', threats: 12, blocked: 67, incidents: 3 },
+  { time: '12:00', threats: 6, blocked: 34, incidents: 1 },
+  { time: '14:00', threats: 4, blocked: 28, incidents: 0 },
+  { time: '16:00', threats: 7, blocked: 41, incidents: 2 },
+  { time: '18:00', threats: 9, blocked: 52, incidents: 1 },
+  { time: '20:00', threats: 3, blocked: 19, incidents: 0 },
+  { time: '22:00', threats: 5, blocked: 31, incidents: 1 },
+];
+
+export const COMPLIANCE_FRAMEWORKS: ComplianceFramework[] = [
+  { id: 'CF-001', name: 'PCI DSS 4.0', score: 96, controls: 312, passing: 300, failing: 12, lastAssessment: '2026-02-15' },
+  { id: 'CF-002', name: 'SOC 2 Type II', score: 98, controls: 64, passing: 63, failing: 1, lastAssessment: '2026-02-10' },
+  { id: 'CF-003', name: 'NIST CSF 2.0', score: 92, controls: 108, passing: 99, failing: 9, lastAssessment: '2026-02-12' },
+  { id: 'CF-004', name: 'ISO 27001:2022', score: 94, controls: 93, passing: 87, failing: 6, lastAssessment: '2026-02-08' },
+  { id: 'CF-005', name: 'GDPR / CCPA', score: 89, controls: 48, passing: 43, failing: 5, lastAssessment: '2026-02-14' },
+];
+
+export const NETWORK_SEGMENTS: NetworkSegment[] = [
+  { id: 'NET-001', name: 'POS Network', status: 'Warning', traffic: 2400, anomalies: 3, firewallRules: 142 },
+  { id: 'NET-002', name: 'Corporate LAN', status: 'Secure', traffic: 8900, anomalies: 0, firewallRules: 256 },
+  { id: 'NET-003', name: 'IoT / Edge Devices', status: 'Secure', traffic: 1200, anomalies: 1, firewallRules: 89 },
+  { id: 'NET-004', name: 'Guest Wi-Fi', status: 'Secure', traffic: 3400, anomalies: 0, firewallRules: 42 },
+  { id: 'NET-005', name: 'Cloud DMZ (Azure)', status: 'Secure', traffic: 15600, anomalies: 0, firewallRules: 198 },
+  { id: 'NET-006', name: 'Warehouse OT Network', status: 'Warning', traffic: 780, anomalies: 2, firewallRules: 67 },
+];
+
+export const SENTINEL_SECURITY_STATS = {
+  totalThreatsToday: 58,
+  threatsBlocked: 52,
+  activeIncidents: 5,
+  meanTimeToDetect: '4.2 min',
+  meanTimeToRespond: '11.8 min',
+  securityScore: 87,
+  assetsMonitored: 1248,
+  alertsTriaged: 342,
+  falsePositiveRate: 3.2,
+  automatedResponseRate: 78,
+  endpointsProtected: 892,
+  dataSourcesIngested: 24,
+};

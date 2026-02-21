@@ -14,7 +14,8 @@ export enum View {
   ROYALTY_DASHBOARD = 'ROYALTY_DASHBOARD',
   STORE_RATINGS = 'STORE_RATINGS',
   LOGISTICS = 'LOGISTICS',
-  GHOST_INVENTORY = 'GHOST_INVENTORY'
+  GHOST_INVENTORY = 'GHOST_INVENTORY',
+  SENTINEL_SECURITY = 'SENTINEL_SECURITY'
 }
 
 export type PluginCategory = 'CRM' | 'ERP' | 'Jurisdiction' | 'AI_Agent' | 'Vision' | 'Cloud';
@@ -131,4 +132,71 @@ export interface ScheduleLogEntry {
   action: string;
   reason: string;
   impact: string;
+}
+
+export type ThreatSeverity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Info';
+export type ThreatStatus = 'Active' | 'Investigating' | 'Contained' | 'Resolved';
+export type IncidentCategory = 'Malware' | 'Phishing' | 'Insider Threat' | 'DDoS' | 'Data Exfiltration' | 'Unauthorized Access' | 'Policy Violation' | 'Anomalous Behavior';
+
+export interface SecurityThreat {
+  id: string;
+  title: string;
+  severity: ThreatSeverity;
+  category: IncidentCategory;
+  status: ThreatStatus;
+  source: string;
+  target: string;
+  detectedAt: string;
+  description: string;
+  mitreTactic: string;
+  confidenceScore: number;
+}
+
+export interface SecurityIncident {
+  id: string;
+  title: string;
+  severity: ThreatSeverity;
+  status: ThreatStatus;
+  assignee: string;
+  createdAt: string;
+  updatedAt: string;
+  affectedAssets: number;
+  alertCount: number;
+  category: IncidentCategory;
+}
+
+export interface SecurityPolicy {
+  id: string;
+  name: string;
+  category: string;
+  status: 'Enforced' | 'Monitoring' | 'Disabled';
+  lastEvaluated: string;
+  complianceRate: number;
+  scope: string;
+}
+
+export interface SecurityMetricTimeline {
+  time: string;
+  threats: number;
+  blocked: number;
+  incidents: number;
+}
+
+export interface ComplianceFramework {
+  id: string;
+  name: string;
+  score: number;
+  controls: number;
+  passing: number;
+  failing: number;
+  lastAssessment: string;
+}
+
+export interface NetworkSegment {
+  id: string;
+  name: string;
+  status: 'Secure' | 'Warning' | 'Breached';
+  traffic: number;
+  anomalies: number;
+  firewallRules: number;
 }
