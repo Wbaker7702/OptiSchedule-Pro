@@ -29,6 +29,57 @@ OptiSchedule Pro is designed for near real-time scheduling feedback:
 - PostgreSQL
 - JSON Web Tokens (JWT)
 
+## Prerequisites
+
+- Node.js 18+
+- npm
+- PostgreSQL database
+
+## Installation
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Create a `.env` file in the project root:
+
+   ```env
+   PORT=4000
+   NODE_ENV=development
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME?schema=public"
+   JWT_SECRET="replace-with-a-secure-secret"
+   ```
+
+3. Generate Prisma client:
+
+   ```bash
+   npx prisma generate
+   ```
+
+4. (Optional for first-time DB setup) Run migrations:
+
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
+## Running the API
+
+- Development mode:
+
+  ```bash
+  npm run dev
+  ```
+
+- Production mode:
+
+  ```bash
+  npm start
+  ```
+
+Server default: `http://localhost:4000`
+
 ## Project Structure
 
 ```text
@@ -57,16 +108,16 @@ OptiSchedule Pro is designed for near real-time scheduling feedback:
 
 Route paths (base URL is environment-specific):
 
-- `GET /health`  
+- `GET /health`
   Returns API health status.
 
-- `GET /api/protected`  
+- `GET /api/protected`
   Test protected route response.
 
-- `GET /api/shifts/test`  
+- `GET /api/shifts/test`
   Test shift route wiring.
 
-- `POST /api/shifts`  
+- `POST /api/shifts`
   Echo endpoint for shift POST payload testing.
 
 ## Notes
