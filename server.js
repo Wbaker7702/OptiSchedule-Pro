@@ -8,12 +8,13 @@ const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const aiRouter = require("./routes/ai");
+const shiftsRouter = require("./routes/shifts");
 
 const app = express();
 app.disable("x-powered-by");
 
-const trustProxy = Number.parseInt(process.env.TRUST_PROXY || "1", 10);
-app.set("trust proxy", Number.isNaN(trustProxy) ? 1 : trustProxy);
+const trustProxy = Number.parseInt(process.env.TRUST_PROXY || "0", 10);
+app.set("trust proxy", Number.isNaN(trustProxy) ? 0 : trustProxy);
 
 const NODE_ENV = process.env.NODE_ENV || "production";
 const IS_PROD = NODE_ENV === "production";
@@ -209,6 +210,7 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+app.use("/api/shifts", shiftsRouter);
 app.use("/api/ai", requireAuth, requireSameOrigin, aiRouter);
 
 // ---------- UI: Login ----------
@@ -658,5 +660,4 @@ function escapeHtml(str) {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`OptiSchedule Enterprise running on ${PORT}`));
-
 
