@@ -21,7 +21,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     // Client-side validation
     const emailValidation = validators.email(email);
     if (!emailValidation.valid) {
-      setError(emailValidation.error || 'Invalid email');
+      setError(emailValidation.error!);
       setIsLoading(false);
       return;
     }
