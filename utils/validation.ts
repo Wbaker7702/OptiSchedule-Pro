@@ -1,5 +1,7 @@
 // Input validation utilities
 
+import sanitizeHtml from 'sanitize-html';
+
 export const validators = {
   // Name validation
   name: (value: string): { valid: boolean; error?: string } => {
@@ -130,10 +132,10 @@ export const validators = {
 };
 
 export const sanitizeInput = (value: string, maxLength = 500): string => {
-  return value
-    .trim()
-    .slice(0, maxLength)
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+\s*=/gi, ''); // Remove event handlers
+  const trimmed = (value || '').trim().slice(0, maxLength);
+  return sanitizeHtml(trimmed, {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
 };
+
