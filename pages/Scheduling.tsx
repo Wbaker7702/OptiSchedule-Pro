@@ -121,7 +121,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `Using HubSpot Breeze customer traffic signals, generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm). 
+        contents: `Generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm). 
         Traffic is projected to be heavy on Friday and Saturday. 
         Staffing levels per slot should range between 4 and 14. 
         Output strictly valid JSON matching this schema.`,
@@ -159,7 +159,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
             id: `SL-AI-${Date.now()}`,
             timestamp: new Date().toLocaleString(),
             manager: 'Microsoft Sentinel AI',
-            action: 'Generated Breeze Demand Forecast',
+            action: 'Generated Demand Forecast',
             reason: 'High Traffic Probability',
             impact: 'Efficiency +14%'
           };
