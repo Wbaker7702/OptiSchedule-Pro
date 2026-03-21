@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, Mail, ArrowRight, Activity, ShieldAlert } from 'lucide-react';
 import { APP_VERSION } from '../constants';
+import { validators } from '../utils/validation';
 
 interface LoginProps {
   onLogin: () => void;
@@ -12,25 +13,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     // Client-side validation
-    if (!email.trim()) {
-      setError('Email is required');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError('Invalid email format');
+    const emailValidation = validators.email(email);
+    if (!emailValidation.valid) {
+      setError(emailValidation.error!);
       setIsLoading(false);
       return;
     }

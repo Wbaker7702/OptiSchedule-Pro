@@ -95,9 +95,10 @@ export async function handler(event) {
       body: JSON.stringify({ error: 'Invalid request type' }),
     };
   } catch (error) {
+    console.error('Gemini API handler error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
+      body: JSON.stringify({ error: 'An error occurred while processing your request.' }),
     };
   }
 }

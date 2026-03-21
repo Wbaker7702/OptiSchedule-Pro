@@ -104,9 +104,12 @@ export async function handler(event) {
       body: JSON.stringify({ error: 'Invalid action' }),
     };
   } catch (error) {
+    console.error('Authentication error:', error);
+    const statusCode = error.message && /Invalid|required|format|security/.test(error.message) ? 400 : 500;
+    const message = statusCode === 400 ? error.message : 'An internal server error occurred.';
     return {
-      statusCode: 400,
-      body: JSON.stringify({ error: error.message }),
+      statusCode,
+      body: JSON.stringify({ error: message }),
     };
   }
 }
