@@ -104,7 +104,7 @@ export const validators = {
 
   // Department validation
   department: (value: string): { valid: boolean; error?: string } => {
-    const validDepartments = ['Front End', 'Back End', 'Stockroom', 'Management', 'Customer Service'];
+    const validDepartments = ['Front End', 'Electronics', 'Grocery', 'Pharmacy', 'Apparel'];
     if (!value || !value.trim()) {
       return { valid: false, error: 'Department is required' };
     }

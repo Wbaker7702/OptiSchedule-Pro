@@ -47,11 +47,13 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
-        setMessages(prev => [...prev, userMessage]);
         setInput('');
         setIsLoading(true);
 
         try {
+            // Include the new user message with the history
+            const messagesWithUserInput = [...messages, userMessage];
+
             // Call backend API instead of exposing API key to client
             const response = await fetch('/api/gemini', {
                 method: 'POST',
@@ -59,7 +61,7 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                 body: JSON.stringify({
                     type: 'chat',
                     payload: {
-                        messages,
+                        messages: messagesWithUserInput,
                         systemInstruction: `You are Microsoft Sentinel AI, the central orchestration agent for Walmart Store #5065.
                     Current Architecture: Triple-Engine Stack.
                     1. Microsoft Azure: Cloud Fabric, Cognitive Compute, Edge Telemetry.
@@ -83,14 +85,14 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
             const data = await response.json();
             const fullResponse = data.response;
 
-            setMessages(prev => [...prev, {
+            setMessages(prev => [...prev, userMessage, {
                 role: 'ai',
                 content: fullResponse,
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             }]);
         } catch (error) {
             console.error("Sentinel Sync Error:", error);
-            setMessages(prev => [...prev, {
+            setMessages(prev => [...prev, userMessage, {
                 role: 'ai',
                 content: "CRITICAL: Azure Compute Handshake Failed. Please check your API credentials or Cloud Fabric status.",
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
