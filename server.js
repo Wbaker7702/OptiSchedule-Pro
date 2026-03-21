@@ -116,7 +116,8 @@ function setSessionCookie(res, token) {
 }
 
 function clearSessionCookie(res) {
-  res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
+  const { maxAge, ...options } = COOKIE_OPTIONS;
+  res.clearCookie(COOKIE_NAME, options);
 }
 
 function requireAuth(req, res, next) {

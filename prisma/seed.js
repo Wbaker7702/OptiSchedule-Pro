@@ -32,7 +32,7 @@ async function main() {
   const employees = [];
 
   for (let i = 1; i <= 40; i++) {
-    const birthYear = 1985 + (i % 15); // realistic age spread
+    const birthYear = 1985 + (i % 30); // realistic age spread
     const birthdate = new Date(birthYear, 5, 15);
 
     const employee = await prisma.employee.create({
