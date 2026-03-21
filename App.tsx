@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
@@ -31,8 +30,22 @@ const App: React.FC = () => {
   const [isERPConnected, setIsERPConnected] = useState(true);
   const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('connected');
 
+  React.useEffect(() => {
+    // Check for valid authentication token on app load
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      // In production, validate token with backend
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   const handleLogin = () => setIsAuthenticated(true);
-  const handleLogout = () => { setIsAuthenticated(false); setCurrentView(View.DASHBOARD); };
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    setIsAuthenticated(false);
+    setCurrentView(View.DASHBOARD);
+  };
 
   const navigateToOperations = (tab: 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance' = 'metrics') => {
     setOperationsTab(tab);

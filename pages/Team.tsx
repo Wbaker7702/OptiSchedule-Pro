@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { EMPLOYEES as INITIAL_EMPLOYEES, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
-import { Mail, MoreHorizontal, Star, ChevronLeft, ChevronRight, UserPlus, X, ShieldCheck, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe } from 'lucide-react';
+import { Mail, MoreHorizontal, Star, ChevronLeft, ChevronRight, UserPlus, X, ShieldCheck, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe, AlertCircle } from 'lucide-react';
 import { Employee } from '../types';
+import { validators } from '../utils/validation';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -30,16 +30,45 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
     age: '25'
   });
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   const totalPages = Math.ceil(employees.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentEmployees = employees.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    const nameValidation = validators.name(formData.name);
+    if (!nameValidation.valid) errors.name = nameValidation.error || 'Invalid name';
+
+    const emailValidation = validators.email(formData.email);
+    if (!emailValidation.valid) errors.email = emailValidation.error || 'Invalid email';
+
+    const roleValidation = validators.role(formData.role);
+    if (!roleValidation.valid) errors.role = roleValidation.error || 'Invalid position';
+
+    const ageValidation = validators.age(formData.age);
+    if (!ageValidation.valid) errors.age = ageValidation.error || 'Invalid age';
+
+    const deptValidation = validators.department(formData.department);
+    if (!deptValidation.valid) errors.department = deptValidation.error || 'Invalid department';
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleAddEmployee = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     setTimeout(() => {
-      const ageNum = parseInt(formData.age);
+      const ageNum = parseInt(formData.age, 10);
       const newEmployee: Employee = {
         id: Math.random().toString(36).substr(2, 9),
         name: formData.name,
@@ -134,28 +163,38 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
               <div className="grid grid-cols-4 gap-4">
                 <div className="col-span-3">
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Full Name</label>
-                  <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full p-2 bg-slate-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs" />
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className={`w-full p-2 bg-slate-50 border rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs ${fieldErrors.name ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
+                  {fieldErrors.name && <p className="text-[9px] text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.name}</p>}
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Age</label>
-                  <input type="number" required value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} className="w-full p-2 bg-slate-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs" />
+                  <input type="number" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})} className={`w-full p-2 bg-slate-50 border rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs ${fieldErrors.age ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
+                  {fieldErrors.age && <p className="text-[9px] text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.age}</p>}
                 </div>
               </div>
 
               <div>
                 <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Position</label>
-                <input type="text" required value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} className="w-full p-2 bg-slate-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs" />
+                <input type="text" value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} className={`w-full p-2 bg-slate-50 border rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs ${fieldErrors.role ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
+                {fieldErrors.role && <p className="text-[9px] text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.role}</p>}
               </div>
 
               <div>
                 <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Operational Zone</label>
-                <select value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full p-2 bg-slate-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs">
+                <select value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className={`w-full p-2 bg-slate-50 border rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs ${fieldErrors.department ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}>
                   <option value="Front End">Front End</option>
                   <option value="Electronics">Electronics</option>
                   <option value="Grocery">Grocery</option>
                   <option value="Pharmacy">Pharmacy</option>
                   <option value="Apparel">Apparel</option>
                 </select>
+                {fieldErrors.department && <p className="text-[9px] text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.department}</p>}
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Corporate Email</label>
+                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className={`w-full p-2 bg-slate-50 border rounded-lg focus:ring-1 focus:ring-blue-600 outline-none font-bold text-xs ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
+                {fieldErrors.email && <p className="text-[9px] text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{fieldErrors.email}</p>}
               </div>
 
               <div className="pt-4">

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, Mail, ArrowRight, Activity, ShieldAlert } from 'lucide-react';
 import { APP_VERSION } from '../constants';
@@ -11,16 +10,73 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
-    
-    // Simulate API authentication delay
-    setTimeout(() => {
+
+    // Client-side validation
+    if (!email.trim()) {
+      setError('Email is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError('Invalid email format');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!password) {
+      setError('Password is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Call backend authentication API
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'login',
+          email: email.trim(),
+          password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Authentication failed');
+        setIsLoading(false);
+        return;
+      }
+
+      // Store authentication token
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
       setIsLoading(false);
       onLogin();
-    }, 1200);
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,6 +106,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <h2 className="text-lg font-bold text-white uppercase tracking-wider">Authentication Required</h2>
             <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest">Microsoft Sentinel Security Protocol Enforcement</p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-xs text-red-400 font-mono">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

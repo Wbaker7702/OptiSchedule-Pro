@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
 import { Truck, Box, Clock, Activity, ArrowUpRight, ShieldCheck, MapPin, Package, AlertTriangle, CheckCircle2, Loader2, Zap, Database, Cloud, FileDown, Download, Brain, Sparkles, Command, MessageSquareText, Terminal, Cpu, Radio, Shield } from 'lucide-react';
 import { HOURLY_LOGISTICS, STORE_NUMBER } from '../constants';
-import { GoogleGenAI } from "@google/genai";
 
 const Logistics: React.FC = () => {
   const [activeDock, setActiveDock] = useState<number | null>(null);
@@ -43,24 +41,35 @@ const Logistics: React.FC = () => {
     }, 400);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Analyze the following logistics data for Store #5065 and provide 3 high-impact management directives in a narrative, "cyber-ops" terminal style.
-        
+      // Call backend API instead of exposing API key to client
+      const apiResponse = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'generateContent',
+          payload: {
+            prompt: `Analyze the following logistics data for Store #5065 and provide 3 high-impact management directives in a narrative, "cyber-ops" terminal style.
+
         Logistics Data: ${JSON.stringify(HOURLY_LOGISTICS)}
         Docks Context: Dock 1 (Occupied - Unloading), Dock 2 (Awaiting - FED-2201), Dock 4 (Occupied - Staging).
-        
+
         Requirements:
         1. Use a gritty, authoritative command-line tone.
         2. Identify specific bottlenecks (e.g., the 85-unit outbound spike at 12 PM).
         3. Recommend specific labor reallocations (e.g., moving staff from low-inbound morning hours to peak outbound windows).
         4. Format the output with clear [DIRECTIVE], [OBSERVATION], and [STATUS] headers.
-        5. Keep the total word count under 120 words.`,
+        5. Keep the total word count under 120 words.`
+          }
+        })
       });
 
+      if (!apiResponse.ok) {
+        throw new Error(`API error: ${apiResponse.statusText}`);
+      }
+
+      const responseData = await apiResponse.json();
       clearInterval(stepInterval);
-      setAiInsight(response.text || "Insight generation failed. Azure Handshake Timeout.");
+      setAiInsight(responseData.response || "Insight generation failed. Azure Handshake Timeout.");
     } catch (error) {
       clearInterval(stepInterval);
       console.error("AI Insight Error:", error);
