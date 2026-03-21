@@ -39,7 +39,7 @@ async function main() {
       data: {
         firstName: `Employee${i}`,
         birthdate: birthdate,
-        isMinor: birthYear > 2007, // basic minor logic
+        isMinor: birthYear > (new Date().getFullYear() - 18), // dynamic minor logic
         storeId: store.id,
       },
     });
