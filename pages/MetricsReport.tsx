@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, LineChart, Line } from 'recharts';
 import { DollarSign, Clock, Target, TrendingUp, ArrowUpRight, ArrowDownRight, Zap, Cloud, Database, ShieldCheck, Filter, Download, ListChecks, Loader2, CheckCircle, FileText, Calendar, BarChart3, PieChart, Activity, RefreshCw, Layers, ChevronRight, FileDown, ShieldAlert, Brain } from 'lucide-react';
@@ -58,6 +57,19 @@ const MetricsReport: React.FC = () => {
     fatigueHours: 12,
   });
 
+  const isMountedRef = useRef(true);
+  const timerRefsRef = useRef<(NodeJS.Timeout | NodeJS.Timer)[]>([]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      timerRefsRef.current.forEach(timer => {
+        clearTimeout(timer as NodeJS.Timeout);
+        clearInterval(timer as NodeJS.Timer);
+      });
+    };
+  }, []);
+
   const budgetResult = budgetGuardian(scenario.hours, scenario.rate, scenario.sales, scenario.target);
   const fatigueResult = checkFatigue(scenario.fatigueHours);
 
@@ -66,9 +78,10 @@ const MetricsReport: React.FC = () => {
     setIsDownloading(id);
     const template = REPORT_TEMPLATES.find(t => t.id === id);
     const reportName = template?.name || 'Sentinel_Report';
-    
+
     // Simulate engine work
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
+      if (!isMountedRef.current) return;
       try {
         const timestamp = new Date().toLocaleString();
         const content = `
@@ -104,23 +117,24 @@ SENTINEL STATUS: NOMINAL
         link.setAttribute('download', `${reportName.replace(/\s+/g, '_')}_${Date.now()}.txt`);
         document.body.appendChild(link);
         link.click();
-        
+
         // Clean up
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       } catch (err) {
         console.error("Report Export Failed:", err);
       } finally {
-        setIsDownloading(null);
+        if (isMountedRef.current) setIsDownloading(null);
       }
     }, 1200);
+    timerRefsRef.current.push(timeout);
   };
 
   const handleGenerateAndDownload = (id: string) => {
     setActiveReport(id);
     setIsGenerating(true);
     setShowReport(false);
-    
+
     const steps = [
       "Quarrying Azure Cloud Data Lake...",
       "Syncing HubSpot Breeze Ingress...",
@@ -131,17 +145,24 @@ SENTINEL STATUS: NOMINAL
 
     let currentStep = 0;
     const interval = setInterval(() => {
+      if (!isMountedRef.current) {
+        clearInterval(interval);
+        return;
+      }
       if (currentStep < steps.length) {
         setGenerationStep(steps[currentStep]);
         currentStep++;
       } else {
         clearInterval(interval);
-        setIsGenerating(false);
-        setShowReport(true);
-        // Automatically trigger the download after generation to satisfy the "should download" requirement
-        downloadReportFile(id);
+        if (isMountedRef.current) {
+          setIsGenerating(false);
+          setShowReport(true);
+          // Automatically trigger the download after generation to satisfy the "should download" requirement
+          downloadReportFile(id);
+        }
       }
     }, 600);
+    timerRefsRef.current.push(interval);
   };
 
   const handlePivot = () => {

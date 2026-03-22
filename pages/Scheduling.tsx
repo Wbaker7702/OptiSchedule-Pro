@@ -17,7 +17,17 @@ interface SchedulingProps {
   onAdjustStaffing?: any;
 }
 
-const Scheduling: React.FC<SchedulingProps> = () => {
+const Scheduling: React.FC<SchedulingProps> = ({
+  setCurrentView,
+  onFinalize,
+  activeProvider,
+  setActiveProvider,
+  isConnected,
+  setIsConnected,
+  setHubspotStatus,
+  heatmapData,
+  onAdjustStaffing,
+}) => {
   const [scheduleData, setScheduleData] = useState(WEEKLY_HEATMAP);
   const [logs, setLogs] = useState<ScheduleLogEntry[]>(MOCK_SCHEDULE_LOGS);
   

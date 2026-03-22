@@ -47,6 +47,30 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       return;
     }
 
+    if (!/[A-Z]/.test(password)) {
+      setError('Password must contain at least one uppercase letter');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[a-z]/.test(password)) {
+      setError('Password must contain at least one lowercase letter');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setError('Password must contain at least one number');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[!@#$%^&*]/.test(password)) {
+      setError('Password must contain at least one special character (!@#$%^&*)');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Call backend authentication API
       const response = await fetch('/api/auth', {

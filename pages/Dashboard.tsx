@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line, ComposedChart, Bar } from 'recharts';
@@ -6,7 +5,7 @@ import { TrendingUp, TrendingDown, Users, AlertTriangle, Clock, Store, Activity,
 import { STORE_PERFORMANCE_DATA, REVENUE_RECOVERY_DATA, WEEKLY_REVENUE_TARGET, TARGET_LABOR_PCT, TARGET_SPLH } from '../constants';
 import { View } from '../types';
 
-const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = () => {
+const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = ({ setCurrentView }) => {
   
   // Logic Implementation from User Prompt
   const calculateRevenueImpact = (weeklySales: number, actualLaborPct: number, totalHours: number) => {
