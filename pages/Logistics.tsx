@@ -23,7 +23,7 @@ const Logistics: React.FC = () => {
   const generateInsights = async () => {
     setIsGeneratingInsights(true);
     setAiInsight(null);
-    
+
     const steps = [
       "Accessing Azure Data Lake...",
       "Intercepting D365 Manifests...",
@@ -33,12 +33,19 @@ const Logistics: React.FC = () => {
     ];
 
     let stepIdx = 0;
-    const stepInterval = setInterval(() => {
-        if (stepIdx < steps.length) {
-            setInsightStep(steps[stepIdx]);
-            stepIdx++;
+    let stepInterval: NodeJS.Timeout | null = null;
+    let isMounted = true;
+
+    const startStepInterval = () => {
+      stepInterval = setInterval(() => {
+        if (stepIdx < steps.length && isMounted) {
+          setInsightStep(steps[stepIdx]);
+          stepIdx++;
         }
-    }, 400);
+      }, 400);
+    };
+
+    startStepInterval();
 
     try {
       // Call backend API instead of exposing API key to client
@@ -68,13 +75,19 @@ const Logistics: React.FC = () => {
       }
 
       const responseData = await apiResponse.json();
-      clearInterval(stepInterval);
-      setAiInsight(responseData.response || "Insight generation failed. Azure Handshake Timeout.");
+      if (stepInterval) clearInterval(stepInterval);
+      if (isMounted) {
+        setAiInsight(responseData.response || "Insight generation failed. Azure Handshake Timeout.");
+      }
     } catch (error) {
-      clearInterval(stepInterval);
+      if (stepInterval) clearInterval(stepInterval);
       console.error("AI Insight Error:", error);
-      setAiInsight("CRITICAL ERROR: Microsoft Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
+      if (isMounted) {
+        setAiInsight("CRITICAL ERROR: Microsoft Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
+      }
     } finally {
+      isMounted = false;
+      if (stepInterval) clearInterval(stepInterval);
       setIsGeneratingInsights(false);
       setInsightStep('');
     }

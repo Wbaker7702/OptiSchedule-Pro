@@ -9,7 +9,7 @@ const VALID_CREDENTIALS = [
 function generateToken() {
   // In production, use proper JWT library
   const timestamp = Date.now();
-  const random = Math.random().toString(36).substr(2);
+  const random = Math.random().toString(36).slice(2);
   return `token_${timestamp}_${random}`;
 }
 

@@ -5,16 +5,25 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 export async function geminiChat(messages, systemInstruction) {
   const apiKey = process.env.GEMINI_API_KEY;
-  
+
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured on the server");
   }
 
+  if (!messages || messages.length === 0) {
+    throw new Error("No messages provided");
+  }
+
   try {
     const ai = new GoogleGenAI({ apiKey });
+
+    // Separate history (all but last message) from the current message
+    const historyMessages = messages.slice(0, -1);
+    const currentMessage = messages[messages.length - 1];
+
     const chat = ai.chats.create({
       model: 'gemini-3-flash-preview',
-      history: messages.map(m => ({
+      history: historyMessages.map(m => ({
         role: m.role === 'ai' ? 'model' : 'user',
         parts: [{ text: m.content }],
       })),
@@ -23,15 +32,15 @@ export async function geminiChat(messages, systemInstruction) {
       },
     });
 
-    const result = await chat.sendMessageStream({ message: messages[messages.length - 1].content });
-    
+    const result = await chat.sendMessageStream({ message: currentMessage.content });
+
     let fullResponse = "";
     for await (const chunk of result) {
       if (chunk.text) {
         fullResponse += chunk.text;
       }
     }
-    
+
     return fullResponse;
   } catch (error) {
     console.error("Gemini API Error:", error);

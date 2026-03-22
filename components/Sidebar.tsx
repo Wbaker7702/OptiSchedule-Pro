@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LayoutDashboard, CalendarDays, Activity, Package, BarChart3, Users, Settings as SettingsIcon, LogOut, ShieldCheck, ArrowLeftRight, Grid3X3, TrendingUp, Coins, Star, Truck, Ghost } from 'lucide-react';
 import { View } from '../types';
@@ -16,6 +15,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
     { id: View.SCHEDULING, label: 'Scheduling', icon: CalendarDays },
     { id: View.OPERATIONS, label: 'Operations', icon: Activity },
     { id: View.ANALYTICS, label: 'Analytics', icon: BarChart3 },
+  ];
+
+  const advancedMenuItems = [
+    { id: View.INVENTORY, label: 'Inventory', icon: Package },
+    { id: View.TEAM, label: 'Team', icon: Users },
+    { id: View.LOGISTICS, label: 'Logistics', icon: Truck },
+    { id: View.COMPARISON, label: 'Comparison', icon: ArrowLeftRight },
+    { id: View.METRICS_REPORT, label: 'Metrics Report', icon: Grid3X3 },
+    { id: View.ROYALTY_DASHBOARD, label: 'Royalty', icon: Coins },
+    { id: View.STORE_RATINGS, label: 'Ratings', icon: Star },
+    { id: View.GHOST_INVENTORY, label: 'Ghost Inventory', icon: Ghost },
+    { id: View.PLAYBOOK, label: 'Playbook', icon: ShieldCheck },
     { id: View.SETTINGS, label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -33,7 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => (
           <button
             key={item.id}
@@ -48,6 +59,24 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
             {item.label}
           </button>
         ))}
+
+        <div className="my-4 pt-4 border-t border-slate-800">
+          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-4 mb-2">Advanced</p>
+          {advancedMenuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setCurrentView(item.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                currentView === item.id
+                  ? 'bg-[#1e293b] text-[#2dd4bf]'
+                  : 'text-slate-400 hover:bg-[#1e293b] hover:text-white'
+              }`}
+            >
+              <item.icon className={`w-4 h-4 ${currentView === item.id ? 'text-[#2dd4bf]' : 'text-slate-500'}`} />
+              {item.label}
+            </button>
+          ))}
+        </div>
       </nav>
 
       <div className="p-4 border-t border-slate-800">

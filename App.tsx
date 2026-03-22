@@ -32,11 +32,35 @@ const App: React.FC = () => {
 
   React.useEffect(() => {
     // Check for valid authentication token on app load
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      // In production, validate token with backend
-      setIsAuthenticated(true);
-    }
+    const validateAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setIsAuthenticated(false);
+        return;
+      }
+
+      try {
+        // Validate token with backend
+        const response = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'validate', token }),
+        });
+
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        // If backend is unavailable, accept token (graceful degradation)
+        setIsAuthenticated(true);
+      }
+    };
+
+    validateAuth();
   }, []);
 
   const handleLogin = () => setIsAuthenticated(true);
