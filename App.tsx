@@ -31,12 +31,31 @@ const App: React.FC = () => {
   const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('connected');
 
   React.useEffect(() => {
-    // Check for valid authentication token on app load
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      // In production, validate token with backend
-      setIsAuthenticated(true);
-    }
+    // Validate authentication token with backend on app load
+    const validateAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          const response = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'validate', token }),
+          });
+          const data = await response.json();
+          if (response.ok && data.valid) {
+            setIsAuthenticated(true);
+          } else {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+          }
+        } catch (error) {
+          console.error('Token validation failed:', error);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+        }
+      }
+    };
+    validateAuth();
   }, []);
 
   const handleLogin = () => setIsAuthenticated(true);

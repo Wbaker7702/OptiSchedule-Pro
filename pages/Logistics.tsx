@@ -9,15 +9,31 @@ const Logistics: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportSuccess, setShowExportSuccess] = useState(false);
-  
+
   // Insight Engine State
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [insightStep, setInsightStep] = useState<string>('');
 
+  const isMountedRef = useRef(true);
+  const timerRefsRef = useRef<(NodeJS.Timeout | NodeJS.Timer)[]>([]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      timerRefsRef.current.forEach(timer => {
+        clearTimeout(timer as NodeJS.Timeout);
+        clearInterval(timer as NodeJS.Timer);
+      });
+    };
+  }, []);
+
   const handleSync = () => {
     setIsSyncing(true);
-    setTimeout(() => setIsSyncing(false), 2000);
+    const timeout = setTimeout(() => {
+      if (isMountedRef.current) setIsSyncing(false);
+    }, 2000);
+    timerRefsRef.current.push(timeout);
   };
 
   const generateInsights = async () => {
@@ -34,11 +50,16 @@ const Logistics: React.FC = () => {
 
     let stepIdx = 0;
     const stepInterval = setInterval(() => {
+        if (!isMountedRef.current) {
+          clearInterval(stepInterval);
+          return;
+        }
         if (stepIdx < steps.length) {
             setInsightStep(steps[stepIdx]);
             stepIdx++;
         }
     }, 400);
+    timerRefsRef.current.push(stepInterval);
 
     try {
       // Call backend API instead of exposing API key to client
@@ -69,21 +90,28 @@ const Logistics: React.FC = () => {
 
       const responseData = await apiResponse.json();
       clearInterval(stepInterval);
-      setAiInsight(responseData.response || "Insight generation failed. Azure Handshake Timeout.");
+      if (isMountedRef.current) {
+        setAiInsight(responseData.response || "Insight generation failed. Azure Handshake Timeout.");
+      }
     } catch (error) {
       clearInterval(stepInterval);
       console.error("AI Insight Error:", error);
-      setAiInsight("CRITICAL ERROR: Microsoft Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
+      if (isMountedRef.current) {
+        setAiInsight("CRITICAL ERROR: Microsoft Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
+      }
     } finally {
-      setIsGeneratingInsights(false);
-      setInsightStep('');
+      if (isMountedRef.current) {
+        setIsGeneratingInsights(false);
+        setInsightStep('');
+      }
     }
   };
 
   const handleExport = () => {
     setIsExporting(true);
-    
-    setTimeout(() => {
+
+    const timeout1 = setTimeout(() => {
+      if (!isMountedRef.current) return;
       try {
         const timestamp = new Date().toLocaleString();
         const content = `
@@ -122,18 +150,22 @@ RECONCILIATION:
         link.setAttribute('download', `Node_5065_Logistics_Manifest_${Date.now()}.txt`);
         document.body.appendChild(link);
         link.click();
-        
+
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-        
+
         setIsExporting(false);
         setShowExportSuccess(true);
-        setTimeout(() => setShowExportSuccess(false), 3000);
+        const timeout2 = setTimeout(() => {
+          if (isMountedRef.current) setShowExportSuccess(false);
+        }, 3000);
+        timerRefsRef.current.push(timeout2);
       } catch (err) {
         console.error("Export Error:", err);
-        setIsExporting(false);
+        if (isMountedRef.current) setIsExporting(false);
       }
     }, 1500);
+    timerRefsRef.current.push(timeout1);
   };
 
   const docks = [
