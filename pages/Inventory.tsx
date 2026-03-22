@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
@@ -27,24 +28,21 @@ const Inventory: React.FC = () => {
   const handleNewOrder = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    
     // Simulate API request to Dynamics 365 Supply Chain Management
-    const timeout1 = setTimeout(() => {
+    setTimeout(() => {
       setIsSubmitting(false);
       setPendingOrdersCount(prev => prev + 1);
       setIsOrderModalOpen(false);
       setSuccessMessage('Order Dispatched to Dynamics 365 Supply Chain');
       setShowSuccess(true);
       setOrderForm({ sku: '', quantity: '1', priority: 'Standard' });
-
+      
       // Update item status locally if matched
       setItems(prev => prev.map(i => i.sku === orderForm.sku ? { ...i, status: 'Good' } : i)); // Optimistic update simulation
 
-      const timeout2 = setTimeout(() => setShowSuccess(false), 3000);
-      return () => clearTimeout(timeout2);
+      setTimeout(() => setShowSuccess(false), 3000);
     }, 1500);
-
-    return () => clearTimeout(timeout1);
   };
 
   const criticalCount = items.filter(i => i.status === 'Critical').length;
@@ -56,7 +54,7 @@ const Inventory: React.FC = () => {
 
     setIsReplenishing(true);
     setD365Logs([]);
-
+    
     const sequence = [
       "Initializing Dynamics 365 Supply Chain Handshake...",
       "Authenticating Secure Node #5065...",
@@ -79,12 +77,9 @@ const Inventory: React.FC = () => {
         setPendingOrdersCount(prev => prev + targetItems.length);
         setSuccessMessage(`Auto-Replenished ${targetItems.length} Items via Dynamics 365`);
         setShowSuccess(true);
-        const timeout = setTimeout(() => setShowSuccess(false), 4000);
-        return () => clearTimeout(timeout);
+        setTimeout(() => setShowSuccess(false), 4000);
       }
     }, 800);
-
-    return () => clearInterval(interval);
   };
 
   return (

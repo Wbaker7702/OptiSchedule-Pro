@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -35,7 +36,7 @@ const Comparison: React.FC = () => {
     setIsSyncing(true);
     setSyncProgress(0);
     setSyncPhase('Initializing Handshake...');
-
+    
     const interval = setInterval(() => {
       setSyncProgress(prev => {
         if (prev < 30) setSyncPhase('Mapping Fiscal Data...');
@@ -51,7 +52,7 @@ const Comparison: React.FC = () => {
       });
     }, 50);
 
-    const timeout = setTimeout(() => {
+    setTimeout(() => {
       const optimizedData = chartData.map(d => ({
         ...d,
         store5065: Math.round((d.store5065 + d.store2080) / 2)
@@ -60,11 +61,6 @@ const Comparison: React.FC = () => {
       setIsSyncing(false);
       setIsApplied(true);
     }, 3000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
   };
 
   return (

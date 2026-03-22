@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, LineChart, Line } from 'recharts';
@@ -119,7 +120,7 @@ SENTINEL STATUS: NOMINAL
     setActiveReport(id);
     setIsGenerating(true);
     setShowReport(false);
-
+    
     const steps = [
       "Quarrying Azure Cloud Data Lake...",
       "Syncing HubSpot Breeze Ingress...",
@@ -129,12 +130,11 @@ SENTINEL STATUS: NOMINAL
     ];
 
     let currentStep = 0;
-    let isMounted = true;
     const interval = setInterval(() => {
-      if (currentStep < steps.length && isMounted) {
+      if (currentStep < steps.length) {
         setGenerationStep(steps[currentStep]);
         currentStep++;
-      } else if (currentStep >= steps.length && isMounted) {
+      } else {
         clearInterval(interval);
         setIsGenerating(false);
         setShowReport(true);
@@ -142,11 +142,6 @@ SENTINEL STATUS: NOMINAL
         downloadReportFile(id);
       }
     }, 600);
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
   };
 
   const handlePivot = () => {

@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { RefreshCw, Download, Zap, Edit2, AlertCircle, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
 import { WEEKLY_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
 import { ScheduleLogEntry } from '../types';
-import { validators } from '../utils/validation';
+import { GoogleGenAI, Type } from "@google/genai";
 
 interface SchedulingProps {
   setCurrentView?: any;
@@ -33,7 +34,6 @@ const Scheduling: React.FC<SchedulingProps> = () => {
   const [modificationType, setModificationType] = useState<'increase' | 'decrease'>('increase');
   const [modificationReason, setModificationReason] = useState('Call-Out Coverage');
   const [modificationNote, setModificationNote] = useState('');
-  const [noteError, setNoteError] = useState('');
 
   const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
 
@@ -60,16 +60,6 @@ const Scheduling: React.FC<SchedulingProps> = () => {
 
   const handleSaveModification = () => {
     if (!selectedSlot) return;
-
-    // Validate modification note if provided
-    setNoteError('');
-    if (modificationNote) {
-      const noteValidation = validators.text(modificationNote, 0, 200);
-      if (!noteValidation.valid) {
-        setNoteError(noteValidation.error || 'Invalid note');
-        return;
-      }
-    }
 
     // 1. Update Schedule Data
     const newValue = modificationType === 'increase' ? selectedSlot.currentValue + 1 : Math.max(0, selectedSlot.currentValue - 1);
@@ -128,51 +118,43 @@ const Scheduling: React.FC<SchedulingProps> = () => {
   const handleAIForecast = async () => {
     setIsForecasting(true);
     try {
-      // Call backend API instead of exposing API key to client
-      const apiResponse = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'generateContent',
-          payload: {
-            prompt: `Generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm).
-        Traffic is projected to be heavy on Friday and Saturday.
-        Staffing levels per slot should range between 4 and 14.
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm). 
+        Traffic is projected to be heavy on Friday and Saturday. 
+        Staffing levels per slot should range between 4 and 14. 
         Output strictly valid JSON matching this schema.`,
-            responseSchema: {
-              type: 'object',
-              properties: {
-                heatmap: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      day: { type: 'string' },
-                      hours: {
-                        type: 'array',
-                        items: { type: 'integer' }
-                      }
-                    },
-                    required: ["day", "hours"]
-                  }
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              heatmap: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    day: { type: Type.STRING },
+                    hours: { 
+                      type: Type.ARRAY,
+                      items: { type: Type.INTEGER }
+                    }
+                  },
+                  required: ["day", "hours"]
                 }
               }
             }
           }
-        })
+        }
       });
 
-      if (!apiResponse.ok) {
-        throw new Error(`API error: ${apiResponse.statusText}`);
-      }
-
-      const responseData = await apiResponse.json();
-      const text = responseData.response;
+      const text = response.text;
       if (text) {
         const data = JSON.parse(text);
         if (data.heatmap && Array.isArray(data.heatmap)) {
           setScheduleData(data.heatmap);
-
+          
           const newLog: ScheduleLogEntry = {
             id: `SL-AI-${Date.now()}`,
             timestamp: new Date().toLocaleString(),
@@ -284,18 +266,13 @@ const Scheduling: React.FC<SchedulingProps> = () => {
 
               <div>
                 <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Additional Notes (Optional)</label>
-                <input
+                <input 
                   type="text"
                   value={modificationNote}
-                  onChange={(e) => setModificationNote(e.target.value.slice(0, 200))}
+                  onChange={(e) => setModificationNote(e.target.value)}
                   placeholder="E.g., Approved by Regional..."
-                  maxLength={200}
-                  className={`w-full p-3 bg-slate-950 border rounded-xl outline-none text-xs text-white placeholder-slate-600 font-mono focus:border-blue-500 transition-colors ${noteError ? 'border-red-500 bg-red-500/10' : 'border-slate-800'}`}
+                  className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-blue-500 outline-none text-xs text-white placeholder-slate-600 font-mono"
                 />
-                <div className="flex justify-between items-start mt-2">
-                  {noteError && <p className="text-[9px] text-red-400 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{noteError}</p>}
-                  <span className="text-[9px] text-slate-600 ml-auto">{modificationNote.length}/200</span>
-                </div>
               </div>
 
               <button 

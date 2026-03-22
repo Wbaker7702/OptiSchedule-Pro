@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -44,7 +45,7 @@ const RoyaltyDashboard: React.FC = () => {
     const interval = setInterval(() => {
       setLiveSales(prev => prev + Math.floor(Math.random() * 200));
       setAccruedRoyalty(prev => prev + (Math.random() * 0.85));
-
+      
       // Fluctuate Health Metrics around targets
       setCurrentLaborCost(prev => {
         const delta = (Math.random() - 0.5) * 0.4;
@@ -58,7 +59,7 @@ const RoyaltyDashboard: React.FC = () => {
       // Advance Ledger Sync
       setLedgerSyncProgress(prev => {
         const next = prev + (Math.random() * 0.05);
-        return next > 100 ? 12.4 : next;
+        return next > 100 ? 12.4 : next; 
       });
 
       // Update Sync Logs
@@ -77,10 +78,7 @@ const RoyaltyDashboard: React.FC = () => {
       setSyncLogs(prev => [newLog, ...prev].slice(0, 4));
 
     }, 3000);
-
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   const triggerSentinelRefresh = () => {
