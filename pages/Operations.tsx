@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { AUDIT_LOGS_MOCK } from '../constants';
-import { CheckCircle2, AlertTriangle, XCircle, Activity, Shield, FileText, BarChart3 } from 'lucide-react';
-import GovernanceTab from '../components/GovernanceTab';
+import { CheckCircle2, AlertTriangle, XCircle, Activity, BarChart3 } from 'lucide-react';
 
 interface OperationsProps {
   defaultTab?: 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance';
@@ -11,7 +10,7 @@ interface OperationsProps {
   onClearTrigger?: any;
 }
 
-const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externalTrigger, onClearTrigger }) => {
+const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   useEffect(() => {
@@ -25,7 +24,6 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
   const tabs = [
     { id: 'metrics', label: 'Metrics', icon: BarChart3 },
     { id: 'audit', label: 'Audit Logs', icon: Activity },
-    { id: 'compliance', label: 'Governance', icon: Shield },
   ];
 
   return (
@@ -56,12 +54,8 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
           })}
         </div>
 
-        {activeTab === 'compliance' ? (
-          <GovernanceTab />
-        ) : (
-          <>
-            {/* Status Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Status Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800 flex items-center gap-4 hover:border-emerald-500/30 transition-colors">
                 <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                    <CheckCircle2 className="w-6 h-6 text-emerald-500" />
@@ -149,8 +143,6 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
                 </table>
               </div>
             </div>
-          </>
-        )}
 
       </div>
     </div>
