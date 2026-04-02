@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Coins, Zap, Activity, Clock, ShieldCheck, TrendingUp, DollarSign, ArrowUpRight, CheckCircle2, Loader2, Landmark, History, Server, Database, Cloud, Shield, CalendarDays, Info, Terminal, Radio, Link as LinkIcon, RefreshCcw, Search, ShieldAlert, Cpu, HeartPulse, CheckCircle } from 'lucide-react';
+import { Coins, Zap, Activity, Clock, ShieldCheck, TrendingUp, DollarSign, CheckCircle2, Loader2, Landmark, Shield, CalendarDays, Info, Terminal, Radio, Link as LinkIcon, RefreshCcw, ShieldAlert, Cpu, HeartPulse } from 'lucide-react';
 import { ROYALTY_METRICS, STORE_NUMBER, CURRENT_STATE, LABOR_REGULATIONS } from '../constants';
 
 const efficiencyTrend = [

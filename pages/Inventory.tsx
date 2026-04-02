@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
-import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Package, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, ShieldCheck, Zap, Terminal } from 'lucide-react';
+import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, Zap, Terminal } from 'lucide-react';
 import { Product } from '../types';
 
 const Inventory: React.FC = () => {
@@ -15,7 +15,6 @@ const Inventory: React.FC = () => {
   
   // Active Procurement State
   const [isReplenishing, setIsReplenishing] = useState(false);
-  const [replenishmentStep, setReplenishmentStep] = useState<string>('');
   const [d365Logs, setD365Logs] = useState<string[]>([]);
 
   // Form State

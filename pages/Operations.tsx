@@ -6,15 +6,13 @@ import { CheckCircle2, AlertTriangle, XCircle, Activity, BarChart3 } from 'lucid
 
 interface OperationsProps {
   defaultTab?: 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance';
-  externalTrigger?: any;
-  onClearTrigger?: any;
 }
 
 const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   useEffect(() => {
-    if (defaultTab) setActiveTab(defaultTab);
+    setActiveTab(defaultTab);
   }, [defaultTab]);
 
   const passedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Passed').length;
@@ -40,7 +38,7 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   isActive 
                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm' 

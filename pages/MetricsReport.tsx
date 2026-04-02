@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, LineChart, Line } from 'recharts';
-import { DollarSign, Clock, Target, TrendingUp, ArrowUpRight, ArrowDownRight, Zap, Cloud, Database, ShieldCheck, Filter, Download, ListChecks, Loader2, CheckCircle, FileText, Calendar, BarChart3, PieChart, Activity, RefreshCw, Layers, ChevronRight, FileDown, ShieldAlert, Brain } from 'lucide-react';
-import { FISCAL_METRICS, AZURE_TELEMETRY, ROYALTY_METRICS } from '../constants';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Clock, TrendingUp, Zap, Cloud, Database, ShieldCheck, Download, Loader2, CheckCircle, FileText, Activity, RefreshCw, Layers, FileDown, ShieldAlert, Brain } from 'lucide-react';
 import { budgetGuardian, checkFatigue } from '../validators';
 
 const otTrendData = [
@@ -47,7 +46,7 @@ const MetricsReport: React.FC = () => {
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [generationStep, setGenerationStep] = useState('');
   const [showReport, setShowReport] = useState(false);
-  const [pivotComplete, setPivotComplete] = useState(false);
+  const [pivotComplete] = useState(false);
 
   // State for Scenario Forecaster ("Battle Creek Test")
   const [scenario, setScenario] = useState({
@@ -142,15 +141,6 @@ SENTINEL STATUS: NOMINAL
         downloadReportFile(id);
       }
     }, 600);
-  };
-
-  const handlePivot = () => {
-    setIsGenerating(true);
-    setTimeout(() => {
-      setIsGenerating(false);
-      setPivotComplete(true);
-      setTimeout(() => setPivotComplete(false), 5000);
-    }, 2000);
   };
 
   return (

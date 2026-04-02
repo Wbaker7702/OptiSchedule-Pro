@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, AlertCircle, CheckCircle2, Info, ChevronDown } from 'lucide-react';
+import { Bell, Search, AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { CURRENT_USER } from '../constants';
 
 interface HeaderProps {

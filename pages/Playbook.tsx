@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { FISCAL_METRICS, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
+import { LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
 import { 
   ShieldCheck, 
   MapPin, 
@@ -17,7 +17,6 @@ import {
   Users, 
   Zap, 
   ChevronRight, 
-  BookOpen,
   Loader2
 } from 'lucide-react';
 

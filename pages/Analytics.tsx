@@ -1,14 +1,9 @@
 
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell, LineChart, Line } from 'recharts';
-import { Download, FileText, TrendingUp, DollarSign, Users, Scale, Target, ArrowUpRight, Loader2, Database, ShieldCheck, ArrowUp, Megaphone, Heart, BarChart2, Layers, Sparkles } from 'lucide-react';
+import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, LineChart, Line } from 'recharts';
+import { Download, FileText, Scale, Loader2, Megaphone, Heart, BarChart2, Layers, Sparkles } from 'lucide-react';
 import { FISCAL_METRICS, HUBSPOT_METRICS } from '../constants';
-import { IntegrationStatus } from '../types';
-
-interface AnalyticsProps {
-  hubspotStatus: IntegrationStatus;
-}
 
 const correlationData = [
   { time: '08:00', crmLeads: 45, footTraffic: 220 },
@@ -41,7 +36,7 @@ const reports = [
   { id: 'rep-3', name: 'Store 5065 Pilot Proof of Concept', date: getFormattedDate(14), size: '2.4 MB' },
 ];
 
-const Analytics: React.FC<AnalyticsProps> = ({ hubspotStatus }) => {
+const Analytics: React.FC = () => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const handleDownloadReport = (report: typeof reports[0]) => {

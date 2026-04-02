@@ -1,12 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap, Cloud, Database, ShieldCheck, Cpu } from 'lucide-react';
+import { Bot, Send, X, Minimize2, Maximize2, Terminal, Loader2, Zap, Cloud, Database } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
-import { IntegrationStatus } from '../types';
-
-interface SentinelAIProps {
-    hubspotStatus: IntegrationStatus;
-}
 
 interface Message {
     role: 'user' | 'ai';
@@ -17,7 +12,7 @@ interface Message {
     isD365?: boolean;
 }
 
-const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
+const SentinelAI: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [input, setInput] = useState('');

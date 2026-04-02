@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidSchedule(data) {
+      return data.keys().hasAll(['data', 'updatedAt']) &&
+             data.data is list &&
+             data.data.size() == 7 &&
+             data.updatedAt is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    match /schedules/weekly {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidSchedule(request.resource.data);
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

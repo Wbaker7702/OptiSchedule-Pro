@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ArrowLeftRight, TrendingDown, TrendingUp, Store, Globe, Activity, Scale, Zap, Target, CheckCircle2, RefreshCw, ShieldCheck, AlertCircle } from 'lucide-react';
-import { FISCAL_METRICS, STORE_2080_METRICS, STORE_NUMBER, COMPARISON_STORE, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
+import { Globe, Activity, Scale, CheckCircle2, RefreshCw, ShieldCheck, AlertCircle } from 'lucide-react';
+import { STORE_NUMBER, COMPARISON_STORE, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
 
 const initialChartData = [
   { hour: '8 AM', store5065: 45, store2080: 38 },

@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { MOCK_STORES } from '../constants';
-import { StoreRatingData } from '../types';
-import { ChevronLeft, ChevronRight, Star, ShieldCheck, Activity, Users, Target, TrendingUp, BarChart3, MapPin, Search, Calendar, Award, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, ShieldCheck, Activity, Users, Target, TrendingUp, BarChart3, MapPin, Calendar, Award, Loader2 } from 'lucide-react';
 
 const StoreRatings: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -69,7 +68,7 @@ STATUS: NOMINAL
     }, 1200);
   };
 
-  const MetricBar = ({ label, value, icon: Icon, color }: { label: string, value: number, icon: any, color: string }) => (
+  const MetricBar = ({ label, value, icon: Icon, color }: { label: string, value: number, icon: React.ElementType, color: string }) => (
     <div className="space-y-2">
       <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
         <div className="flex items-center gap-2 text-slate-400">

@@ -2,42 +2,24 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { 
-  Shield, 
   Database, 
-  Eye, 
-  Bell, 
-  RefreshCw, 
-  Lock, 
-  Globe, 
   Save, 
   Check, 
-  AlertTriangle,
-  Loader2,
-  Terminal,
-  Layers,
-  Link as LinkIcon,
-  MessageSquare,
-  Scale,
-  Activity,
-  ArrowRightLeft,
-  Server,
-  Zap,
-  Sparkles,
-  Sliders,
-  ShieldCheck,
+  Loader2, 
+  Terminal, 
+  Scale, 
+  Activity, 
+  Zap, 
+  ShieldCheck, 
   Cpu
 } from 'lucide-react';
 import { APP_VERSION } from '../constants';
 import { IntegrationStatus } from '../types';
 
-interface SettingsProps {
-  hubspotStatus: IntegrationStatus;
-  setHubspotStatus: (status: IntegrationStatus) => void;
-}
-
 type SettingTab = 'breeze' | 'erp' | 'conflict';
 
-const Settings: React.FC<SettingsProps> = ({ hubspotStatus, setHubspotStatus }) => {
+const Settings: React.FC = () => {
+  const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('connected');
   const [activeTab, setActiveTab] = useState<SettingTab>('breeze');
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -241,7 +223,7 @@ const Settings: React.FC<SettingsProps> = ({ hubspotStatus, setHubspotStatus }) 
                   ].map((strategy) => (
                     <div 
                       key={strategy.id}
-                      onClick={() => setConflictStrategy(strategy.id as any)}
+                      onClick={() => setConflictStrategy(strategy.id as 'ERP' | 'CRM' | 'Hybrid')}
                       className={`cursor-pointer p-5 rounded-2xl border-2 transition-all group ${
                          conflictStrategy === strategy.id ? 'border-indigo-500 bg-indigo-50/50' : 'border-gray-100 hover:border-indigo-100 bg-gray-50/50'
                       }`}

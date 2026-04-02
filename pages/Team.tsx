@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { EMPLOYEES as INITIAL_EMPLOYEES, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
-import { Mail, MoreHorizontal, Star, ChevronLeft, ChevronRight, UserPlus, X, ShieldCheck, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe } from 'lucide-react';
+import { MoreHorizontal, ChevronLeft, ChevronRight, UserPlus, X, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe } from 'lucide-react';
 import { Employee } from '../types';
 
 const ITEMS_PER_PAGE = 8;
@@ -17,7 +17,7 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [activeState, setActiveState] = useState(CURRENT_STATE);
+  const [activeState] = useState(CURRENT_STATE);
 
   const reg = LABOR_REGULATIONS[activeState] || LABOR_REGULATIONS['MI'];
 

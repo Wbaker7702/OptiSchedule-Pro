@@ -1,13 +1,12 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
-import { Truck, Box, Clock, Activity, ArrowUpRight, ShieldCheck, MapPin, Package, AlertTriangle, CheckCircle2, Loader2, Zap, Database, Cloud, FileDown, Download, Brain, Sparkles, Command, MessageSquareText, Terminal, Cpu, Radio, Shield } from 'lucide-react';
-import { HOURLY_LOGISTICS, STORE_NUMBER } from '../constants';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Truck, Activity, ShieldCheck, Package, CheckCircle2, Loader2, Zap, Database, Download, Brain, Sparkles, Command, Terminal, Cpu, Radio } from 'lucide-react';
+import { HOURLY_LOGISTICS } from '../constants';
 import { GoogleGenAI } from "@google/genai";
 
 const Logistics: React.FC = () => {
-  const [activeDock, setActiveDock] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportSuccess, setShowExportSuccess] = useState(false);
@@ -15,7 +14,7 @@ const Logistics: React.FC = () => {
   // Insight Engine State
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
-  const [insightStep, setInsightStep] = useState<string>('');
+  const [insightStep] = useState<string>('');
 
   const handleSync = () => {
     setIsSyncing(true);
