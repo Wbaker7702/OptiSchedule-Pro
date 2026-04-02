@@ -2,10 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { AUDIT_LOGS_MOCK } from '../constants';
-import { CheckCircle2, AlertTriangle, XCircle, Activity, Shield, FileText, BarChart3, Wand2, Loader2 } from 'lucide-react';
-import GovernanceTab from '../components/GovernanceTab';
-import ComplianceVisualization from '../components/ComplianceVisualization';
-import WorkforceImpact from '../components/WorkforceImpact';
+import { CheckCircle2, AlertTriangle, XCircle, Activity, BarChart3 } from 'lucide-react';
 
 interface OperationsProps {
   defaultTab?: 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance';
@@ -13,38 +10,20 @@ interface OperationsProps {
   onClearTrigger?: any;
 }
 
-const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externalTrigger, onClearTrigger }) => {
+const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics' }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [isFixing, setIsFixing] = useState(false);
-  const [logs, setLogs] = useState(AUDIT_LOGS_MOCK);
 
   useEffect(() => {
     if (defaultTab) setActiveTab(defaultTab);
   }, [defaultTab]);
 
-  const handleAutoFix = () => {
-    setIsFixing(true);
-    setTimeout(() => {
-      // Auto-resolve warnings and failures
-      const updatedLogs = logs.map(log => {
-        if (log.status === 'Warning' || log.status === 'Failed') {
-          return { ...log, status: 'Passed' as const };
-        }
-        return log;
-      });
-      setLogs(updatedLogs);
-      setIsFixing(false);
-    }, 2000);
-  };
-
-  const passedCount = logs.filter(l => l.status === 'Passed').length;
-  const warningCount = logs.filter(l => l.status === 'Warning').length;
-  const failedCount = logs.filter(l => l.status === 'Failed').length;
+  const passedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Passed').length;
+  const warningCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Warning').length;
+  const failedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Failed').length;
 
   const tabs = [
     { id: 'metrics', label: 'Metrics', icon: BarChart3 },
     { id: 'audit', label: 'Audit Logs', icon: Activity },
-    { id: 'compliance', label: 'Governance', icon: Shield },
   ];
 
   return (
@@ -53,45 +32,30 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
         
-        {/* Tab Navigation & Actions */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex space-x-1 bg-slate-900/50 p-1 rounded-xl border border-slate-800 w-fit">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    isActive 
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm' 
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <button 
-            onClick={handleAutoFix}
-            disabled={isFixing}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg shadow-blue-600/20 active:scale-95"
-          >
-            {isFixing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-            {isFixing ? 'Running Fixes...' : 'Trigger Auto-Fix'}
-          </button>
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 bg-slate-900/50 p-1 rounded-xl border border-slate-800 w-fit">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  isActive 
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        {activeTab === 'compliance' ? (
-          <GovernanceTab />
-        ) : (
-          <>
-            {/* Status Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Status Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800 flex items-center gap-4 hover:border-emerald-500/30 transition-colors">
                 <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                    <CheckCircle2 className="w-6 h-6 text-emerald-500" />
@@ -123,14 +87,6 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
               </div>
             </div>
 
-            {/* Metrics Visualization */}
-            {activeTab === 'metrics' && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <WorkforceImpact />
-                <ComplianceVisualization logs={logs} />
-              </div>
-            )}
-
             {/* Audit Log Table */}
             <div className="bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden">
               <div className="p-6 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
@@ -158,7 +114,7 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800 text-sm font-mono text-slate-300">
-                    {logs.map((log) => (
+                    {AUDIT_LOGS_MOCK.map((log) => (
                       <tr key={log.id} className="hover:bg-slate-800/50 transition-colors group">
                         <td className="px-6 py-4 text-slate-500 text-xs">
                           {log.id}
@@ -187,8 +143,6 @@ const Operations: React.FC<OperationsProps> = ({ defaultTab = 'metrics', externa
                 </table>
               </div>
             </div>
-          </>
-        )}
 
       </div>
     </div>

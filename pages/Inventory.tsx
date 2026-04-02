@@ -203,7 +203,7 @@ const Inventory: React.FC = () => {
                     <span className="px-2 py-0.5 bg-blue-600 rounded text-[9px] font-black text-white uppercase tracking-widest border border-blue-400/30">D365 Linked</span>
                  </div>
                  <p className="text-xs text-blue-200 leading-relaxed font-mono uppercase tracking-widest">
-                    Automated Supply Chain Logic. Triggering this node will scan current inventory levels against the Dynamics 365 replenishment algorithm AND <span className="text-[#ff7a59] font-bold">HubSpot Breeze</span> demand signals to instantly place orders for Critical/Low stock.
+                    Automated Supply Chain Logic. Triggering this node will scan current inventory levels against the Dynamics 365 replenishment algorithm and instantly place orders for Critical/Low stock.
                  </p>
               </div>
            </div>

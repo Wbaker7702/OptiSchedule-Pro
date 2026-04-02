@@ -13,20 +13,8 @@ export enum View {
   ROYALTY_DASHBOARD = 'ROYALTY_DASHBOARD',
   STORE_RATINGS = 'STORE_RATINGS',
   LOGISTICS = 'LOGISTICS',
-  GHOST_INVENTORY = 'GHOST_INVENTORY'
-}
-
-export type PluginCategory = 'CRM' | 'ERP' | 'Jurisdiction' | 'AI_Agent' | 'Vision' | 'Cloud';
-
-export interface SystemPlugin {
-  id: string;
-  name: string;
-  category: PluginCategory;
-  provider: string;
-  description: string;
-  version: string;
-  status: 'Mounted' | 'Available' | 'Locked';
-  iconName: string;
+  GHOST_INVENTORY = 'GHOST_INVENTORY',
+  BLACK_FRIDAY_SIMULATOR = 'BLACK_FRIDAY_SIMULATOR'
 }
 
 export type ERPProvider = 'Dynamics 365' | 'SAP S/4HANA' | 'FDE' | 'HubSpot' | 'Azure';
@@ -80,14 +68,6 @@ export interface DepartmentMetric {
   extraMetricLabel: string;
   extraMetricValue: string;
   waitTime: string;
-}
-
-export interface IngressDataPoint {
-  date: string;
-  volume: number;
-  source: 'Dynamics 365' | 'HubSpot' | 'Microsoft Sentinel' | 'Azure Edge';
-  growth: number;
-  status: 'Verified' | 'Syncing' | 'Hardened';
 }
 
 export interface Vulnerability {

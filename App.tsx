@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Scheduling from './pages/Scheduling';
@@ -15,6 +15,7 @@ import RoyaltyDashboard from './pages/RoyaltyDashboard';
 import StoreRatings from './pages/StoreRatings';
 import Logistics from './pages/Logistics';
 import GhostInventory from './pages/GhostInventory';
+import BlackFridaySimulator from './pages/BlackFridaySimulator';
 import Login from './components/Login';
 import SentinelAI from './components/SentinelAI';
 import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint } from './types';
@@ -58,6 +59,7 @@ const App: React.FC = () => {
       case View.DASHBOARD: return <Dashboard setCurrentView={setCurrentView} />;
       case View.LOGISTICS: return <Logistics />;
       case View.GHOST_INVENTORY: return <GhostInventory />;
+      case View.BLACK_FRIDAY_SIMULATOR: return <BlackFridaySimulator />;
       case View.METRICS_REPORT: return <MetricsReport />;
       case View.ROYALTY_DASHBOARD: return <RoyaltyDashboard />;
       case View.STORE_RATINGS: return <StoreRatings />;
@@ -87,7 +89,7 @@ const App: React.FC = () => {
       />
       <main className="flex-1 ml-64 flex flex-col h-screen relative">
         {renderView()}
-        <SentinelAI hubspotStatus={hubspotStatus} />
+        <SentinelAI />
       </main>
     </div>
   );
