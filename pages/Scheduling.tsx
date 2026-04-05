@@ -1,18 +1,26 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
-import { RefreshCw, Download, Zap, Edit2, History, User, CalendarDays, Loader2, CheckCircle2, Save, X } from 'lucide-react';
+import { RefreshCw, Download, Zap, Edit2, AlertCircle, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
 import { WEEKLY_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
 import { ScheduleLogEntry } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
-import { db, auth } from '../firebase';
-import { doc, onSnapshot, setDoc, getDocFromServer } from 'firebase/firestore';
 
-const Scheduling: React.FC = () => {
+interface SchedulingProps {
+  setCurrentView?: any;
+  onFinalize?: any;
+  activeProvider?: any;
+  setActiveProvider?: any;
+  isConnected?: any;
+  setIsConnected?: any;
+  setHubspotStatus?: any;
+  heatmapData?: any;
+  onAdjustStaffing?: any;
+}
+
+const Scheduling: React.FC<SchedulingProps> = () => {
   const [scheduleData, setScheduleData] = useState(WEEKLY_HEATMAP);
   const [logs, setLogs] = useState<ScheduleLogEntry[]>(MOCK_SCHEDULE_LOGS);
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   
   // Loading States
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -27,54 +35,7 @@ const Scheduling: React.FC = () => {
   const [modificationReason, setModificationReason] = useState('Call-Out Coverage');
   const [modificationNote, setModificationNote] = useState('');
 
-  const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
-
-  // Firestore Real-time Sync
-  useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, 'schedules', 'weekly'), (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        if (data.data) {
-          setScheduleData(data.data);
-        }
-      }
-    }, (error) => {
-      console.error('Firestore Sync Error:', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Connection Test
-  useEffect(() => {
-    const testConnection = async () => {
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration.");
-        }
-      }
-    };
-    testConnection();
-  }, []);
-
-  const handleSaveToFirestore = async (dataToSave = scheduleData) => {
-    setIsSaving(true);
-    try {
-      await setDoc(doc(db, 'schedules', 'weekly'), {
-        data: dataToSave,
-        updatedAt: new Date().toISOString(),
-        updatedBy: auth.currentUser?.email || 'Anonymous'
-      });
-      setShowSaveSuccess(true);
-      setTimeout(() => setShowSaveSuccess(false), 3000);
-    } catch (error) {
-      console.error('Error saving to Firestore:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
 
   const getHeatmapColor = (value: number) => {
     if (value >= 10) return 'bg-[#0d9488] text-white hover:bg-[#0f766e] ring-1 ring-white/10'; // Dark Teal
@@ -100,25 +61,19 @@ const Scheduling: React.FC = () => {
   const handleSaveModification = () => {
     if (!selectedSlot) return;
 
-    // 1. Calculate New Data
+    // 1. Update Schedule Data
     const newValue = modificationType === 'increase' ? selectedSlot.currentValue + 1 : Math.max(0, selectedSlot.currentValue - 1);
     
-    const updatedData = scheduleData.map(row => {
+    setScheduleData(prev => prev.map(row => {
       if (row.day === selectedSlot.day) {
         const newHours = [...row.hours];
         newHours[selectedSlot.hourIndex] = newValue;
         return { ...row, hours: newHours };
       }
       return row;
-    });
+    }));
 
-    // 2. Update Local State
-    setScheduleData(updatedData);
-
-    // 3. Save to Firestore (Real-time)
-    handleSaveToFirestore(updatedData);
-
-    // 4. Add Audit Log
+    // 2. Add Audit Log
     const newLog: ScheduleLogEntry = {
       id: `SL-${Date.now()}`,
       timestamp: new Date().toLocaleString(),
@@ -140,11 +95,7 @@ const Scheduling: React.FC = () => {
         // Simple logic: Ensure minimum of 5 staff during core hours (indices 2-6: 8am-12pm)
         // and minimum 3 elsewhere.
         const optimizedHours = row.hours.map((h, i) => {
-          // Core Morning Hours (8am-12pm)
           if (i >= 2 && i <= 6 && h < 5) return 5;
-          // Core Evening Hours (4pm-8pm)
-          if (i >= 10 && i <= 14 && h < 5) return 5;
-          // Minimum staffing elsewhere
           if (h < 3) return 3;
           return h;
         });
@@ -154,7 +105,7 @@ const Scheduling: React.FC = () => {
       const newLog: ScheduleLogEntry = {
         id: `SL-OPT-${Date.now()}`,
         timestamp: new Date().toLocaleString(),
-        manager: 'Microsoft Sentinel Optimizer',
+        manager: 'Sentinel Optimizer',
         action: 'Auto-Balanced Staffing Levels',
         reason: 'Coverage Compliance Check',
         impact: 'Risk Eliminated'
@@ -167,10 +118,10 @@ const Scheduling: React.FC = () => {
   const handleAIForecast = async () => {
     setIsForecasting(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 17 time slots from 6am to 10pm). 
+        model: 'gemini-2.5-flash',
+        contents: `Generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm). 
         Traffic is projected to be heavy on Friday and Saturday. 
         Staffing levels per slot should range between 4 and 14. 
         Output strictly valid JSON matching this schema.`,
@@ -207,7 +158,7 @@ const Scheduling: React.FC = () => {
           const newLog: ScheduleLogEntry = {
             id: `SL-AI-${Date.now()}`,
             timestamp: new Date().toLocaleString(),
-            manager: 'Microsoft Sentinel AI',
+            manager: 'Sentinel AI',
             action: 'Generated Demand Forecast',
             reason: 'High Traffic Probability',
             impact: 'Efficiency +14%'
@@ -244,19 +195,6 @@ const Scheduling: React.FC = () => {
               <div>
                  <p className="text-xs font-black uppercase tracking-widest text-white">Schedule Exported</p>
                  <p className="text-[10px] font-mono opacity-80 uppercase text-white/80">Committed to local filesystem</p>
-              </div>
-           </div>
-        </div>
-      )}
-
-      {/* Save Success Toast */}
-      {showSaveSuccess && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-500">
-           <div className="bg-blue-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-blue-400">
-              <CheckCircle2 className="w-5 h-5" />
-              <div>
-                 <p className="text-xs font-black uppercase tracking-widest text-white">Schedule Saved</p>
-                 <p className="text-[10px] font-mono opacity-80 uppercase text-white/80">Synced to Microsoft Sentinel Cloud</p>
               </div>
            </div>
         </div>
@@ -351,14 +289,6 @@ const Scheduling: React.FC = () => {
       <div className="p-8 max-w-7xl mx-auto space-y-8">
         
         <div className="flex justify-end gap-3">
-          <button 
-            onClick={() => handleSaveToFirestore()}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-blue-500 shadow-lg shadow-blue-500/20 transition-all disabled:opacity-50"
-          >
-            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} 
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
           <button 
             onClick={handleOptimize}
             disabled={isOptimizing}

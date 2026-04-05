@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
+import { FISCAL_METRICS, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
 import { 
   ShieldCheck, 
   MapPin, 
@@ -17,6 +17,7 @@ import {
   Users, 
   Zap, 
   ChevronRight, 
+  BookOpen,
   Loader2
 } from 'lucide-react';
 
@@ -32,7 +33,7 @@ const Playbook: React.FC = () => {
         const timestamp = new Date().toLocaleString();
         const content = `
 =========================================
-MICROSOFT SENTINEL POLICY FRAME - ${reg.state.toUpperCase()}
+SENTINEL POLICY FRAME - ${reg.state.toUpperCase()}
 =========================================
 GENERATED: ${timestamp}
 JURISDICTION: ${reg.state}
@@ -54,7 +55,7 @@ BREAK PROTOCOLS:
 - Threshold: ${reg.mandatoryBreakThreshold} Hours
 - Duration: ${reg.mandatoryBreakDuration} Minutes (Unpaid)
 
-MICROSOFT SENTINEL LINTER OVERRIDE:
+SENTINEL LINTER OVERRIDE:
 [ENABLED] All schedules are automatically gated by 
 these parameters to ensure zero-breach compliance.
 
@@ -65,7 +66,7 @@ these parameters to ensure zero-breach compliance.
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `Microsoft_Sentinel_Policy_${reg.state}_${Date.now()}.txt`);
+        link.setAttribute('download', `Sentinel_Policy_${reg.state}_${Date.now()}.txt`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -80,7 +81,7 @@ these parameters to ensure zero-breach compliance.
 
   return (
     <div className="flex-1 bg-slate-950 overflow-auto custom-scrollbar">
-      <Header title="Microsoft Sentinel Policy Playbook" subtitle={`Jurisdictional Compliance Matrix • Region: ${reg.state}`} />
+      <Header title="Sentinel Policy Playbook" subtitle={`Jurisdictional Compliance Matrix • Region: ${reg.state}`} />
       
       <div className="p-8 max-w-7xl mx-auto space-y-8 pb-24">
         {/* Active Jurisdiction Status */}
@@ -198,7 +199,7 @@ these parameters to ensure zero-breach compliance.
                  <div className="flex items-center gap-4 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
                     <Zap className="w-5 h-5 text-blue-400 shrink-0" />
                     <p className="text-[10px] text-slate-300 font-mono leading-relaxed">
-                       Microsoft Sentinel's scheduler automatically injects a <span className="text-blue-400 font-black">30-minute unpaid lunch</span> at exactly the 4.5-hour mark for all minor associates to ensure zero breach of MI state labor standards.
+                       Sentinel's scheduler automatically injects a <span className="text-blue-400 font-black">30-minute unpaid lunch</span> at exactly the 4.5-hour mark for all minor associates to ensure zero breach of MI state labor standards.
                     </p>
                  </div>
               </div>
@@ -217,7 +218,7 @@ these parameters to ensure zero-breach compliance.
                       </div>
                       <div>
                          <p className="text-[11px] font-black text-white uppercase tracking-widest">Restoration Gap</p>
-                         <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">Microsoft Sentinel enforces 8 hours between shifts for adult associates to prevent fatigue leakage.</p>
+                         <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">Sentinel enforces 8 hours between shifts for adult associates to prevent fatigue leakage.</p>
                       </div>
                    </div>
                    <div className="flex items-start gap-4 p-4 hover:bg-slate-800/40 transition-colors rounded-xl group cursor-help">
@@ -235,7 +236,7 @@ these parameters to ensure zero-breach compliance.
                       </div>
                       <div>
                          <p className="text-[11px] font-black text-white uppercase tracking-widest">Audit Readiness</p>
-                         <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">Full digital trail maintained for 7 years per federal retention policy. Exportable via Microsoft Sentinel D365 Bridge.</p>
+                         <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">Full digital trail maintained for 7 years per federal retention policy. Exportable via Sentinel D365 Bridge.</p>
                       </div>
                    </div>
                 </div>

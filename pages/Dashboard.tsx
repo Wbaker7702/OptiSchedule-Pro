@@ -1,12 +1,12 @@
 
 import React, { useMemo } from 'react';
 import Header from '../components/Header';
-import { Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart } from 'recharts';
-import { TrendingUp, TrendingDown, AlertTriangle, Activity, Target, DollarSign, AlertOctagon, Store, ShieldCheck } from 'lucide-react';
-import { STORE_PERFORMANCE_DATA, REVENUE_RECOVERY_DATA, TARGET_LABOR_PCT, TARGET_SPLH } from '../constants';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line, ComposedChart, Bar } from 'recharts';
+import { TrendingUp, TrendingDown, Users, AlertTriangle, Clock, Store, Activity, Target, ShieldCheck, DollarSign, AlertOctagon } from 'lucide-react';
+import { STORE_PERFORMANCE_DATA, REVENUE_RECOVERY_DATA, WEEKLY_REVENUE_TARGET, TARGET_LABOR_PCT, TARGET_SPLH } from '../constants';
 import { View } from '../types';
 
-const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = ({ setCurrentView }) => {
+const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = () => {
   
   // Logic Implementation from User Prompt
   const calculateRevenueImpact = (weeklySales: number, actualLaborPct: number, totalHours: number) => {
@@ -193,10 +193,7 @@ const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = ({ setCur
                       <p className="text-[10px] text-red-200 font-medium leading-relaxed">
                          Revenue gap exceeds $1,000 threshold. Immediate schedule optimization recommended to recapture velocity.
                       </p>
-                      <button 
-                        onClick={() => setCurrentView?.(View.SCHEDULING)}
-                        className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20"
-                      >
+                      <button className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20">
                          Trigger Auto-Fix
                       </button>
                    </div>

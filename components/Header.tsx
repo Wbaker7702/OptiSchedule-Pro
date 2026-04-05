@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { Bell, Search, AlertCircle, CheckCircle2, Info, ChevronDown } from 'lucide-react';
 import { CURRENT_USER } from '../constants';
 
 interface HeaderProps {
@@ -26,7 +26,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
   }, []);
 
   const notifications = [
-    { id: 0, type: 'success', text: 'System Restoration Complete. Microsoft Sentinel Online.', time: 'Just now' },
+    { id: 0, type: 'success', text: 'System Restoration Complete. Sentinel Online.', time: 'Just now' },
     { id: 1, type: 'info', text: 'Optimization protocol running normally', time: '5 min ago' },
     { id: 2, type: 'info', text: 'New inventory shipment arrived', time: '1 hour ago' },
     { id: 3, type: 'success', text: 'Weekly schedule published successfully', time: '2 hours ago' },

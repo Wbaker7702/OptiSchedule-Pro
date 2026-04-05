@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Truck, Activity, ShieldCheck, Package, CheckCircle2, Loader2, Zap, Database, Download, Brain, Sparkles, Command, Terminal, Cpu, Radio } from 'lucide-react';
-import { HOURLY_LOGISTICS } from '../constants';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
+import { Truck, Box, Clock, Activity, ArrowUpRight, ShieldCheck, MapPin, Package, AlertTriangle, CheckCircle2, Loader2, Zap, Database, Cloud, FileDown, Download, Brain, Sparkles, Command, MessageSquareText, Terminal, Cpu, Radio, Shield } from 'lucide-react';
+import { HOURLY_LOGISTICS, STORE_NUMBER } from '../constants';
 import { GoogleGenAI } from "@google/genai";
 
 const Logistics: React.FC = () => {
+  const [activeDock, setActiveDock] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportSuccess, setShowExportSuccess] = useState(false);
@@ -14,7 +15,7 @@ const Logistics: React.FC = () => {
   // Insight Engine State
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
-  const [insightStep] = useState<string>('');
+  const [insightStep, setInsightStep] = useState<string>('');
 
   const handleSync = () => {
     setIsSyncing(true);
@@ -63,7 +64,7 @@ const Logistics: React.FC = () => {
     } catch (error) {
       clearInterval(stepInterval);
       console.error("AI Insight Error:", error);
-      setAiInsight("CRITICAL ERROR: Microsoft Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
+      setAiInsight("CRITICAL ERROR: Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
     } finally {
       setIsGeneratingInsights(false);
       setInsightStep('');
@@ -78,7 +79,7 @@ const Logistics: React.FC = () => {
         const timestamp = new Date().toLocaleString();
         const content = `
 =====================================================
-MICROSOFT SENTINEL LOGISTICS COMMAND - MANIFEST EXPORT
+SENTINEL LOGISTICS COMMAND - MANIFEST EXPORT
 =====================================================
 NODE ID: #5065
 TIMESTAMP: ${timestamp}
@@ -99,7 +100,7 @@ HOURLY THROUGHPUT (PEAK):
 RECONCILIATION:
 - Dynamics 365 Supply Chain: SYNCED
 - HubSpot Breeze Delivery Node: ACTIVE
-- Microsoft Sentinel Policy Guard: NOMINAL
+- Sentinel Policy Guard: NOMINAL
 
 (c) 2024 OptiSchedule Pro Enterprise Logistics
 =====================================================
@@ -162,7 +163,7 @@ RECONCILIATION:
               <div>
                  <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
-                    Microsoft Sentinel Insight Engine
+                    Sentinel Insight Engine
                  </h3>
                  <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">Neural Logistics Analysis • Node #5065</p>
               </div>

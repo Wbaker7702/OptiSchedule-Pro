@@ -10,11 +10,15 @@ import {
   CheckCircle2, 
   Camera, 
   Search, 
+  FileText, 
   Activity, 
   Clock, 
+  MapPin, 
   ArrowRight,
   Snowflake,
+  Scan,
   MessageSquare,
+  History,
   AlertOctagon,
   Image as ImageIcon,
   Loader2,
@@ -46,11 +50,13 @@ interface LogEntry {
 const GhostInventory: React.FC = () => {
   const [accuracy, setAccuracy] = useState(78.4);
   const [recoveryRate, setRecoveryRate] = useState(64);
-  const [freezeTime] = useState(14); // minutes
+  const [freezeTime, setFreezeTime] = useState(14); // minutes
   const [laborWaste, setLaborWaste] = useState(42); // minutes lost
   const [activeTab, setActiveTab] = useState<'dashboard' | 'governance'>('dashboard');
   
   // Pilot Logic States
+  const [twoStrikeActive, setTwoStrikeActive] = useState(true);
+  const [neighborLogicActive, setNeighborLogicActive] = useState(true);
   const [isSimulating, setIsSimulating] = useState(false);
   
   // Frozen Bins Data
@@ -93,7 +99,7 @@ const GhostInventory: React.FC = () => {
            { msg: "Audit complete: Row 4 cleared", type: 'success' }
         ];
         const evt = events[Math.floor(Math.random() * events.length)];
-        addLog(evt.msg, evt.type as 'info' | 'alert' | 'success' | 'system');
+        addLog(evt.msg, evt.type as any);
       }
     }, 2500);
     return () => clearInterval(interval);
@@ -159,7 +165,7 @@ const GhostInventory: React.FC = () => {
            item: 'Simulated Asset',
            sku: `SIM-${1000 + steps}`,
            strikes: 2,
-           reportedBy: ['Auto-Sim', 'Microsoft Sentinel'],
+           reportedBy: ['Auto-Sim', 'Sentinel'],
            timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
            status: 'Frozen'
         };
@@ -363,7 +369,7 @@ const GhostInventory: React.FC = () => {
                <div className="lg:col-span-4 space-y-6">
                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl h-full flex flex-col">
                      <h3 className="text-[10px] font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <Terminal className="w-4 h-4 text-emerald-500" /> Microsoft Sentinel Event Stream
+                        <Terminal className="w-4 h-4 text-emerald-500" /> Sentinel Event Stream
                      </h3>
                      <div className="bg-slate-950 rounded-xl border border-slate-800 p-4 flex-1 overflow-hidden flex flex-col">
                         <div className="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-2" ref={scrollRef}>

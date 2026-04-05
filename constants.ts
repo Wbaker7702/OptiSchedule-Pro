@@ -1,5 +1,5 @@
 
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry } from './types';
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
@@ -48,13 +48,13 @@ export const REVENUE_VS_LABOR = [
 ];
 
 export const WEEKLY_HEATMAP = [
-  { day: 'Mon', hours: [5, 5, 3, 5, 5, 8, 8, 9, 7, 6, 5, 4, 3, 2, 2, 1, 1] },
-  { day: 'Tue', hours: [7, 4, 7, 5, 4, 9, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1] },
-  { day: 'Wed', hours: [4, 6, 4, 5, 6, 9, 8, 9, 7, 6, 5, 4, 3, 2, 2, 1, 1] },
-  { day: 'Thu', hours: [4, 4, 6, 6, 6, 8, 10, 7, 6, 5, 4, 3, 2, 2, 1, 1, 1] },
-  { day: 'Fri', hours: [4, 6, 4, 4, 6, 9, 9, 11, 10, 8, 7, 6, 5, 4, 3, 2, 2] },
-  { day: 'Sat', hours: [8, 7, 5, 7, 7, 11, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2] },
-  { day: 'Sun', hours: [7, 7, 5, 6, 5, 11, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2] },
+  { day: 'Mon', hours: [5, 5, 3, 5, 5, 8, 8, 9] },
+  { day: 'Tue', hours: [7, 4, 7, 5, 4, 9, 10, 8] },
+  { day: 'Wed', hours: [4, 6, 4, 5, 6, 9, 8, 9] },
+  { day: 'Thu', hours: [4, 4, 6, 6, 6, 8, 10, 7] },
+  { day: 'Fri', hours: [4, 6, 4, 4, 6, 9, 9, 11] },
+  { day: 'Sat', hours: [8, 7, 5, 7, 7, 11, 12, 11] },
+  { day: 'Sun', hours: [7, 7, 5, 6, 5, 11, 12, 11] },
 ];
 
 export const AUDIT_LOGS_MOCK = [
@@ -140,7 +140,7 @@ export const PLUGIN_REGISTRY: SystemPlugin[] = [
     id: 'plg-lab-mi',
     name: 'Michigan Labor Frame',
     category: 'Jurisdiction',
-    provider: 'Microsoft Sentinel Legal',
+    provider: 'Sentinel Legal',
     description: 'MI P.A. 90 Compliance (Minors & Mandatory Breaks).',
     version: '1.0.4',
     status: 'Mounted',

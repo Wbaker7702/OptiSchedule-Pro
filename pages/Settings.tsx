@@ -2,24 +2,42 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { 
+  Shield, 
   Database, 
+  Eye, 
+  Bell, 
+  RefreshCw, 
+  Lock, 
+  Globe, 
   Save, 
   Check, 
-  Loader2, 
-  Terminal, 
-  Scale, 
-  Activity, 
-  Zap, 
-  ShieldCheck, 
+  AlertTriangle,
+  Loader2,
+  Terminal,
+  Layers,
+  Link as LinkIcon,
+  MessageSquare,
+  Scale,
+  Activity,
+  ArrowRightLeft,
+  Server,
+  Zap,
+  Sparkles,
+  Sliders,
+  ShieldCheck,
   Cpu
 } from 'lucide-react';
 import { APP_VERSION } from '../constants';
 import { IntegrationStatus } from '../types';
 
+interface SettingsProps {
+  hubspotStatus: IntegrationStatus;
+  setHubspotStatus: (status: IntegrationStatus) => void;
+}
+
 type SettingTab = 'breeze' | 'erp' | 'conflict';
 
-const Settings: React.FC = () => {
-  const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('connected');
+const Settings: React.FC<SettingsProps> = ({ hubspotStatus, setHubspotStatus }) => {
   const [activeTab, setActiveTab] = useState<SettingTab>('breeze');
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -173,7 +191,7 @@ const Settings: React.FC = () => {
                         <div className="flex items-center justify-between mb-2">
                            <div className="flex items-center gap-2">
                               <ShieldCheck className="w-4 h-4 text-blue-600" />
-                              <span className="text-[10px] font-black text-blue-900 uppercase tracking-widest">Microsoft Sentinel Secure Node</span>
+                              <span className="text-[10px] font-black text-blue-900 uppercase tracking-widest">Sentinel Secure Node</span>
                            </div>
                            <span className="text-[9px] font-black text-white bg-blue-600 px-2 py-0.5 rounded uppercase tracking-wider">Active</span>
                         </div>
@@ -219,11 +237,11 @@ const Settings: React.FC = () => {
                   {[
                     { id: 'ERP', label: 'ERP Strict', desc: 'Financial compliance above all else.' },
                     { id: 'CRM', label: 'Breeze Priority', desc: 'Staff for traffic signals first.' },
-                    { id: 'Hybrid', label: 'Microsoft Sentinel Hybrid', desc: 'AI-balanced weighted resolution.' }
+                    { id: 'Hybrid', label: 'Sentinel Hybrid', desc: 'AI-balanced weighted resolution.' }
                   ].map((strategy) => (
                     <div 
                       key={strategy.id}
-                      onClick={() => setConflictStrategy(strategy.id as 'ERP' | 'CRM' | 'Hybrid')}
+                      onClick={() => setConflictStrategy(strategy.id as any)}
                       className={`cursor-pointer p-5 rounded-2xl border-2 transition-all group ${
                          conflictStrategy === strategy.id ? 'border-indigo-500 bg-indigo-50/50' : 'border-gray-100 hover:border-indigo-100 bg-gray-50/50'
                       }`}
@@ -271,7 +289,7 @@ const Settings: React.FC = () => {
 
   return (
     <div className="flex-1 bg-gray-50 overflow-auto custom-scrollbar">
-      <Header title="System Configuration" subtitle={`Triple-Engine Node ${APP_VERSION} • Microsoft Sentinel Secured`} />
+      <Header title="System Configuration" subtitle={`Triple-Engine Node ${APP_VERSION} • Sentinel Secured`} />
       
       <div className="p-8 max-w-6xl mx-auto space-y-8 pb-24">
         

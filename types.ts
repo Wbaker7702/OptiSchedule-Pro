@@ -16,6 +16,19 @@ export enum View {
   GHOST_INVENTORY = 'GHOST_INVENTORY'
 }
 
+export type PluginCategory = 'CRM' | 'ERP' | 'Jurisdiction' | 'AI_Agent' | 'Vision' | 'Cloud';
+
+export interface SystemPlugin {
+  id: string;
+  name: string;
+  category: PluginCategory;
+  provider: string;
+  description: string;
+  version: string;
+  status: 'Mounted' | 'Available' | 'Locked';
+  iconName: string;
+}
+
 export type ERPProvider = 'Dynamics 365' | 'SAP S/4HANA' | 'FDE' | 'HubSpot' | 'Azure';
 export type IntegrationStatus = 'connected' | 'disconnected';
 
@@ -67,6 +80,14 @@ export interface DepartmentMetric {
   extraMetricLabel: string;
   extraMetricValue: string;
   waitTime: string;
+}
+
+export interface IngressDataPoint {
+  date: string;
+  volume: number;
+  source: 'Dynamics 365' | 'HubSpot' | 'Sentinel Node' | 'Azure Edge';
+  growth: number;
+  status: 'Verified' | 'Syncing' | 'Hardened';
 }
 
 export interface Vulnerability {

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { EMPLOYEES as INITIAL_EMPLOYEES, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
-import { MoreHorizontal, ChevronLeft, ChevronRight, UserPlus, X, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe } from 'lucide-react';
+import { Mail, MoreHorizontal, Star, ChevronLeft, ChevronRight, UserPlus, X, ShieldCheck, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe } from 'lucide-react';
 import { Employee } from '../types';
 
 const ITEMS_PER_PAGE = 8;
@@ -17,7 +17,7 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [activeState] = useState(CURRENT_STATE);
+  const [activeState, setActiveState] = useState(CURRENT_STATE);
 
   const reg = LABOR_REGULATIONS[activeState] || LABOR_REGULATIONS['MI'];
 
@@ -127,7 +127,7 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
             <form onSubmit={handleAddEmployee} className="p-8 space-y-4">
               <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mb-2 text-center">
                  <p className="text-[9px] text-blue-800 font-black uppercase tracking-widest">
-                    Microsoft Sentinel Linter will auto-apply {reg.state} constraints based on Age.
+                    Sentinel Linter will auto-apply {reg.state} constraints based on Age.
                  </p>
               </div>
 

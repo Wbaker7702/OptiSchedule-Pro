@@ -1,7 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Minimize2, Maximize2, Terminal, Loader2, Zap, Cloud, Database } from 'lucide-react';
+import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap, Cloud, Database, ShieldCheck, Cpu } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
+import { IntegrationStatus } from '../types';
+
+interface SentinelAIProps {
+    hubspotStatus: IntegrationStatus;
+}
 
 interface Message {
     role: 'user' | 'ai';
@@ -12,14 +17,14 @@ interface Message {
     isD365?: boolean;
 }
 
-const SentinelAI: React.FC = () => {
+const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
         {
             role: 'ai',
-            content: "Microsoft Sentinel AI Node #5065 Online. Triple-Engine Stack (Azure, HubSpot, Dynamics 365) detected. How can I assist with your operational theater today?",
+            content: "Sentinel AI Node #5065 Online. Triple-Engine Stack (Azure, HubSpot, Dynamics 365) detected. How can I assist with your operational theater today?",
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
     ]);
@@ -57,7 +62,7 @@ const SentinelAI: React.FC = () => {
                     parts: [{ text: m.content }],
                 })),
                 config: {
-                    systemInstruction: `You are Microsoft Sentinel AI, the central orchestration agent for Walmart Store #5065. 
+                    systemInstruction: `You are Sentinel AI, the central orchestration agent for Walmart Store #5065. 
                     Current Architecture: Triple-Engine Stack.
                     1. Microsoft Azure: Cloud Fabric, Cognitive Compute, Edge Telemetry.
                     2. HubSpot Breeze: CRM, Marketing Velocity, Loyalty Ingress.
@@ -126,7 +131,7 @@ const SentinelAI: React.FC = () => {
                             <Bot className="w-4 h-4 text-blue-500" />
                         </div>
                         <div>
-                            <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Microsoft Sentinel Core</h3>
+                            <h3 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Sentinel Core AI</h3>
                             <div className="flex items-center gap-1.5 mt-1">
                                 <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
                                 <span className="text-[8px] text-slate-500 font-mono uppercase">Azure Fabric: Active</span>
@@ -156,7 +161,7 @@ const SentinelAI: React.FC = () => {
                                     }`}>
                                         {msg.role === 'ai' && (
                                             <div className="flex items-center gap-2 mb-1.5 text-[9px] font-black uppercase tracking-widest text-slate-500">
-                                                <Terminal className="w-3 h-3" /> Microsoft Sentinel
+                                                <Terminal className="w-3 h-3" /> Sentinel Node
                                             </div>
                                         )}
                                         <div className="whitespace-pre-wrap">{msg.content}</div>

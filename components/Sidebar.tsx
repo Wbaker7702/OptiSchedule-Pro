@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { LayoutDashboard, CalendarDays, Activity, Package, BarChart3, Users, Settings as SettingsIcon, LogOut, Truck, Ghost } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Activity, Package, BarChart3, Users, Settings as SettingsIcon, LogOut, ShieldCheck, ArrowLeftRight, Grid3X3, TrendingUp, Coins, Star, Truck, Ghost } from 'lucide-react';
 import { View } from '../types';
+import { APP_VERSION } from '../constants';
 
 interface SidebarProps {
   currentView: View;
@@ -15,10 +16,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
     { id: View.SCHEDULING, label: 'Scheduling', icon: CalendarDays },
     { id: View.OPERATIONS, label: 'Operations', icon: Activity },
     { id: View.ANALYTICS, label: 'Analytics', icon: BarChart3 },
-    { id: View.TEAM, label: 'Team', icon: Users },
-    { id: View.INVENTORY, label: 'Inventory', icon: Package },
-    { id: View.LOGISTICS, label: 'Logistics', icon: Truck },
-    { id: View.GHOST_INVENTORY, label: 'Ghost Inventory', icon: Ghost },
     { id: View.SETTINGS, label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -36,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-4 space-y-1">
         {menuItems.map((item) => (
           <button
             key={item.id}

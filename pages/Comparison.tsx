@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Globe, Activity, Scale, CheckCircle2, RefreshCw, ShieldCheck, AlertCircle } from 'lucide-react';
-import { STORE_NUMBER, COMPARISON_STORE, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
+import { ArrowLeftRight, TrendingDown, TrendingUp, Store, Globe, Activity, Scale, Zap, Target, CheckCircle2, RefreshCw, ShieldCheck, AlertCircle } from 'lucide-react';
+import { FISCAL_METRICS, STORE_2080_METRICS, STORE_NUMBER, COMPARISON_STORE, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
 
 const initialChartData = [
   { hour: '8 AM', store5065: 45, store2080: 38 },
@@ -18,7 +18,7 @@ const initialChartData = [
 
 const strategyComparison = [
   { sector: 'Front End', s5065: 'Fixed Shift (8hr)', s2080: 'Dynamic Flex (4-6hr)', recommendation: 'Deploy Flex Model' },
-  { sector: 'Inventory', s5065: 'Daily Audit', s2080: 'Microsoft Sentinel Real-time', recommendation: 'Upgrade Node Ingress' },
+  { sector: 'Inventory', s5065: 'Daily Audit', s2080: 'Sentinel Real-time', recommendation: 'Upgrade Node Ingress' },
   { sector: 'Overtime', s5065: 'Manager Override', s2080: 'Breeze Predictive', recommendation: 'Automate OT Mitigation' },
   { sector: 'Minor Compliance', s5065: 'Manual Tracking', s2080: 'Automated Curfew Guard', recommendation: 'Apply MI Policy 432' },
 ];
