@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { FISCAL_METRICS, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
+import { FISCAL_METRICS, LABOR_REGULATIONS, CURRENT_STATE, SHIFT_LEAD_BRIEFINGS } from '../constants';
+import { TrainingBriefingItem } from '../types';
 import { 
   ShieldCheck, 
   MapPin, 
@@ -20,6 +21,12 @@ import {
   BookOpen,
   Loader2
 } from 'lucide-react';
+
+const BRIEFING_STATUS_CLASS: Record<TrainingBriefingItem['status'], string> = {
+  Scheduled: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
+  Ready: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+  Complete: 'bg-slate-800 text-slate-400 border-slate-700',
+};
 
 const Playbook: React.FC = () => {
   const reg = LABOR_REGULATIONS[CURRENT_STATE];
@@ -256,6 +263,59 @@ these parameters to ensure zero-breach compliance.
                  </button>
               </div>
            </div>
+        </div>
+
+        {/* Shift Lead Training Loop */}
+        <div className="bg-slate-900 rounded-3xl p-8 border border-blue-500/20 shadow-xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                <BookOpen className="w-5 h-5 text-blue-400" />
+                Cross-Department Shift Lead Briefings
+              </h3>
+              <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">
+                Non-technical huddles explain why schedules look the way they do, when overrides are appropriate, and how notes improve the next automation pass.
+              </p>
+            </div>
+            <div className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest text-blue-300">
+              Objective: reduce discretionary edits
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {SHIFT_LEAD_BRIEFINGS.map((briefing) => (
+              <div key={briefing.id} className="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 space-y-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{briefing.id}</p>
+                    <h4 className="text-sm font-black text-white mt-1">{briefing.audience}</h4>
+                  </div>
+                  <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${BRIEFING_STATUS_CLASS[briefing.status]}`}>
+                    {briefing.status}
+                  </span>
+                </div>
+
+                <div className="space-y-4 text-[10px] font-mono">
+                  <div>
+                    <p className="text-slate-500 uppercase font-black mb-1">Briefing Topic</p>
+                    <p className="text-slate-300 leading-relaxed">{briefing.topic}</p>
+                  </div>
+                  <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                    <p className="text-slate-500 uppercase font-black mb-1">Schedule</p>
+                    <p className="text-slate-300">{briefing.schedule}</p>
+                  </div>
+                  <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                    <p className="text-blue-300 uppercase font-black mb-1">Expected Behavior Change</p>
+                    <p className="text-slate-300 leading-relaxed">{briefing.outcome}</p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-slate-800 pt-4">
+                    <span className="text-slate-500 uppercase font-black">Owner</span>
+                    <span className="text-white font-bold">{briefing.owner}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Expansion Map Visualization */}

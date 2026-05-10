@@ -1,5 +1,6 @@
 
 import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, EnterpriseSkill, SkillPolicy, SkillAuditEvent } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, StaffingReviewItem, HardwareFailsafeItem, TrainingBriefingItem } from './types';
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
@@ -426,4 +427,97 @@ export const MOCK_STORES: StoreRatingData[] = [
 export const MOCK_SCHEDULE_LOGS: ScheduleLogEntry[] = [
   { id: 'SL-001', timestamp: '2026-02-15 08:32', manager: 'Wesley Baker', action: 'Increased 9:00 AM Front End Staffing', reason: 'Unplanned High Traffic', impact: 'Efficiency +4%' },
   { id: 'SL-002', timestamp: '2026-02-15 07:15', manager: 'System (Auto)', action: 'Reduced 7:00 AM Grocery Staffing', reason: 'Low Ingress Volume', impact: 'Labor Cost -0.2%' },
+];
+
+export const WEEKLY_STAFFING_REVIEWS: StaffingReviewItem[] = [
+  {
+    id: 'WR-2026-07',
+    week: 'Feb 9 - Feb 15',
+    varianceSummary: 'System planned 2,811 hours; actual landed at 2,847 hours.',
+    manualAdjustments: 14,
+    primaryDriver: 'Weekend front-end demand and same-day call-outs',
+    automationRefinement: 'Increase Saturday cashier buffer by 1.5 FTE from 10:00-13:00.',
+    owner: 'Store Ops + People Lead',
+    status: 'In Review',
+  },
+  {
+    id: 'WR-2026-06',
+    week: 'Feb 2 - Feb 8',
+    varianceSummary: 'Actual stocking hours exceeded the system plan by 22 hours.',
+    manualAdjustments: 9,
+    primaryDriver: 'Late inbound freight created overnight recovery work.',
+    automationRefinement: 'Tie dock delay signals to grocery stocking reserve hours.',
+    owner: 'Automation Steward',
+    status: 'Rule Updated',
+  },
+  {
+    id: 'WR-2026-08',
+    week: 'Feb 16 - Feb 22',
+    varianceSummary: 'Pending closeout after Sunday labor reconciliation.',
+    manualAdjustments: 0,
+    primaryDriver: 'Collecting override reason codes',
+    automationRefinement: 'Review manager-discretion overrides before publishing next forecast.',
+    owner: 'Shift Lead Council',
+    status: 'Queued',
+  },
+];
+
+export const MONITORING_FAILSAFES: HardwareFailsafeItem[] = [
+  {
+    id: 'EDGE-FE-01',
+    location: 'Front End Queue Monitor',
+    monitor: 'Localized traffic camera + counter node',
+    failsafes: ['Passive heat sink', '45-minute UPS', 'Local buffer storage'],
+    coverageWindow: '09:00-14:00 critical checkout window',
+    risk: 'Low',
+    lastChecked: '2026-02-15 06:45',
+  },
+  {
+    id: 'EDGE-DOCK-02',
+    location: 'Receiving Dock Sensor',
+    monitor: 'Dock ingress scanner gateway',
+    failsafes: ['Ventilated enclosure', '30-minute UPS', 'Offline replay queue'],
+    coverageWindow: '08:00-15:00 freight intake window',
+    risk: 'Medium',
+    lastChecked: '2026-02-15 07:05',
+  },
+  {
+    id: 'EDGE-GROC-03',
+    location: 'Grocery Demand Beacon',
+    monitor: 'Aisle traffic telemetry hub',
+    failsafes: ['Heat spreader plate', 'Spare battery pack', 'Nightly health ping'],
+    coverageWindow: '10:00-13:00 replenishment window',
+    risk: 'Low',
+    lastChecked: '2026-02-15 06:50',
+  },
+];
+
+export const SHIFT_LEAD_BRIEFINGS: TrainingBriefingItem[] = [
+  {
+    id: 'BRF-101',
+    audience: 'Front End Shift Leads',
+    topic: 'Why forecasted checkout buffers appear before peak traffic',
+    schedule: 'Monday huddle, 08:45',
+    outcome: 'Manual cuts require a demand-gap note and coach approval.',
+    owner: 'People Lead',
+    status: 'Ready',
+  },
+  {
+    id: 'BRF-102',
+    audience: 'Stocking and Grocery Leads',
+    topic: 'How freight signals convert into reserve stocking hours',
+    schedule: 'Wednesday pre-shift, 13:30',
+    outcome: 'Leads can explain protected recovery hours without technical terms.',
+    owner: 'Operations Coach',
+    status: 'Scheduled',
+  },
+  {
+    id: 'BRF-103',
+    audience: 'Closing Shift Leads',
+    topic: 'When a manual override improves the automation model',
+    schedule: 'Friday closeout, 16:00',
+    outcome: 'Every override includes a reason code that feeds weekly rule review.',
+    owner: 'Automation Steward',
+    status: 'Scheduled',
+  },
 ];
