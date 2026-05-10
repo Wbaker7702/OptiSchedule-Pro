@@ -127,7 +127,7 @@ SENTINEL SECURITY POLICY:
             const conversationHistory = [...messages, userMessage];
             const ai = createGeminiClient();
             const chat = ai.chats.create({
-                model: 'gemini-3-flash-preview',
+                model: 'gemini-1.5-flash',
                 history: conversationHistory.map(m => ({
                     role: m.role === 'ai' ? 'model' : 'user',
                     parts: [{ text: m.content }],
