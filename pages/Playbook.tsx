@@ -22,15 +22,15 @@ import {
   Loader2
 } from 'lucide-react';
 
+const BRIEFING_STATUS_CLASS: Record<TrainingBriefingItem['status'], string> = {
+  Scheduled: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
+  Ready: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+  Complete: 'bg-slate-800 text-slate-400 border-slate-700',
+};
+
 const Playbook: React.FC = () => {
   const reg = LABOR_REGULATIONS[CURRENT_STATE];
   const [isDownloading, setIsDownloading] = useState(false);
-
-  const briefingStatusClass: Record<TrainingBriefingItem['status'], string> = {
-    Scheduled: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
-    Ready: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-    Complete: 'bg-slate-800 text-slate-400 border-slate-700',
-  };
 
   const handleDownloadPolicy = () => {
     setIsDownloading(true);
@@ -290,7 +290,7 @@ these parameters to ensure zero-breach compliance.
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{briefing.id}</p>
                     <h4 className="text-sm font-black text-white mt-1">{briefing.audience}</h4>
                   </div>
-                  <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${briefingStatusClass[briefing.status]}`}>
+                  <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${BRIEFING_STATUS_CLASS[briefing.status]}`}>
                     {briefing.status}
                   </span>
                 </div>

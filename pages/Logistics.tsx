@@ -7,6 +7,12 @@ import { HOURLY_LOGISTICS, STORE_NUMBER, MONITORING_FAILSAFES } from '../constan
 import { HardwareFailsafeItem } from '../types';
 import { GoogleGenAI } from "@google/genai";
 
+const FAILSAFE_RISK_CLASS: Record<HardwareFailsafeItem['risk'], string> = {
+  Low: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+  Medium: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+  High: 'bg-red-500/10 text-red-300 border-red-500/20',
+};
+
 const Logistics: React.FC = () => {
   const [activeDock, setActiveDock] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -17,12 +23,6 @@ const Logistics: React.FC = () => {
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [insightStep, setInsightStep] = useState<string>('');
-
-  const failsafeRiskClass: Record<HardwareFailsafeItem['risk'], string> = {
-    Low: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-    Medium: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-    High: 'bg-red-500/10 text-red-300 border-red-500/20',
-  };
 
   const handleSync = () => {
     setIsSyncing(true);
@@ -244,7 +244,7 @@ RECONCILIATION:
                      <h4 className="text-sm font-black text-white mt-1">{item.location}</h4>
                      <p className="text-[10px] text-slate-500 font-mono mt-1">{item.monitor}</p>
                    </div>
-                   <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${failsafeRiskClass[item.risk]}`}>
+                   <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${FAILSAFE_RISK_CLASS[item.risk]}`}>
                      {item.risk} Risk
                    </span>
                  </div>

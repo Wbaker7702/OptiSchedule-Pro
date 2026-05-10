@@ -18,6 +18,12 @@ interface SchedulingProps {
   onAdjustStaffing?: any;
 }
 
+const REVIEW_STATUS_CLASS: Record<StaffingReviewItem['status'], string> = {
+  'Queued': 'bg-slate-800 text-slate-400 border-slate-700',
+  'In Review': 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+  'Rule Updated': 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+};
+
 const Scheduling: React.FC<SchedulingProps> = () => {
   const [scheduleData, setScheduleData] = useState(WEEKLY_HEATMAP);
   const [salesData] = useState(WEEKLY_SALES_HEATMAP);
@@ -41,12 +47,6 @@ const Scheduling: React.FC<SchedulingProps> = () => {
   const [modificationNote, setModificationNote] = useState('');
 
   const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
-
-  const reviewStatusClass: Record<StaffingReviewItem['status'], string> = {
-    'Queued': 'bg-slate-800 text-slate-400 border-slate-700',
-    'In Review': 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-    'Rule Updated': 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-  };
 
   const getHeatmapColor = (value: number) => {
     if (value >= 10) return 'bg-[#0d9488] text-white hover:bg-[#0f766e] ring-1 ring-white/10'; // Dark Teal
@@ -500,7 +500,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{review.id}</p>
                      <h4 className="text-sm font-black text-white mt-1">{review.week}</h4>
                    </div>
-                   <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest whitespace-nowrap ${reviewStatusClass[review.status]}`}>
+                   <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest whitespace-nowrap ${REVIEW_STATUS_CLASS[review.status]}`}>
                      {review.status}
                    </span>
                  </div>
