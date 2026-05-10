@@ -5,7 +5,7 @@ export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
 export const COMPARISON_STORE = "2080";
 export const APP_VERSION = "v4.2.0"; 
-export const SENTINEL_VERSION = "v3.1";
+export const DEFENDER_PORTAL_VERSION = "v3.1";
 export const CURRENT_STATE = "MI";
 
 export const WEEKLY_REVENUE_TARGET = 90000;
@@ -150,7 +150,7 @@ export const PLUGIN_REGISTRY: SystemPlugin[] = [
     id: 'plg-lab-mi',
     name: 'Michigan Labor Frame',
     category: 'Jurisdiction',
-    provider: 'Sentinel Legal',
+    provider: 'Microsoft Defender',
     description: 'MI P.A. 90 Compliance (Minors & Mandatory Breaks).',
     version: '1.0.4',
     status: 'Mounted',

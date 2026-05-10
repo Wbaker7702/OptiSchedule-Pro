@@ -37,7 +37,7 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
   { id: 'weekly_hours', name: 'Weekly Hours Audit', description: 'Total hour distribution per department node.', icon: Clock, category: 'Labor' },
   { id: 'overtime', name: 'OT Vector Report', description: 'Identify employees approaching 40h threshold.', icon: Zap, category: 'Compliance' },
   { id: 'labor_pct', name: 'Labor vs Sales Ratio', description: 'Real-time efficiency gain vs baseline targets.', icon: BarChart3, category: 'Financial' },
-  { id: 'efficiency', name: 'Efficiency Gain Summary', description: 'Recaptured fiscal value from Sentinel optimization.', icon: TrendingUp, category: 'Financial' },
+  { id: 'efficiency', name: 'Efficiency Gain Summary', description: 'Recaptured fiscal value from Defender optimization.', icon: TrendingUp, category: 'Financial' },
   { id: 'weekly_audit', name: 'Weekly Audit Log (IT/AJ Hoka)', description: 'Full system trace and security events.', icon: ShieldAlert, category: 'Compliance' },
 ];
 
@@ -65,7 +65,7 @@ const MetricsReport: React.FC = () => {
   const downloadReportFile = (id: string) => {
     setIsDownloading(id);
     const template = REPORT_TEMPLATES.find(t => t.id === id);
-    const reportName = template?.name || 'Sentinel_Report';
+    const reportName = template?.name || 'Defender_Report';
     
     // Simulate engine work
     setTimeout(() => {
@@ -73,7 +73,7 @@ const MetricsReport: React.FC = () => {
         const timestamp = new Date().toLocaleString();
         const content = `
 =========================================
-OPTISCHEDULE SENTINEL AI - EXPORT
+MICROSOFT DEFENDER PORTAL - EXPORT
 =========================================
 REPORT TYPE: ${reportName}
 GENERATED: ${timestamp}
@@ -92,9 +92,9 @@ DEPARTMENTAL BREAKDOWN:
 - Grocery: 94% Resource Efficiency
 - Electronics: Zero Compliance Violations
 
-SENTINEL STATUS: NOMINAL
+DEFENDER STATUS: NOMINAL
 -----------------------------------------
-(c) 2024 OptiSchedule Pro Enterprise Systems
+(c) 2024 Microsoft Defender portal
         `.trim();
 
         const blob = new Blob([content], { type: 'text/plain' });
@@ -182,7 +182,7 @@ SENTINEL STATUS: NOMINAL
            <div className="relative z-10">
               <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-3 mb-8">
                  <ShieldCheck className="w-5 h-5 text-indigo-400" />
-                 Sentinel Scenario Forecaster
+                 Defender Scenario Forecaster
               </h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                  {/* Money Rule Tester */}
@@ -354,7 +354,7 @@ SENTINEL STATUS: NOMINAL
                                 <p className="text-2xl font-black text-emerald-500">Nominal</p>
                              </div>
                              <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                                <p className="text-[9px] text-slate-500 uppercase font-black mb-1">Sentinel Rating</p>
+                                <p className="text-[9px] text-slate-500 uppercase font-black mb-1">Defender Rating</p>
                                 <p className="text-2xl font-black text-blue-400">98.4</p>
                              </div>
                           </div>

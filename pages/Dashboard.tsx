@@ -37,7 +37,7 @@ const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = () => {
 
   return (
     <div className="flex-1 bg-[#020617] overflow-auto custom-scrollbar font-sans text-slate-200">
-      <Header title="Dashboard" subtitle="Workforce optimization overview — Feb 15, 2026" />
+      <Header title="Dashboard" subtitle="Microsoft Defender portal operational overview - Feb 15, 2026" />
       
       <div className="p-8 max-w-7xl mx-auto space-y-8 pb-24">
         

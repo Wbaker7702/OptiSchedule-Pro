@@ -165,7 +165,7 @@ const GhostInventory: React.FC = () => {
            item: 'Simulated Asset',
            sku: `SIM-${1000 + steps}`,
            strikes: 2,
-           reportedBy: ['Auto-Sim', 'Sentinel'],
+           reportedBy: ['Auto-Sim', 'Defender'],
            timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
            status: 'Frozen'
         };
@@ -369,7 +369,7 @@ const GhostInventory: React.FC = () => {
                <div className="lg:col-span-4 space-y-6">
                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl h-full flex flex-col">
                      <h3 className="text-[10px] font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <Terminal className="w-4 h-4 text-emerald-500" /> Sentinel Event Stream
+                        <Terminal className="w-4 h-4 text-emerald-500" /> Defender Event Stream
                      </h3>
                      <div className="bg-slate-950 rounded-xl border border-slate-800 p-4 flex-1 overflow-hidden flex flex-col">
                         <div className="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-2" ref={scrollRef}>
@@ -427,7 +427,7 @@ const GhostInventory: React.FC = () => {
           <div className="max-w-4xl mx-auto bg-white text-slate-900 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
              <div className="bg-slate-100 p-8 border-b border-slate-200 text-center">
                 <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Ghost Inventory Prevention</h2>
-                <h3 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em]">Governance Packet • OptiSchedule Pro</h3>
+                <h3 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em]">Governance Packet • Microsoft Defender portal</h3>
              </div>
              <div className="p-10 space-y-10 font-serif">
                 <section>
@@ -455,7 +455,7 @@ const GhostInventory: React.FC = () => {
                 </section>
              </div>
              <div className="bg-slate-50 p-6 border-t border-slate-200 text-center">
-                <p className="text-[10px] text-slate-400 font-mono uppercase tracking-widest">CONFIDENTIAL – Fortune-50 Internal Use Only | OptiSchedule Pro v1.0</p>
+                <p className="text-[10px] text-slate-400 font-mono uppercase tracking-widest">CONFIDENTIAL - Fortune-50 Internal Use Only | Microsoft Defender portal v1.0</p>
              </div>
           </div>
         )}

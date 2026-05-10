@@ -36,19 +36,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="bg-slate-900 p-8 text-center relative border-b border-slate-800">
           <div className="absolute top-4 right-4 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20 flex items-center gap-1">
              <ShieldCheck className="w-3 h-3 text-blue-500" />
-             <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Sentinel Active</span>
+             <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Defender Active</span>
           </div>
           <div className="inline-flex items-center justify-center p-4 bg-slate-800 rounded-2xl mb-6 shadow-xl border border-slate-700">
             <Activity className="w-10 h-10 text-blue-500" />
           </div>
-          <h1 className="text-xl font-black text-white mb-2 tracking-[0.1em] uppercase">OptiSchedule Pro</h1>
-          <p className="text-slate-400 text-xs font-mono uppercase tracking-widest">Workforce Management v3.1</p>
+          <h1 className="text-xl font-black text-white mb-2 tracking-[0.1em] uppercase">Microsoft Defender portal</h1>
+          <p className="text-slate-400 text-xs font-mono uppercase tracking-widest">Security Operations v3.1</p>
         </div>
 
         <div className="p-8">
           <div className="mb-8">
             <h2 className="text-lg font-bold text-white uppercase tracking-wider">Authentication Required</h2>
-            <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest">Sentinel Security Protocol Enforcement</p>
+            <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest">Microsoft Defender security enforcement</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -63,7 +63,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
-                  placeholder="ID@optischedule.com"
+                  placeholder="user@contoso.com"
                   required
                 />
               </div>
@@ -112,7 +112,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div className="mt-8 pt-6 border-t border-slate-800">
             <div className="flex items-center justify-center gap-2 text-[10px] text-slate-600 font-mono font-bold uppercase tracking-widest">
               <ShieldAlert className="w-3 h-3" />
-              <span>Sentinel Security Standard • {APP_VERSION}</span>
+              <span>Microsoft Defender security standard • {APP_VERSION}</span>
             </div>
           </div>
         </div>
