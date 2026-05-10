@@ -86,9 +86,9 @@ const EnterpriseSkillsPolicies: React.FC = () => {
   const approvedSkills = ENTERPRISE_SKILL_CATALOG.filter(skill => skill.status === 'Approved').length;
   const blockedSkills = ENTERPRISE_SKILL_CATALOG.filter(skill => skill.status === 'Blocked').length;
   const reviewSkills = ENTERPRISE_SKILL_CATALOG.filter(skill => skill.status === 'Review Required').length;
-  const averagePolicyCoverage = Math.round(
-    ENTERPRISE_SKILL_POLICIES.reduce((total, policy) => total + policy.coverage, 0) / ENTERPRISE_SKILL_POLICIES.length
-  );
+  const averagePolicyCoverage = ENTERPRISE_SKILL_POLICIES.length > 0
+    ? Math.round(ENTERPRISE_SKILL_POLICIES.reduce((total, policy) => total + policy.coverage, 0) / ENTERPRISE_SKILL_POLICIES.length)
+    : 0;
 
   const renderSkillCard = (skill: EnterpriseSkill) => {
     const isSelected = skill.id === selectedSkill.id;
