@@ -52,9 +52,20 @@ const Operations: React.FC<OperationsProps> = ({
     return AUDIT_LOGS_MOCK.slice(0, 5);
   }, [activeTab]);
 
-  const passedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Passed').length;
-  const warningCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Warning').length;
-  const failedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Failed').length;
+  const auditCounts = useMemo(() => AUDIT_LOGS_MOCK.reduce(
+    (counts, log) => {
+      if (log.status === 'Passed') {
+        counts.passed += 1;
+      } else if (log.status === 'Warning') {
+        counts.warning += 1;
+      } else if (log.status === 'Failed') {
+        counts.failed += 1;
+      }
+      return counts;
+    },
+    { passed: 0, warning: 0, failed: 0 }
+  ), []);
+  const { passed: passedCount, warning: warningCount, failed: failedCount } = auditCounts;
 
   return (
     <div className="flex-1 bg-[#020617] overflow-auto custom-scrollbar font-sans text-slate-200">

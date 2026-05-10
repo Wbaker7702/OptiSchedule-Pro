@@ -1,9 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import Header from '../components/Header';
 import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
 import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Package, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, ShieldCheck, Zap, Terminal } from 'lucide-react';
 import { Product } from '../types';
+
+interface ProcurementLogEntry {
+  id: string;
+  timestamp: string;
+  message: string;
+}
 
 const Inventory: React.FC = () => {
   const [items, setItems] = useState<Product[]>(INVENTORY_DATA);
@@ -16,7 +22,7 @@ const Inventory: React.FC = () => {
   // Active Procurement State
   const [isReplenishing, setIsReplenishing] = useState(false);
   const [replenishmentStep, setReplenishmentStep] = useState<string>('');
-  const [d365Logs, setD365Logs] = useState<string[]>([]);
+  const [d365Logs, setD365Logs] = useState<ProcurementLogEntry[]>([]);
 
   // Form State
   const [orderForm, setOrderForm] = useState({
@@ -45,8 +51,19 @@ const Inventory: React.FC = () => {
     }, 1500);
   };
 
-  const criticalCount = items.filter(i => i.status === 'Critical').length;
-  const lowCount = items.filter(i => i.status === 'Low').length;
+  const stockCounts = useMemo(() => items.reduce(
+    (counts, item) => {
+      if (item.status === 'Critical') {
+        counts.critical += 1;
+      } else if (item.status === 'Low') {
+        counts.low += 1;
+      }
+      return counts;
+    },
+    { critical: 0, low: 0 }
+  ), [items]);
+  const criticalCount = stockCounts.critical;
+  const lowCount = stockCounts.low;
 
   const triggerActiveProcurement = () => {
     const targetItems = items.filter(i => i.status !== 'Good');
@@ -68,8 +85,16 @@ const Inventory: React.FC = () => {
     let step = 0;
     const interval = setInterval(() => {
       if (step < sequence.length) {
-        setReplenishmentStep(sequence[step]);
-        setD365Logs(prev => [sequence[step], ...prev]);
+        const message = sequence[step];
+        setReplenishmentStep(message);
+        setD365Logs(prev => [
+          {
+            id: `d365-${Date.now()}-${step}`,
+            timestamp: new Date().toLocaleTimeString(),
+            message
+          },
+          ...prev
+        ]);
         step++;
       } else {
         clearInterval(interval);
@@ -239,10 +264,10 @@ const Inventory: React.FC = () => {
                  <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Dynamics 365 Secure Stream</span>
               </div>
               <div className="font-mono text-[10px] text-slate-300 space-y-1 h-24 overflow-y-auto custom-scrollbar">
-                 {d365Logs.map((log, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                       <span className="text-slate-600">[{new Date().toLocaleTimeString()}]</span>
-                       <span>{log}</span>
+                 {d365Logs.map((log) => (
+                    <div key={log.id} className="flex items-center gap-2">
+                       <span className="text-slate-600">[{log.timestamp}]</span>
+                       <span>{log.message}</span>
                     </div>
                  ))}
               </div>

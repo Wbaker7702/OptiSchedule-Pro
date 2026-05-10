@@ -1,28 +1,35 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import Scheduling from './pages/Scheduling';
-import Operations from './pages/Operations';
-import Inventory from './pages/Inventory';
-import Team from './pages/Team';
-import Analytics from './pages/Analytics';
-import Playbook from './pages/Playbook';
-import Settings from './pages/Settings';
-import Comparison from './pages/Comparison';
-import MetricsReport from './pages/MetricsReport';
-import RoyaltyDashboard from './pages/RoyaltyDashboard';
-import StoreRatings from './pages/StoreRatings';
-import Logistics from './pages/Logistics';
-import GhostInventory from './pages/GhostInventory';
 import Login from './components/Login';
-import SentinelAI from './components/SentinelAI';
 import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint, OperationsTab } from './types';
 import { HEATMAP_DATA } from './constants';
+
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Scheduling = React.lazy(() => import('./pages/Scheduling'));
+const Operations = React.lazy(() => import('./pages/Operations'));
+const Inventory = React.lazy(() => import('./pages/Inventory'));
+const Team = React.lazy(() => import('./pages/Team'));
+const Analytics = React.lazy(() => import('./pages/Analytics'));
+const Playbook = React.lazy(() => import('./pages/Playbook'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+const Comparison = React.lazy(() => import('./pages/Comparison'));
+const MetricsReport = React.lazy(() => import('./pages/MetricsReport'));
+const RoyaltyDashboard = React.lazy(() => import('./pages/RoyaltyDashboard'));
+const StoreRatings = React.lazy(() => import('./pages/StoreRatings'));
+const Logistics = React.lazy(() => import('./pages/Logistics'));
+const GhostInventory = React.lazy(() => import('./pages/GhostInventory'));
+const SentinelAI = React.lazy(() => import('./components/SentinelAI'));
 
 const assertNever = (value: never): never => {
   throw new Error(`Unhandled view: ${value}`);
 };
+
+const LoadingView: React.FC = () => (
+  <div className="flex-1 bg-slate-950 text-slate-400 flex items-center justify-center font-mono text-xs uppercase tracking-widest">
+    Loading operations module...
+  </div>
+);
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -35,32 +42,47 @@ const App: React.FC = () => {
   const [isERPConnected, setIsERPConnected] = useState(true);
   const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('connected');
 
-  const handleLogin = () => setIsAuthenticated(true);
-  const handleLogout = () => {
+  const handleLogin = useCallback(() => setIsAuthenticated(true), []);
+  const handleLogout = useCallback(() => {
     setIsAuthenticated(false);
     setCurrentView(View.DASHBOARD);
     setOperationsTab('metrics');
     setLinterTrigger(null);
-  };
+  }, []);
 
-  const navigateToOperations = (tab: OperationsTab = 'metrics') => {
+  const navigateToOperations = useCallback((tab: OperationsTab = 'metrics') => {
     setOperationsTab(tab);
     setCurrentView(View.OPERATIONS);
-  };
+  }, []);
 
-  const handleEmployeeAdded = () => {
+  const handleEmployeeAdded = useCallback(() => {
     setLinterTrigger('NEW_ASSET_SCAN');
     navigateToOperations('audit');
-  };
+  }, [navigateToOperations]);
 
-  const handleStaffingAdjustment = () => {
+  const handleStaffingAdjustment = useCallback(() => {
     setHeatmapData(prev => prev.map(point => {
       if (point.efficiency < 80) {
         return { ...point, staffing: point.staffing + 2, efficiency: Math.min(100, point.efficiency + 15) };
       }
       return point;
     }));
-  };
+  }, []);
+
+  const handleSidebarViewChange = useCallback((view: View) => {
+    if (view !== View.OPERATIONS) {
+      setOperationsTab('metrics');
+    }
+    setCurrentView(view);
+  }, []);
+
+  const handleFinalizeSchedule = useCallback(() => {
+    navigateToOperations('audit');
+  }, [navigateToOperations]);
+
+  const handleClearLinterTrigger = useCallback(() => {
+    setLinterTrigger(null);
+  }, []);
 
   const renderView = () => {
     switch (currentView) {
@@ -71,8 +93,8 @@ const App: React.FC = () => {
       case View.ROYALTY_DASHBOARD: return <RoyaltyDashboard />;
       case View.STORE_RATINGS: return <StoreRatings />;
       case View.COMPARISON: return <Comparison />;
-      case View.SCHEDULING: return <Scheduling setCurrentView={setCurrentView} onFinalize={() => navigateToOperations('audit')} activeProvider={activeERPProvider} setActiveProvider={setActiveERPProvider} isConnected={isERPConnected} setIsConnected={setIsERPConnected} setHubspotStatus={setHubspotStatus} heatmapData={heatmapData} onAdjustStaffing={handleStaffingAdjustment} />;
-      case View.OPERATIONS: return <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={() => setLinterTrigger(null)} />;
+      case View.SCHEDULING: return <Scheduling setCurrentView={setCurrentView} onFinalize={handleFinalizeSchedule} activeProvider={activeERPProvider} setActiveProvider={setActiveERPProvider} isConnected={isERPConnected} setIsConnected={setIsERPConnected} setHubspotStatus={setHubspotStatus} heatmapData={heatmapData} onAdjustStaffing={handleStaffingAdjustment} />;
+      case View.OPERATIONS: return <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={handleClearLinterTrigger} />;
       case View.INVENTORY: return <Inventory />;
       case View.ANALYTICS: return <Analytics hubspotStatus={hubspotStatus} />;
       case View.TEAM: return <Team onEmployeeAdded={handleEmployeeAdded} />;
@@ -89,15 +111,14 @@ const App: React.FC = () => {
     <div className="flex h-screen bg-gray-50">
       <Sidebar 
         currentView={currentView} 
-        setCurrentView={(view) => {
-          if (view !== View.OPERATIONS) setOperationsTab('metrics');
-          setCurrentView(view);
-        }} 
+        setCurrentView={handleSidebarViewChange}
         onLogout={handleLogout}
       />
       <main className="flex-1 ml-64 flex flex-col h-screen relative">
-        {renderView()}
-        <SentinelAI hubspotStatus={hubspotStatus} />
+        <Suspense fallback={<LoadingView />}>
+          {renderView()}
+          <SentinelAI hubspotStatus={hubspotStatus} />
+        </Suspense>
       </main>
     </div>
   );

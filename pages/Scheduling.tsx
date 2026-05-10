@@ -1,10 +1,11 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import { RefreshCw, Download, Zap, Edit2, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
 import { WEEKLY_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
 import { ERPProvider, HeatmapDataPoint, IntegrationStatus, ScheduleLogEntry, View, WeeklyScheduleRow } from '../types';
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { createGeminiClient } from '../services/geminiClient';
 
 interface SchedulingProps {
   setCurrentView?: (view: View) => void;
@@ -19,6 +20,7 @@ interface SchedulingProps {
 }
 
 const ERP_PROVIDER_OPTIONS: ERPProvider[] = ['Dynamics 365', 'SAP S/4HANA', 'FDE', 'HubSpot', 'Azure'];
+const HOUR_LABELS = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
 const isWeeklyScheduleRowArray = (value: unknown): value is WeeklyScheduleRow[] =>
   Array.isArray(value) &&
   value.every(item =>
@@ -57,8 +59,10 @@ const Scheduling: React.FC<SchedulingProps> = ({
   const [modificationReason, setModificationReason] = useState('Call-Out Coverage');
   const [modificationNote, setModificationNote] = useState('');
 
-  const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
-  const lowEfficiencySlots = heatmapData.filter(point => point.efficiency < 90).length;
+  const lowEfficiencySlots = useMemo(
+    () => heatmapData.filter(point => point.efficiency < 90).length,
+    [heatmapData]
+  );
   const isFinalizeAvailable = Boolean(onFinalize);
 
   useEffect(() => {
@@ -77,7 +81,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
     setSelectedSlot({
       day,
       hourIndex,
-      hourLabel: hourLabels[hourIndex],
+      hourLabel: HOUR_LABELS[hourIndex],
       currentValue
     });
     setModificationType('increase');
@@ -146,7 +150,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
   const handleAIForecast = async () => {
     setIsForecasting(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const ai = createGeminiClient();
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: `Generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm). 
@@ -425,7 +429,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
              <div className="min-w-[600px]">
                <div className="flex mb-3">
                  <div className="w-20"></div>
-                 {hourLabels.map(h => (
+                 {HOUR_LABELS.map(h => (
                    <div key={h} className="flex-1 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">{h}</div>
                  ))}
                </div>

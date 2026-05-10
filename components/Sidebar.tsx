@@ -17,6 +17,7 @@ import {
   Truck,
   Users
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { View } from '../types';
 import { APP_VERSION } from '../constants';
 
@@ -26,42 +27,52 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout }) => {
-  const navigationSections = [
-    {
-      id: 'core',
-      label: 'Core',
-      items: [
-        { id: View.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
-        { id: View.SCHEDULING, label: 'Scheduling', icon: CalendarDays },
-        { id: View.OPERATIONS, label: 'Operations', icon: Activity },
-        { id: View.ANALYTICS, label: 'Analytics', icon: BarChart3 },
-        { id: View.SETTINGS, label: 'Settings', icon: SettingsIcon }
-      ]
-    },
-    {
-      id: 'workforce',
-      label: 'Workforce & Inventory',
-      items: [
-        { id: View.TEAM, label: 'Team', icon: Users },
-        { id: View.INVENTORY, label: 'Inventory', icon: Package },
-        { id: View.GHOST_INVENTORY, label: 'Ghost Inventory', icon: Ghost },
-        { id: View.LOGISTICS, label: 'Logistics', icon: Truck }
-      ]
-    },
-    {
-      id: 'insights',
-      label: 'Insights',
-      items: [
-        { id: View.PLAYBOOK, label: 'Playbook', icon: ShieldCheck },
-        { id: View.COMPARISON, label: 'Comparison', icon: ArrowLeftRight },
-        { id: View.METRICS_REPORT, label: 'Metrics Report', icon: TrendingUp },
-        { id: View.ROYALTY_DASHBOARD, label: 'Royalty Dashboard', icon: Grid3X3 },
-        { id: View.STORE_RATINGS, label: 'Store Ratings', icon: Star }
-      ]
-    }
-  ];
+interface NavigationSection {
+  id: string;
+  label: string;
+  items: Array<{
+    id: View;
+    label: string;
+    icon: LucideIcon;
+  }>;
+}
 
+const NAVIGATION_SECTIONS: NavigationSection[] = [
+  {
+    id: 'core',
+    label: 'Core',
+    items: [
+      { id: View.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
+      { id: View.SCHEDULING, label: 'Scheduling', icon: CalendarDays },
+      { id: View.OPERATIONS, label: 'Operations', icon: Activity },
+      { id: View.ANALYTICS, label: 'Analytics', icon: BarChart3 },
+      { id: View.SETTINGS, label: 'Settings', icon: SettingsIcon }
+    ]
+  },
+  {
+    id: 'workforce',
+    label: 'Workforce & Inventory',
+    items: [
+      { id: View.TEAM, label: 'Team', icon: Users },
+      { id: View.INVENTORY, label: 'Inventory', icon: Package },
+      { id: View.GHOST_INVENTORY, label: 'Ghost Inventory', icon: Ghost },
+      { id: View.LOGISTICS, label: 'Logistics', icon: Truck }
+    ]
+  },
+  {
+    id: 'insights',
+    label: 'Insights',
+    items: [
+      { id: View.PLAYBOOK, label: 'Playbook', icon: ShieldCheck },
+      { id: View.COMPARISON, label: 'Comparison', icon: ArrowLeftRight },
+      { id: View.METRICS_REPORT, label: 'Metrics Report', icon: TrendingUp },
+      { id: View.ROYALTY_DASHBOARD, label: 'Royalty Dashboard', icon: Grid3X3 },
+      { id: View.STORE_RATINGS, label: 'Store Ratings', icon: Star }
+    ]
+  }
+];
+
+const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout }) => {
   return (
     <div className="w-64 bg-[#0f172a] text-white h-screen fixed left-0 top-0 flex flex-col shadow-xl z-50">
       <div className="p-6">
@@ -77,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
       </div>
 
       <nav className="flex-1 px-4 space-y-5 overflow-y-auto pb-4 custom-scrollbar">
-        {navigationSections.map((section) => (
+        {NAVIGATION_SECTIONS.map((section) => (
           <div key={section.id}>
             <p className="px-4 pb-2 text-[10px] text-slate-500 font-black uppercase tracking-widest">
               {section.label}
