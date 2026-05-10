@@ -99,12 +99,44 @@ export interface LaborLawConfig {
   mandatoryBreakDuration: number;
 }
 
+export type InventorySourceSystem = 'Dynamics 365' | 'SAP S/4HANA' | 'FDE' | 'Manual Audit';
+
+export interface InventoryItemDto {
+  item_id: string;
+  server_id: string;
+  external_system_id: string;
+  item_name: string;
+  sku_code: string;
+  category_name: string;
+  source_system: InventorySourceSystem;
+  last_synced_at: string;
+  on_hand_quantity: number;
+  available_quantity: number;
+  on_order_quantity: number;
+  reserved_quantity: number;
+  reorder_point: number;
+  inventory_status: 'Good' | 'Low' | 'Critical';
+  supplier_id?: string;
+  warehouse_id?: string;
+  average_daily_demand: number;
+  lead_time_days: number;
+  unit_cost_cents: number;
+  case_pack_size: number;
+  max_capacity: number;
+}
+
 export interface Product {
   id: string;
+  serverId: string;
+  externalSystemId: string;
   name: string;
   sku: string;
   category: string;
+  /** On-hand units currently counted at the store. */
   stock: number;
+  availableQuantity: number;
+  onOrderQuantity: number;
+  reservedQuantity: number;
   reorderPoint: number;
   status: 'Good' | 'Low' | 'Critical';
   averageDailyDemand: number;
@@ -115,6 +147,15 @@ export interface Product {
   warehouseAvailable: number;
   supplierAvailable: boolean;
   unitCost: number;
+  lastSyncedAt: string;
+  sourceSystem: InventorySourceSystem;
+  supplierId?: string;
+  warehouseId?: string;
+  averageDailyDemand: number;
+  leadTimeDays: number;
+  unitCost: number;
+  casePackSize: number;
+  maxCapacity: number;
 }
 
 export interface HeatmapDataPoint {
