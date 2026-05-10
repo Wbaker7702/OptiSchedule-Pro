@@ -107,6 +107,14 @@ export interface Product {
   stock: number;
   reorderPoint: number;
   status: 'Good' | 'Low' | 'Critical';
+  averageDailyDemand: number;
+  leadTimeDays: number;
+  safetyStock: number;
+  casePackSize: number;
+  maxShelfCapacity: number;
+  warehouseAvailable: number;
+  supplierAvailable: boolean;
+  unitCost: number;
 }
 
 export interface HeatmapDataPoint {

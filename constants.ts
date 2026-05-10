@@ -1,6 +1,5 @@
 
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, EnterpriseSkill, SkillPolicy, SkillAuditEvent } from './types';
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, StaffingReviewItem, HardwareFailsafeItem, TrainingBriefingItem } from './types';
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, StaffingReviewItem, HardwareFailsafeItem, TrainingBriefingItem, EnterpriseSkill, SkillPolicy, SkillAuditEvent } from './types';
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
@@ -396,13 +395,13 @@ export const DEPARTMENT_METRICS: DepartmentMetric[] = [
 ];
 
 export const INVENTORY_DATA: Product[] = [
-  { id: '1', name: 'Mobile Comms Unit', sku: 'ELEC-001', category: 'Electronics', stock: 45, reorderPoint: 20, status: 'Good' },
-  { id: '2', name: 'Premium ANC Headphones', sku: 'AUD-550', category: 'Electronics', stock: 2, reorderPoint: 15, status: 'Critical' },
-  { id: '3', name: 'Organic Avocado Mesh', sku: 'GRO-102', category: 'Grocery', stock: 0, reorderPoint: 50, status: 'Critical' },
-  { id: '4', name: 'Winter Fleece Jacket', sku: 'APR-880', category: 'Apparel', stock: 12, reorderPoint: 30, status: 'Low' },
-  { id: '5', name: '4K OLED Display 55"', sku: 'TV-4K-55', category: 'Electronics', stock: 5, reorderPoint: 8, status: 'Low' },
-  { id: '6', name: 'Isotonic Energy Drink', sku: 'bev-ISO', category: 'Grocery', stock: 140, reorderPoint: 40, status: 'Good' },
-  { id: '7', name: 'Smart Home Hub v2', sku: 'IOT-HUB', category: 'Electronics', stock: 18, reorderPoint: 25, status: 'Low' },
+  { id: '1', name: 'Mobile Comms Unit', sku: 'ELEC-001', category: 'Electronics', stock: 45, reorderPoint: 20, status: 'Good', averageDailyDemand: 3, leadTimeDays: 5, safetyStock: 8, casePackSize: 5, maxShelfCapacity: 80, warehouseAvailable: 60, supplierAvailable: true, unitCost: 129.99 },
+  { id: '2', name: 'Premium ANC Headphones', sku: 'AUD-550', category: 'Electronics', stock: 2, reorderPoint: 15, status: 'Critical', averageDailyDemand: 4, leadTimeDays: 6, safetyStock: 10, casePackSize: 6, maxShelfCapacity: 60, warehouseAvailable: 42, supplierAvailable: true, unitCost: 79.95 },
+  { id: '3', name: 'Organic Avocado Mesh', sku: 'GRO-102', category: 'Grocery', stock: 0, reorderPoint: 50, status: 'Critical', averageDailyDemand: 18, leadTimeDays: 2, safetyStock: 25, casePackSize: 24, maxShelfCapacity: 220, warehouseAvailable: 120, supplierAvailable: true, unitCost: 2.35 },
+  { id: '4', name: 'Winter Fleece Jacket', sku: 'APR-880', category: 'Apparel', stock: 12, reorderPoint: 30, status: 'Low', averageDailyDemand: 5, leadTimeDays: 8, safetyStock: 15, casePackSize: 12, maxShelfCapacity: 96, warehouseAvailable: 36, supplierAvailable: true, unitCost: 24.5 },
+  { id: '5', name: '4K OLED Display 55"', sku: 'TV-4K-55', category: 'Electronics', stock: 5, reorderPoint: 8, status: 'Low', averageDailyDemand: 1, leadTimeDays: 10, safetyStock: 3, casePackSize: 2, maxShelfCapacity: 18, warehouseAvailable: 8, supplierAvailable: true, unitCost: 389.99 },
+  { id: '6', name: 'Isotonic Energy Drink', sku: 'BEV-ISO', category: 'Grocery', stock: 140, reorderPoint: 40, status: 'Good', averageDailyDemand: 22, leadTimeDays: 3, safetyStock: 40, casePackSize: 24, maxShelfCapacity: 220, warehouseAvailable: 160, supplierAvailable: true, unitCost: 1.15 },
+  { id: '7', name: 'Smart Home Hub v2', sku: 'IOT-HUB', category: 'Electronics', stock: 18, reorderPoint: 25, status: 'Low', averageDailyDemand: 2, leadTimeDays: 7, safetyStock: 6, casePackSize: 4, maxShelfCapacity: 48, warehouseAvailable: 12, supplierAvailable: false, unitCost: 54.25 },
 ];
 
 export const OPERATIONAL_AUDITS: AuditLog[] = [
