@@ -55,27 +55,25 @@ const App: React.FC = () => {
   };
 
   const renderView = () => {
-    switch (currentView) {
-      case View.DASHBOARD: return <Dashboard setCurrentView={setCurrentView} />;
-      case View.LOGISTICS: return <Logistics />;
-      case View.GHOST_INVENTORY: return <GhostInventory />;
-      case View.METRICS_REPORT: return <MetricsReport />;
-      case View.ROYALTY_DASHBOARD: return <RoyaltyDashboard />;
-      case View.STORE_RATINGS: return <StoreRatings />;
-      case View.COMPARISON: return <Comparison />;
-      case View.SCHEDULING: return <Scheduling setCurrentView={setCurrentView} onFinalize={() => navigateToOperations('audit')} activeProvider={activeERPProvider} setActiveProvider={setActiveERPProvider} isConnected={isERPConnected} setIsConnected={setIsERPConnected} setHubspotStatus={setHubspotStatus} heatmapData={heatmapData} onAdjustStaffing={handleStaffingAdjustment} />;
-      case View.OPERATIONS: return <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={() => setLinterTrigger(null)} />;
-      case View.INVENTORY: return <Inventory />;
-      case View.ANALYTICS: return <Analytics hubspotStatus={hubspotStatus} />;
-      case View.ENTERPRISE_SKILLS: return <EnterpriseSkillsPolicies />;
-      case View.TEAM: return <Team onEmployeeAdded={handleEmployeeAdded} />;
-      case View.PLAYBOOK: return <Playbook />;
-      case View.SETTINGS: return <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />;
-      default: {
-        const exhaustiveCheck: never = currentView;
-        return exhaustiveCheck;
-      }
-    }
+    const views: Record<View, React.ReactNode> = {
+      [View.DASHBOARD]: <Dashboard setCurrentView={setCurrentView} />,
+      [View.LOGISTICS]: <Logistics />,
+      [View.GHOST_INVENTORY]: <GhostInventory />,
+      [View.METRICS_REPORT]: <MetricsReport />,
+      [View.ROYALTY_DASHBOARD]: <RoyaltyDashboard />,
+      [View.STORE_RATINGS]: <StoreRatings />,
+      [View.COMPARISON]: <Comparison />,
+      [View.SCHEDULING]: <Scheduling setCurrentView={setCurrentView} onFinalize={() => navigateToOperations('audit')} activeProvider={activeERPProvider} setActiveProvider={setActiveERPProvider} isConnected={isERPConnected} setIsConnected={setIsERPConnected} setHubspotStatus={setHubspotStatus} heatmapData={heatmapData} onAdjustStaffing={handleStaffingAdjustment} />,
+      [View.OPERATIONS]: <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={() => setLinterTrigger(null)} />,
+      [View.INVENTORY]: <Inventory />,
+      [View.ANALYTICS]: <Analytics hubspotStatus={hubspotStatus} />,
+      [View.ENTERPRISE_SKILLS]: <EnterpriseSkillsPolicies />,
+      [View.TEAM]: <Team onEmployeeAdded={handleEmployeeAdded} />,
+      [View.PLAYBOOK]: <Playbook />,
+      [View.SETTINGS]: <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />,
+    };
+
+    return views[currentView];
   };
 
   if (!isAuthenticated) return <Login onLogin={handleLogin} />;
