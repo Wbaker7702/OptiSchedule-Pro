@@ -7,6 +7,7 @@ import Operations from './pages/Operations';
 import Inventory from './pages/Inventory';
 import Team from './pages/Team';
 import Analytics from './pages/Analytics';
+import EnterpriseSkillsPolicies from './pages/EnterpriseSkillsPolicies';
 import Playbook from './pages/Playbook';
 import Settings from './pages/Settings';
 import Comparison from './pages/Comparison';
@@ -66,10 +67,14 @@ const App: React.FC = () => {
       case View.OPERATIONS: return <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={() => setLinterTrigger(null)} />;
       case View.INVENTORY: return <Inventory />;
       case View.ANALYTICS: return <Analytics hubspotStatus={hubspotStatus} />;
+      case View.ENTERPRISE_SKILLS: return <EnterpriseSkillsPolicies />;
       case View.TEAM: return <Team onEmployeeAdded={handleEmployeeAdded} />;
       case View.PLAYBOOK: return <Playbook />;
       case View.SETTINGS: return <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />;
-      default: return <Dashboard setCurrentView={setCurrentView} />;
+      default: {
+        const exhaustiveCheck: never = currentView;
+        return exhaustiveCheck;
+      }
     }
   };
 

@@ -16,6 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
     { id: View.SCHEDULING, label: 'Scheduling', icon: CalendarDays },
     { id: View.OPERATIONS, label: 'Operations', icon: Activity },
     { id: View.ANALYTICS, label: 'Analytics', icon: BarChart3 },
+    { id: View.ENTERPRISE_SKILLS, label: 'Skill Policies', icon: ShieldCheck },
     { id: View.SETTINGS, label: 'Settings', icon: SettingsIcon },
   ];
 
