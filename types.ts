@@ -131,3 +131,34 @@ export interface ScheduleLogEntry {
   reason: string;
   impact: string;
 }
+
+export interface StaffingReviewItem {
+  id: string;
+  week: string;
+  varianceSummary: string;
+  manualAdjustments: number;
+  primaryDriver: string;
+  automationRefinement: string;
+  owner: string;
+  status: 'Queued' | 'In Review' | 'Rule Updated';
+}
+
+export interface HardwareFailsafeItem {
+  id: string;
+  location: string;
+  monitor: string;
+  failsafes: string[];
+  coverageWindow: string;
+  risk: 'Low' | 'Medium' | 'High';
+  lastChecked: string;
+}
+
+export interface TrainingBriefingItem {
+  id: string;
+  audience: string;
+  topic: string;
+  schedule: string;
+  outcome: string;
+  owner: string;
+  status: 'Scheduled' | 'Ready' | 'Complete';
+}

@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
 import { Truck, Box, Clock, Activity, ArrowUpRight, ShieldCheck, MapPin, Package, AlertTriangle, CheckCircle2, Loader2, Zap, Database, Cloud, FileDown, Download, Brain, Sparkles, Command, MessageSquareText, Terminal, Cpu, Radio, Shield } from 'lucide-react';
-import { HOURLY_LOGISTICS, STORE_NUMBER } from '../constants';
+import { HOURLY_LOGISTICS, STORE_NUMBER, MONITORING_FAILSAFES } from '../constants';
+import { HardwareFailsafeItem } from '../types';
 import { GoogleGenAI } from "@google/genai";
 
 const Logistics: React.FC = () => {
@@ -16,6 +17,12 @@ const Logistics: React.FC = () => {
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [insightStep, setInsightStep] = useState<string>('');
+
+  const failsafeRiskClass: Record<HardwareFailsafeItem['risk'], string> = {
+    Low: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+    Medium: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+    High: 'bg-red-500/10 text-red-300 border-red-500/20',
+  };
 
   const handleSync = () => {
     setIsSyncing(true);
@@ -208,6 +215,63 @@ RECONCILIATION:
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Awaiting Neural Authorization</p>
                  </div>
               )}
+           </div>
+        </div>
+
+        {/* Localized Monitoring Failsafes */}
+        <div className="bg-slate-900 rounded-3xl p-8 border border-emerald-500/20 shadow-2xl">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div>
+                 <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                    <Shield className="w-4 h-4 text-emerald-400" />
+                    Local Monitoring Failsafe Plan
+                 </h3>
+                 <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">
+                    Critical edge monitors require thermal control, backup power, and local buffering before peak operating windows.
+                 </p>
+              </div>
+              <div className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest text-emerald-300">
+                No data-gap posture: active
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+             {MONITORING_FAILSAFES.map((item) => (
+               <div key={item.id} className="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 space-y-5">
+                 <div className="flex items-start justify-between gap-4">
+                   <div>
+                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{item.id}</p>
+                     <h4 className="text-sm font-black text-white mt-1">{item.location}</h4>
+                     <p className="text-[10px] text-slate-500 font-mono mt-1">{item.monitor}</p>
+                   </div>
+                   <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${failsafeRiskClass[item.risk]}`}>
+                     {item.risk} Risk
+                   </span>
+                 </div>
+
+                 <div>
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Failsafe Requirements</p>
+                   <div className="flex flex-wrap gap-2">
+                     {item.failsafes.map((failsafe) => (
+                       <span key={failsafe} className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-[9px] font-bold text-emerald-200 uppercase">
+                         {failsafe}
+                       </span>
+                     ))}
+                   </div>
+                 </div>
+
+                 <div className="grid grid-cols-1 gap-3 text-[10px] font-mono">
+                   <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                     <p className="text-slate-500 uppercase font-black mb-1">Protected Window</p>
+                     <p className="text-slate-300">{item.coverageWindow}</p>
+                   </div>
+                   <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                     <p className="text-slate-500 uppercase font-black mb-1">Last Readiness Check</p>
+                     <p className="text-slate-300">{item.lastChecked}</p>
+                   </div>
+                 </div>
+               </div>
+             ))}
            </div>
         </div>
 
