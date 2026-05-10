@@ -1,9 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../components/Header';
 import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
 import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Package, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, ShieldCheck, Zap, Terminal } from 'lucide-react';
 import { Product } from '../types';
+import { createProcurementOrder, createReplenishmentBatch, getInventory, getInventoryErrorMessage, isInventoryBackendUnavailable } from '../services/inventoryClient';
+
+const isDevMode = Boolean((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV);
+const delay = (milliseconds: number) => new Promise(resolve => window.setTimeout(resolve, milliseconds));
 
 const formatSyncTime = (isoTimestamp: string) =>
   new Intl.DateTimeFormat('en-US', {
@@ -18,7 +22,13 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
 const Inventory: React.FC = () => {
-  const [items, setItems] = useState<Product[]>(INVENTORY_DATA);
+  const [items, setItems] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isUsingDemoFallback, setIsUsingDemoFallback] = useState(false);
+  const [isStale, setIsStale] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [lastLoadedAt, setLastLoadedAt] = useState<Date | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(14);
@@ -37,16 +47,67 @@ const Inventory: React.FC = () => {
     priority: 'Standard'
   });
 
-  const handleNewOrder = (e: React.FormEvent) => {
+  const loadInventory = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
+    const isRefresh = mode === 'refresh';
+
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+
+    try {
+      const inventory = await getInventory(STORE_NUMBER);
+      setItems(inventory);
+      setServerError(null);
+      setIsStale(false);
+      setIsUsingDemoFallback(false);
+      setLastLoadedAt(new Date());
+    } catch (error) {
+      const errorMessage = getInventoryErrorMessage(error);
+      const canUseDemoFallback = isDevMode && isInventoryBackendUnavailable(error);
+
+      if (canUseDemoFallback && !isRefresh) {
+        setItems(INVENTORY_DATA);
+        setServerError('Inventory backend unavailable. Showing demo fallback data for development only.');
+        setIsUsingDemoFallback(true);
+        setIsStale(true);
+        setLastLoadedAt(new Date());
+      } else {
+        setServerError(errorMessage);
+        setIsStale(isRefresh);
+
+        if (!isRefresh) {
+          setItems([]);
+          setIsUsingDemoFallback(false);
+        }
+      }
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadInventory();
+  }, [loadInventory]);
+
+  const handleNewOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API request to Dynamics 365 Supply Chain Management
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setServerError(null);
+
+    try {
+      await createProcurementOrder({
+        storeNumber: STORE_NUMBER,
+        sku: orderForm.sku,
+        quantity: Number(orderForm.quantity),
+        priority: orderForm.priority
+      });
+
       setPendingOrdersCount(prev => prev + 1);
       setIsOrderModalOpen(false);
-      setSuccessMessage('Order Dispatched to Dynamics 365 Supply Chain');
+      setSuccessMessage('Order Dispatched to Authorized Supply Chain Backend');
       setShowSuccess(true);
       setOrderForm({ sku: '', quantity: '1', priority: 'Standard' });
       
@@ -59,28 +120,35 @@ const Inventory: React.FC = () => {
         lastSyncedAt: new Date().toISOString()
       } : i)); // Optimistic update simulation
 
+      setItems(prev => prev.map(i => i.sku === orderForm.sku ? { ...i, status: 'Good' } : i));
       setTimeout(() => setShowSuccess(false), 3000);
-    }, 1500);
+    } catch (error) {
+      setServerError(getInventoryErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const criticalCount = items.filter(i => i.status === 'Critical').length;
   const lowCount = items.filter(i => i.status === 'Low').length;
+  const isEmpty = !isLoading && items.length === 0 && !serverError;
+  const dataFreshnessLabel = lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : 'Not loaded';
 
-  const triggerActiveProcurement = () => {
+  const triggerActiveProcurement = async () => {
     const targetItems = items.filter(i => i.status !== 'Good');
     if (targetItems.length === 0) return;
 
     setIsReplenishing(true);
+    setServerError(null);
     setD365Logs([]);
     
     const sequence = [
-      "Initializing Dynamics 365 Supply Chain Handshake...",
-      "Authenticating Secure Node #5065...",
+      "Initializing authorized supply-chain request...",
+      "Handing request to backend credential broker...",
       `Detected ${targetItems.length} SKUs below threshold...`,
-      "Calculating Optimal Reorder Quantities (EOQ Model)...",
-      "Checking Regional Warehouse Availability...",
-      "Committing Purchase Order Batch #PO-D365-AUTO...",
-      "Sync Complete. Logistics Chain Activated."
+      "Calculating optimal reorder quantities (EOQ model)...",
+      "Submitting replenishment batch through server endpoint...",
+      "Awaiting backend procurement confirmation..."
     ];
 
     let step = 0;
@@ -106,8 +174,37 @@ const Inventory: React.FC = () => {
         setSuccessMessage(`Auto-Replenished ${targetItems.length} Items via Dynamics 365`);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 4000);
+    try {
+      for (const entry of sequence) {
+        setReplenishmentStep(entry);
+        setD365Logs(prev => [entry, ...prev]);
+        await delay(500);
       }
-    }, 800);
+
+      await createReplenishmentBatch({
+        storeNumber: STORE_NUMBER,
+        items: targetItems.map(item => ({
+          sku: item.sku,
+          currentStock: item.stock,
+          reorderPoint: item.reorderPoint,
+          requestedQuantity: Math.max(item.reorderPoint - item.stock, 1)
+        }))
+      });
+
+      const completeMessage = 'Sync complete. Logistics chain activated.';
+      setReplenishmentStep(completeMessage);
+      setD365Logs(prev => [completeMessage, ...prev]);
+      setPendingOrdersCount(prev => prev + targetItems.length);
+      setSuccessMessage(`Auto-Replenished ${targetItems.length} Items via Authorized Backend`);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 4000);
+      void loadInventory('refresh');
+    } catch (error) {
+      setServerError(getInventoryErrorMessage(error));
+      setIsStale(items.length > 0);
+    } finally {
+      setIsReplenishing(false);
+    }
   };
 
   return (
@@ -144,7 +241,7 @@ const Inventory: React.FC = () => {
                  <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-blue-800">Dynamics 365 Integration</p>
                     <p className="text-slate-500 text-xs font-medium leading-relaxed mt-1">
-                      This request will be instantly synced with the Regional Supply Chain node. Approval is automated based on current OTB budget.
+                      This request is sent to the authorized backend endpoint. Browser code never stores Walmart, ERP, or service tokens.
                     </p>
                  </div>
               </div>
@@ -199,7 +296,7 @@ const Inventory: React.FC = () => {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Syncing with ERP...
+                      Submitting securely...
                     </>
                   ) : (
                     <>
@@ -214,6 +311,50 @@ const Inventory: React.FC = () => {
       )}
 
       <div className="p-8 max-w-7xl mx-auto space-y-6">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className={`p-3 rounded-xl ${serverError ? 'bg-red-50' : isLoading ? 'bg-blue-50' : isStale ? 'bg-amber-50' : 'bg-emerald-50'}`}>
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+              ) : serverError ? (
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              ) : isStale ? (
+                <RefreshCw className="w-5 h-5 text-amber-600" />
+              ) : (
+                <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              )}
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Authorized Inventory Feed</p>
+              <h3 className="font-black text-gray-900 uppercase tracking-wider text-sm mt-1">
+                {isLoading ? 'Loading inventory from backend...' : serverError ? 'Inventory service needs attention' : isEmpty ? 'No inventory records returned' : 'Inventory data loaded'}
+              </h3>
+              <p className="text-xs text-gray-500 font-medium mt-1">
+                {serverError ?? (isEmpty ? 'The authorized backend returned an empty inventory set for this store.' : `Last successful load: ${dataFreshnessLabel}`)}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {isUsingDemoFallback && (
+              <span className="px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest">Dev Demo Fallback</span>
+            )}
+            {isStale && (
+              <span className="px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-black uppercase tracking-widest">Stale Data</span>
+            )}
+            {!isLoading && !serverError && !isEmpty && (
+              <span className="px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest">Live Backend Data</span>
+            )}
+            <button
+              onClick={() => void loadInventory('refresh')}
+              disabled={isLoading || isRefreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing' : 'Refresh'}
+            </button>
+          </div>
+        </div>
         
         {/* Active Procurement Engine Banner */}
         <div className="bg-[#002050] rounded-3xl p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 border border-blue-500/30">
@@ -336,7 +477,7 @@ const Inventory: React.FC = () => {
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
            <div className="p-5 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <h3 className="font-black text-gray-900 uppercase tracking-widest text-xs">Inventory Assets • Store 5065</h3>
+              <h3 className="font-black text-gray-900 uppercase tracking-widest text-xs">Inventory Assets • Store {STORE_NUMBER}</h3>
               <div className="flex items-center gap-3">
                  <div className="relative">
                     <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -344,6 +485,13 @@ const Inventory: React.FC = () => {
                  </div>
                  <button className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 font-bold uppercase tracking-widest text-[10px]">
                     <Filter className="w-4 h-4" /> Filter
+                 </button>
+                 <button
+                    onClick={() => void loadInventory('refresh')}
+                    disabled={isLoading || isRefreshing}
+                    className="flex items-center gap-2 px-3 py-2 border border-blue-200 bg-blue-50 rounded-lg text-sm text-blue-700 hover:bg-blue-100 font-bold uppercase tracking-widest text-[10px] disabled:opacity-60"
+                 >
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} /> Refresh
                  </button>
               </div>
            </div>
@@ -366,7 +514,37 @@ const Inventory: React.FC = () => {
                  </tr>
                </thead>
                <tbody className="divide-y divide-gray-100">
-                 {items.map((item) => (
+                 {isLoading && (
+                   <tr>
+                     <td colSpan={7} className="px-6 py-12 text-center">
+                       <div className="flex flex-col items-center gap-3 text-blue-600">
+                         <Loader2 className="w-8 h-8 animate-spin" />
+                         <span className="text-[10px] font-black uppercase tracking-widest">Loading authorized inventory feed...</span>
+                       </div>
+                     </td>
+                   </tr>
+                 )}
+                 {!isLoading && serverError && items.length === 0 && (
+                   <tr>
+                     <td colSpan={7} className="px-6 py-12 text-center">
+                       <div className="flex flex-col items-center gap-3 text-red-600">
+                         <AlertTriangle className="w-8 h-8" />
+                         <span className="text-[10px] font-black uppercase tracking-widest">{serverError}</span>
+                       </div>
+                     </td>
+                   </tr>
+                 )}
+                 {isEmpty && (
+                   <tr>
+                     <td colSpan={7} className="px-6 py-12 text-center">
+                       <div className="flex flex-col items-center gap-3 text-gray-500">
+                         <Package className="w-8 h-8" />
+                         <span className="text-[10px] font-black uppercase tracking-widest">No inventory assets returned for Store {STORE_NUMBER}</span>
+                       </div>
+                     </td>
+                   </tr>
+                 )}
+                 {!isLoading && items.map((item) => (
                    <tr key={item.id} className="hover:bg-gray-50/50">
                      <td className="px-6 py-4 font-bold text-gray-900">{item.name}</td>
                      <td className="px-6 py-4 font-mono text-[10px] font-black text-gray-400">{item.sku}</td>

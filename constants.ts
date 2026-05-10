@@ -19,6 +19,8 @@ import {
   TrainingBriefingItem
 } from './types';
 
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, EnterpriseSkill, SkillPolicy, SkillAuditEvent, StaffingReviewItem, HardwareFailsafeItem, TrainingBriefingItem } from './types';
+
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
 export const COMPARISON_STORE = "2080";
