@@ -31,8 +31,8 @@ const RoyaltyDashboard: React.FC = () => {
   // Initiative Linking States
   const [laborIssueId, setLaborIssueId] = useState('LAB-5065-COST');
   const [inventoryIssueId, setInventoryIssueId] = useState('INV-5065-HUB');
-  const [isTriggeringSentinel, setIsTriggeringSentinel] = useState(false);
-  const [sentinelLogs, setSentinelLogs] = useState<{id: string, text: string, status: 'info' | 'success' | 'warn'}[]>([]);
+  const [isTriggeringDefender, setIsTriggeringDefender] = useState(false);
+  const [defenderLogs, setDefenderLogs] = useState<{id: string, text: string, status: 'info' | 'success' | 'warn'}[]>([]);
 
   // Ledger Sync States
   const [ledgerSyncProgress, setLedgerSyncProgress] = useState(12.4);
@@ -68,7 +68,7 @@ const RoyaltyDashboard: React.FC = () => {
         "Azure Fabric Handshake Verified",
         "HS Breeze Signal Delta Commit",
         "D365 Ledger Entry Verified",
-        "Sentinel Integrity Check: Pass",
+        "Defender Integrity Check: Pass",
         "Amortization Vector Aligned"
       ];
       const newLog = {
@@ -81,9 +81,9 @@ const RoyaltyDashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const triggerSentinelRefresh = () => {
-    setIsTriggeringSentinel(true);
-    setSentinelLogs([]);
+  const triggerDefenderRefresh = () => {
+    setIsTriggeringDefender(true);
+    setDefenderLogs([]);
     
     const sequence = [
       { text: `Pinging Initiative: ${laborIssueId}...`, status: 'info' },
@@ -99,11 +99,11 @@ const RoyaltyDashboard: React.FC = () => {
     let current = 0;
     const interval = setInterval(() => {
       if (current < sequence.length) {
-        setSentinelLogs(prev => [...prev, { id: Date.now().toString(), ...sequence[current] }]);
+        setDefenderLogs(prev => [...prev, { id: Date.now().toString(), ...sequence[current] }]);
         current++;
       } else {
         clearInterval(interval);
-        setIsTriggeringSentinel(false);
+        setIsTriggeringDefender(false);
       }
     }, 600);
   };
@@ -240,7 +240,7 @@ const RoyaltyDashboard: React.FC = () => {
                        <div className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-all duration-1000" style={{ width: `${(parseFloat(efficiencyGainPct)/10) * 100}%` }}></div>
                     </div>
                     <p className="text-[9px] text-slate-500 leading-relaxed uppercase">
-                       Sentinel AI successfully suppressed labor burn against the <span className="text-emerald-400 font-bold">{reg.state} Labor Frame Baseline</span>.
+                       Defender portal automation successfully suppressed labor burn against the <span className="text-emerald-400 font-bold">{reg.state} Labor Frame Baseline</span>.
                     </p>
                  </div>
               </div>
@@ -402,12 +402,12 @@ const RoyaltyDashboard: React.FC = () => {
                        <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">Strategic Asset Integration</p>
                     </div>
                     <button 
-                      onClick={triggerSentinelRefresh}
-                      disabled={isTriggeringSentinel}
+                      onClick={triggerDefenderRefresh}
+                      disabled={isTriggeringDefender}
                       className="p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
                     >
-                       {isTriggeringSentinel ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
-                       <span className="text-[9px] font-black uppercase tracking-widest">Trigger Sentinel</span>
+                       {isTriggeringDefender ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+                       <span className="text-[9px] font-black uppercase tracking-widest">Trigger Defender</span>
                     </button>
                  </div>
 
@@ -444,21 +444,21 @@ const RoyaltyDashboard: React.FC = () => {
                     <div className="flex items-center justify-between mb-3 border-b border-slate-900 pb-2">
                        <div className="flex items-center gap-2">
                           <ShieldAlert className="w-3 h-3 text-blue-500" />
-                          <span className="text-[8px] font-black text-slate-600 uppercase">Sentinel Validation Stream</span>
+                          <span className="text-[8px] font-black text-slate-600 uppercase">Defender Validation Stream</span>
                        </div>
                        <div className="flex items-center gap-1.5">
-                          <div className={`w-1.5 h-1.5 rounded-full ${isTriggeringSentinel ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
-                          <span className="text-[7px] text-slate-600 uppercase font-mono">{isTriggeringSentinel ? 'Pinging' : 'Standby'}</span>
+                          <div className={`w-1.5 h-1.5 rounded-full ${isTriggeringDefender ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                          <span className="text-[7px] text-slate-600 uppercase font-mono">{isTriggeringDefender ? 'Pinging' : 'Standby'}</span>
                        </div>
                     </div>
                     
                     <div className="space-y-1.5 overflow-y-auto custom-scrollbar flex-1 max-h-[120px]">
-                       {sentinelLogs.length === 0 ? (
+                       {defenderLogs.length === 0 ? (
                          <div className="h-full flex items-center justify-center">
                             <p className="text-[9px] text-slate-800 font-black uppercase tracking-[0.2em]">Awaiting Authorization</p>
                          </div>
                        ) : (
-                         sentinelLogs.map(log => (
+                         defenderLogs.map(log => (
                             <div key={log.id} className="flex gap-2 animate-in slide-in-from-left-2 fade-in duration-300">
                                <span className="text-slate-700 font-mono text-[8px] shrink-0">[{new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
                                <p className={`text-[8px] font-mono leading-tight ${log.status === 'success' ? 'text-emerald-500' : 'text-slate-400'}`}>

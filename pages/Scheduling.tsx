@@ -122,7 +122,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
       const newLog: ScheduleLogEntry = {
         id: `SL-OPT-${Date.now()}`,
         timestamp: new Date().toLocaleString(),
-        manager: 'Sentinel Optimizer',
+        manager: 'Defender Optimizer',
         action: 'Auto-Balanced Staffing Levels',
         reason: 'Coverage Compliance Check',
         impact: 'Risk Eliminated'
@@ -175,7 +175,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
           const newLog: ScheduleLogEntry = {
             id: `SL-AI-${Date.now()}`,
             timestamp: new Date().toLocaleString(),
-            manager: 'Sentinel AI',
+            manager: 'Defender Assistant',
             action: 'Generated Demand Forecast',
             reason: 'High Traffic Probability',
             impact: 'Efficiency +14%'

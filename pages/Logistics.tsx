@@ -64,7 +64,7 @@ const Logistics: React.FC = () => {
     } catch (error) {
       clearInterval(stepInterval);
       console.error("AI Insight Error:", error);
-      setAiInsight("CRITICAL ERROR: Sentinel Insight Node unreachable. Check Cloud Fabric credentials or regional connectivity.");
+      setAiInsight("CRITICAL ERROR: Defender insight node unreachable. Check Cloud Fabric credentials or regional connectivity.");
     } finally {
       setIsGeneratingInsights(false);
       setInsightStep('');
@@ -79,7 +79,7 @@ const Logistics: React.FC = () => {
         const timestamp = new Date().toLocaleString();
         const content = `
 =====================================================
-SENTINEL LOGISTICS COMMAND - MANIFEST EXPORT
+MICROSOFT DEFENDER PORTAL - MANIFEST EXPORT
 =====================================================
 NODE ID: #5065
 TIMESTAMP: ${timestamp}
@@ -100,9 +100,9 @@ HOURLY THROUGHPUT (PEAK):
 RECONCILIATION:
 - Dynamics 365 Supply Chain: SYNCED
 - HubSpot Breeze Delivery Node: ACTIVE
-- Sentinel Policy Guard: NOMINAL
+- Defender Policy Guard: NOMINAL
 
-(c) 2024 OptiSchedule Pro Enterprise Logistics
+(c) 2024 Microsoft Defender portal Logistics
 =====================================================
         `.trim();
 
@@ -163,7 +163,7 @@ RECONCILIATION:
               <div>
                  <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
-                    Sentinel Insight Engine
+                    Defender Insight Engine
                  </h3>
                  <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase tracking-widest">Neural Logistics Analysis • Node #5065</p>
               </div>

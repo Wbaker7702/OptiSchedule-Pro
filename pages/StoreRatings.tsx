@@ -43,13 +43,13 @@ OPERATIONAL PERFORMANCE MATRIX:
 
 AUDIT TRAIL:
 - Last Physical Audit: ${currentStore.lastAudit}
-- Sentinel Sync: Verified
+- Defender Sync: Verified
 - Dynamics 365 Ledger: Reconciled
 - HubSpot Signal Integrity: 98.2%
 
 STATUS: NOMINAL
 -----------------------------------------
-(c) 2024 OptiSchedule Pro Enterprise Systems
+(c) 2024 Microsoft Defender portal
         `.trim();
 
         const blob = new Blob([content], { type: 'text/plain' });
@@ -158,7 +158,7 @@ STATUS: NOMINAL
                           <h2 className="text-7xl font-black text-white">{currentStore.overallScore}</h2>
                           <div className="flex flex-col">
                              <span className="text-emerald-400 font-black text-sm">/ 100</span>
-                             <span className="text-slate-500 text-[10px] font-black uppercase">SENTINEL GRADE</span>
+                             <span className="text-slate-500 text-[10px] font-black uppercase">DEFENDER GRADE</span>
                           </div>
                        </div>
                     </div>
@@ -209,7 +209,7 @@ STATUS: NOMINAL
                        <div className="space-y-3">
                           <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800/50 flex gap-3">
                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                             <p className="text-[10px] text-slate-400 leading-relaxed font-mono italic">"Checkout wait times improved by 14% since Sentinel AI schedule integration."</p>
+                             <p className="text-[10px] text-slate-400 leading-relaxed font-mono italic">"Checkout wait times improved by 14% since Defender portal schedule integration."</p>
                           </div>
                           <div className="p-3 bg-slate-950/50 rounded-xl border border-slate-800/50 flex gap-3">
                              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
@@ -249,7 +249,7 @@ STATUS: NOMINAL
               <div className="max-w-xl">
                  <h4 className="text-sm font-black text-white uppercase tracking-widest mb-2">Network Benchmarking Mode</h4>
                  <p className="text-xs text-slate-400 leading-relaxed font-mono uppercase tracking-tight">
-                    This module allows you to cycle through every store in the <span className="text-blue-400 font-bold">Sentinel Network</span>. Ratings are compiled using real-time ingress from HubSpot and Dynamics 365, ensuring unbiased operational truth.
+                    This module allows you to cycle through every store in the <span className="text-blue-400 font-bold">Defender Network</span>. Ratings are compiled using real-time ingress from HubSpot and Dynamics 365, ensuring unbiased operational truth.
                  </p>
               </div>
            </div>

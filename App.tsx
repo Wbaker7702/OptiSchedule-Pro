@@ -16,7 +16,7 @@ import StoreRatings from './pages/StoreRatings';
 import Logistics from './pages/Logistics';
 import GhostInventory from './pages/GhostInventory';
 import Login from './components/Login';
-import SentinelAI from './components/SentinelAI';
+import DefenderAssistant from './components/DefenderAssistant';
 import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint } from './types';
 import { HEATMAP_DATA } from './constants';
 
@@ -87,7 +87,7 @@ const App: React.FC = () => {
       />
       <main className="flex-1 ml-64 flex flex-col h-screen relative">
         {renderView()}
-        <SentinelAI hubspotStatus={hubspotStatus} />
+        <DefenderAssistant hubspotStatus={hubspotStatus} />
       </main>
     </div>
   );
