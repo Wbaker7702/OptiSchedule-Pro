@@ -5,6 +5,7 @@ export enum View {
   OPERATIONS = 'OPERATIONS',
   INVENTORY = 'INVENTORY',
   ANALYTICS = 'ANALYTICS',
+  ENTERPRISE_SKILLS = 'ENTERPRISE_SKILLS',
   TEAM = 'TEAM',
   PLAYBOOK = 'PLAYBOOK',
   SETTINGS = 'SETTINGS',
@@ -27,6 +28,48 @@ export interface SystemPlugin {
   version: string;
   status: 'Mounted' | 'Available' | 'Locked';
   iconName: string;
+}
+
+export type EnterpriseSkillCategory = 'Labor' | 'Inventory' | 'Compliance' | 'Revenue' | 'Security';
+export type EnterpriseSkillRisk = 'Low' | 'Medium' | 'High';
+export type EnterpriseSkillStatus = 'Approved' | 'Review Required' | 'Blocked';
+export type PolicyEnforcementMode = 'Monitor' | 'Warn' | 'Block';
+export type SkillAuditOutcome = 'Approved' | 'Warned' | 'Blocked';
+
+export interface EnterpriseSkill {
+  id: string;
+  name: string;
+  owner: string;
+  category: EnterpriseSkillCategory;
+  description: string;
+  status: EnterpriseSkillStatus;
+  risk: EnterpriseSkillRisk;
+  dataScopes: string[];
+  approvalGroup: string;
+  usageCount: number;
+  lastReviewed: string;
+}
+
+export interface SkillPolicy {
+  id: string;
+  name: string;
+  scope: string;
+  description: string;
+  enforcement: PolicyEnforcementMode;
+  coverage: number;
+  controls: string[];
+  exceptions: number;
+  lastUpdated: string;
+}
+
+export interface SkillAuditEvent {
+  id: string;
+  timestamp: string;
+  actor: string;
+  skill: string;
+  policy: string;
+  outcome: SkillAuditOutcome;
+  detail: string;
 }
 
 export type ERPProvider = 'Dynamics 365' | 'SAP S/4HANA' | 'FDE' | 'HubSpot' | 'Azure';

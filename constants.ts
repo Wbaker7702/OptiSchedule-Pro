@@ -1,4 +1,5 @@
 
+import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, EnterpriseSkill, SkillPolicy, SkillAuditEvent } from './types';
 import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry, StaffingReviewItem, HardwareFailsafeItem, TrainingBriefingItem } from './types';
 
 export const CURRENT_USER = "Wesley Baker";
@@ -165,6 +166,160 @@ export const PLUGIN_REGISTRY: SystemPlugin[] = [
     version: '3.1.0',
     status: 'Mounted',
     iconName: 'Eye'
+  }
+];
+
+export const ENTERPRISE_SKILL_CATALOG: EnterpriseSkill[] = [
+  {
+    id: 'skill-labor-forecast',
+    name: 'Labor Forecast Optimizer',
+    owner: 'Workforce Systems',
+    category: 'Labor',
+    description: 'Projects demand curves and recommends weekly coverage changes before publishing schedules.',
+    status: 'Approved',
+    risk: 'Medium',
+    dataScopes: ['labor.hours', 'sales.forecast', 'employee.availability'],
+    approvalGroup: 'Regional Operations Council',
+    usageCount: 1840,
+    lastReviewed: '2026-05-01'
+  },
+  {
+    id: 'skill-minor-compliance',
+    name: 'Minor Labor Compliance Guard',
+    owner: 'People Compliance',
+    category: 'Compliance',
+    description: 'Blocks schedule drafts that violate jurisdictional curfew, shift-length, or break thresholds.',
+    status: 'Approved',
+    risk: 'High',
+    dataScopes: ['employee.age_band', 'schedule.shift', 'jurisdiction.rules'],
+    approvalGroup: 'Legal + HR Policy',
+    usageCount: 926,
+    lastReviewed: '2026-04-28'
+  },
+  {
+    id: 'skill-inventory-variance',
+    name: 'Inventory Variance Explainer',
+    owner: 'Asset Protection',
+    category: 'Inventory',
+    description: 'Summarizes shrink anomalies and suggests reconciliation steps using POS and receiving deltas.',
+    status: 'Review Required',
+    risk: 'Medium',
+    dataScopes: ['inventory.counts', 'pos.voids', 'receiving.manifest'],
+    approvalGroup: 'Asset Protection Review',
+    usageCount: 311,
+    lastReviewed: '2026-03-19'
+  },
+  {
+    id: 'skill-revenue-recovery',
+    name: 'Revenue Recovery Coach',
+    owner: 'Finance Operations',
+    category: 'Revenue',
+    description: 'Generates manager playbooks for recovering labor leakage and missed sales velocity.',
+    status: 'Approved',
+    risk: 'Low',
+    dataScopes: ['sales.summary', 'labor.cost', 'store.performance'],
+    approvalGroup: 'Store Finance',
+    usageCount: 1404,
+    lastReviewed: '2026-04-24'
+  },
+  {
+    id: 'skill-open-web-agent',
+    name: 'Open Web Procurement Agent',
+    owner: 'Pilot Programs',
+    category: 'Security',
+    description: 'Autonomously researches external vendors and drafts purchase recommendations.',
+    status: 'Blocked',
+    risk: 'High',
+    dataScopes: ['vendor.search', 'budget.requests', 'external.web'],
+    approvalGroup: 'Security Architecture Board',
+    usageCount: 0,
+    lastReviewed: '2026-05-03'
+  }
+];
+
+export const ENTERPRISE_SKILL_POLICIES: SkillPolicy[] = [
+  {
+    id: 'policy-data-minimization',
+    name: 'Data Minimization Boundary',
+    scope: 'All AI-assisted skills',
+    description: 'Restricts each skill to approved data scopes and prevents free-form access to personnel, POS, or vendor systems.',
+    enforcement: 'Block',
+    coverage: 98,
+    controls: ['Scope allowlist required', 'PII fields masked by default', 'Cross-system joins require approval'],
+    exceptions: 1,
+    lastUpdated: '2026-05-06'
+  },
+  {
+    id: 'policy-human-approval',
+    name: 'High-Risk Human Approval',
+    scope: 'High-risk labor, finance, and security skills',
+    description: 'Requires named approvers before a skill can publish schedules, modify budgets, or trigger external actions.',
+    enforcement: 'Block',
+    coverage: 94,
+    controls: ['Two-person approval', 'Justification capture', 'Manager override audit trail'],
+    exceptions: 2,
+    lastUpdated: '2026-05-04'
+  },
+  {
+    id: 'policy-model-provenance',
+    name: 'Model and Prompt Provenance',
+    scope: 'Mounted and marketplace skills',
+    description: 'Tracks model versions, prompt bundles, and policy hashes for every enterprise skill execution.',
+    enforcement: 'Warn',
+    coverage: 89,
+    controls: ['Prompt hash logged', 'Model version pinned', 'Skill release notes required'],
+    exceptions: 3,
+    lastUpdated: '2026-04-30'
+  },
+  {
+    id: 'policy-jurisdiction-lock',
+    name: 'Jurisdiction Policy Lock',
+    scope: 'Labor and compliance skills',
+    description: 'Prevents skills from applying labor rules outside the selected state and flags stale regulatory packs.',
+    enforcement: 'Monitor',
+    coverage: 100,
+    controls: ['State pack checksum', 'Effective date validation', 'Curfew rule regression checks'],
+    exceptions: 0,
+    lastUpdated: '2026-05-07'
+  }
+];
+
+export const ENTERPRISE_SKILL_AUDIT_EVENTS: SkillAuditEvent[] = [
+  {
+    id: 'SKA-1042',
+    timestamp: '2026-05-10 08:12',
+    actor: 'Wesley Baker',
+    skill: 'Labor Forecast Optimizer',
+    policy: 'High-Risk Human Approval',
+    outcome: 'Approved',
+    detail: 'Schedule recommendation sent to manager queue after council approval.'
+  },
+  {
+    id: 'SKA-1041',
+    timestamp: '2026-05-10 07:54',
+    actor: 'Defender Policy Engine',
+    skill: 'Open Web Procurement Agent',
+    policy: 'Data Minimization Boundary',
+    outcome: 'Blocked',
+    detail: 'External web action denied until vendor data scope is reviewed.'
+  },
+  {
+    id: 'SKA-1038',
+    timestamp: '2026-05-09 18:33',
+    actor: 'Asset Protection Lead',
+    skill: 'Inventory Variance Explainer',
+    policy: 'Model and Prompt Provenance',
+    outcome: 'Warned',
+    detail: 'Prompt bundle v2.1 lacks reviewer notes for the latest shrink workflow.'
+  },
+  {
+    id: 'SKA-1035',
+    timestamp: '2026-05-09 15:10',
+    actor: 'People Compliance',
+    skill: 'Minor Labor Compliance Guard',
+    policy: 'Jurisdiction Policy Lock',
+    outcome: 'Approved',
+    detail: 'Michigan rule pack checksum verified before schedule validation.'
   }
 ];
 
