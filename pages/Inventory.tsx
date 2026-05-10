@@ -1,4 +1,11 @@
 
+import React, { useRef, useState, useEffect } from 'react';
+import Header from '../components/Header';
+import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
+import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Package, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, ShieldCheck, Zap, Terminal } from 'lucide-react';
+import type { Product } from '../types';
+import { createProcurementOrder } from '../services/procurementOrders';
+import type { ProcurementOrderResponse } from '../services/procurementOrders';
 import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../components/Header';
 import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
@@ -34,6 +41,10 @@ const Inventory: React.FC = () => {
   const [pendingOrdersCount, setPendingOrdersCount] = useState(14);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [toastVariant, setToastVariant] = useState<'success' | 'warning' | 'error'>('success');
+  const [orderFeedback, setOrderFeedback] = useState<{ variant: 'success' | 'warning' | 'error'; message: string } | null>(null);
+  const [pendingOrderKeys, setPendingOrderKeys] = useState<string[]>([]);
+  const pendingOrderKeysRef = useRef(new Set<string>());
   
   // Active Procurement State
   const [isReplenishing, setIsReplenishing] = useState(false);
@@ -47,6 +58,17 @@ const Inventory: React.FC = () => {
     priority: 'Standard'
   });
 
+  const showOrderToast = (message: string, variant: 'success' | 'warning' | 'error' = 'success') => {
+    setToastVariant(variant);
+    setSuccessMessage(message);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), variant === 'success' ? 3000 : 5000);
+  };
+
+  const formatOrderResult = (result: ProcurementOrderResponse) => {
+    const arrivalMessage = result.expectedArrivalDate ? ` ETA ${result.expectedArrivalDate}.` : '';
+    return `${result.orderStatus.toUpperCase()}: accepted ${result.acceptedQuantity}, rejected ${result.rejectedQuantity}.${arrivalMessage}`;
+  };
   const loadInventory = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
     const isRefresh = mode === 'refresh';
 
@@ -94,7 +116,74 @@ const Inventory: React.FC = () => {
 
   const handleNewOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const quantity = Number(orderForm.quantity);
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      const message = 'Quantity must be a positive whole number before submission.';
+      setOrderFeedback({ variant: 'error', message });
+      showOrderToast(message, 'error');
+      return;
+    }
+
+    const targetItem = items.find(item => item.sku === orderForm.sku);
+    if (!targetItem) {
+      const message = 'Select a valid inventory item before submission.';
+      setOrderFeedback({ variant: 'error', message });
+      showOrderToast(message, 'error');
+      return;
+    }
+
+    const orderKey = `${orderForm.sku}:${quantity}:${orderForm.priority}`;
+    if (pendingOrderKeysRef.current.has(orderKey)) {
+      const message = 'This SKU/order request is already pending.';
+      setOrderFeedback({ variant: 'warning', message });
+      showOrderToast(message, 'warning');
+      return;
+    }
+
     setIsSubmitting(true);
+    setOrderFeedback(null);
+    pendingOrderKeysRef.current.add(orderKey);
+    setPendingOrderKeys(prev => [...prev, orderKey]);
+
+    try {
+      const result = await createProcurementOrder({
+        sku: targetItem.sku,
+        quantity,
+        priority: orderForm.priority,
+        storeNumber: STORE_NUMBER,
+        currentStock: targetItem.stock,
+        reorderPoint: targetItem.reorderPoint,
+      });
+
+      const resultMessage = formatOrderResult(result);
+      const isRejectedOrPartial = result.orderStatus !== 'accepted' || result.rejectedQuantity > 0 || result.acceptedQuantity < quantity;
+      const projectedMeetsReorderThreshold = result.projectedOnHandQuantity >= targetItem.reorderPoint;
+
+      if (projectedMeetsReorderThreshold) {
+        setItems(prev => prev.map(item => item.sku === targetItem.sku ? { ...item, status: result.updatedItemStatus } : item));
+      }
+
+      if (result.acceptedQuantity > 0) {
+        setPendingOrdersCount(prev => prev + 1);
+      }
+
+      if (isRejectedOrPartial) {
+        setOrderFeedback({ variant: 'warning', message: resultMessage });
+        showOrderToast(resultMessage, 'warning');
+      } else {
+        setIsOrderModalOpen(false);
+        setOrderForm({ sku: '', quantity: '1', priority: 'Standard' });
+        showOrderToast(resultMessage);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to submit procurement order.';
+      setOrderFeedback({ variant: 'error', message });
+      showOrderToast(message, 'error');
+    } finally {
+      setIsSubmitting(false);
+      pendingOrderKeysRef.current.delete(orderKey);
+      setPendingOrderKeys(prev => prev.filter(key => key !== orderKey));
     setServerError(null);
 
     try {
@@ -214,8 +303,8 @@ const Inventory: React.FC = () => {
       {/* Success Notification */}
       {showSuccess && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] animate-in slide-in-from-top-4 duration-300">
-          <div className="bg-emerald-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-emerald-500">
-            <CheckCircle className="w-5 h-5" />
+          <div className={`${toastVariant === 'success' ? 'bg-emerald-600 border-emerald-500' : toastVariant === 'warning' ? 'bg-amber-600 border-amber-500' : 'bg-red-600 border-red-500'} text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border`}>
+            {toastVariant === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
             <span className="text-sm font-black uppercase tracking-widest">{successMessage}</span>
           </div>
         </div>
@@ -230,7 +319,7 @@ const Inventory: React.FC = () => {
                 <ShoppingCart className="w-6 h-6 text-blue-400" />
                 Procurement Request
               </h3>
-              <button onClick={() => setIsOrderModalOpen(false)} className="text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full p-1">
+              <button onClick={() => { setOrderFeedback(null); setIsOrderModalOpen(false); }} className="text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -287,10 +376,17 @@ const Inventory: React.FC = () => {
                 </div>
               </div>
 
+              {orderFeedback && (
+                <div className={`${orderFeedback.variant === 'error' ? 'bg-red-50 border-red-200 text-red-700' : orderFeedback.variant === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'} p-4 rounded-xl border flex items-start gap-3`}>
+                  <AlertTriangle className="w-5 h-5 mt-0.5" />
+                  <p className="text-xs font-bold leading-relaxed">{orderFeedback.message}</p>
+                </div>
+              )}
+
               <div className="pt-4">
                 <button 
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || pendingOrderKeys.includes(`${orderForm.sku}:${Number(orderForm.quantity)}:${orderForm.priority}`)}
                   className="w-full py-4 bg-[#002050] hover:bg-[#003070] text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-75"
                 >
                   {isSubmitting ? (
@@ -464,7 +560,7 @@ const Inventory: React.FC = () => {
            </div>
            
            <button 
-             onClick={() => setIsOrderModalOpen(true)}
+             onClick={() => { setOrderFeedback(null); setIsOrderModalOpen(true); }}
              className="bg-blue-600 p-5 rounded-lg border border-blue-700 shadow-lg text-white flex flex-col justify-center items-center cursor-pointer hover:bg-blue-700 transition-all active:scale-[0.98] group"
            >
               <div className="bg-white/20 p-2 rounded-lg mb-1 group-hover:bg-white/30 transition-colors">
