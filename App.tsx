@@ -17,13 +17,17 @@ import Logistics from './pages/Logistics';
 import GhostInventory from './pages/GhostInventory';
 import Login from './components/Login';
 import SentinelAI from './components/SentinelAI';
-import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint } from './types';
+import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint, OperationsTab } from './types';
 import { HEATMAP_DATA } from './constants';
+
+const assertNever = (value: never): never => {
+  throw new Error(`Unhandled view: ${value}`);
+};
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
-  const [operationsTab, setOperationsTab] = useState<'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance'>('metrics');
+  const [operationsTab, setOperationsTab] = useState<OperationsTab>('metrics');
   const [linterTrigger, setLinterTrigger] = useState<string | null>(null);
 
   const [heatmapData, setHeatmapData] = useState<HeatmapDataPoint[]>(HEATMAP_DATA);
@@ -32,9 +36,14 @@ const App: React.FC = () => {
   const [hubspotStatus, setHubspotStatus] = useState<IntegrationStatus>('connected');
 
   const handleLogin = () => setIsAuthenticated(true);
-  const handleLogout = () => { setIsAuthenticated(false); setCurrentView(View.DASHBOARD); };
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentView(View.DASHBOARD);
+    setOperationsTab('metrics');
+    setLinterTrigger(null);
+  };
 
-  const navigateToOperations = (tab: 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance' = 'metrics') => {
+  const navigateToOperations = (tab: OperationsTab = 'metrics') => {
     setOperationsTab(tab);
     setCurrentView(View.OPERATIONS);
   };
@@ -69,7 +78,8 @@ const App: React.FC = () => {
       case View.TEAM: return <Team onEmployeeAdded={handleEmployeeAdded} />;
       case View.PLAYBOOK: return <Playbook />;
       case View.SETTINGS: return <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />;
-      default: return <Dashboard setCurrentView={setCurrentView} />;
+      default:
+        return assertNever(currentView);
     }
   };
 

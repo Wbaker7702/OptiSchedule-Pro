@@ -1,26 +1,48 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import { RefreshCw, Download, Zap, Edit2, AlertCircle, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, Download, Zap, Edit2, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
 import { WEEKLY_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
-import { ScheduleLogEntry } from '../types';
+import { ERPProvider, HeatmapDataPoint, IntegrationStatus, ScheduleLogEntry, View, WeeklyScheduleRow } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
 
 interface SchedulingProps {
-  setCurrentView?: any;
-  onFinalize?: any;
-  activeProvider?: any;
-  setActiveProvider?: any;
-  isConnected?: any;
-  setIsConnected?: any;
-  setHubspotStatus?: any;
-  heatmapData?: any;
-  onAdjustStaffing?: any;
+  setCurrentView?: (view: View) => void;
+  onFinalize?: () => void;
+  activeProvider?: ERPProvider;
+  setActiveProvider?: (provider: ERPProvider) => void;
+  isConnected?: boolean;
+  setIsConnected?: (isConnected: boolean) => void;
+  setHubspotStatus?: (status: IntegrationStatus) => void;
+  heatmapData?: HeatmapDataPoint[];
+  onAdjustStaffing?: () => void;
 }
 
-const Scheduling: React.FC<SchedulingProps> = () => {
-  const [scheduleData, setScheduleData] = useState(WEEKLY_HEATMAP);
+const ERP_PROVIDER_OPTIONS: ERPProvider[] = ['Dynamics 365', 'SAP S/4HANA', 'FDE', 'HubSpot', 'Azure'];
+const isWeeklyScheduleRowArray = (value: unknown): value is WeeklyScheduleRow[] =>
+  Array.isArray(value) &&
+  value.every(item =>
+    typeof item === 'object' &&
+    item !== null &&
+    typeof (item as WeeklyScheduleRow).day === 'string' &&
+    Array.isArray((item as WeeklyScheduleRow).hours) &&
+    (item as WeeklyScheduleRow).hours.every(hour => typeof hour === 'number')
+  );
+
+const Scheduling: React.FC<SchedulingProps> = ({
+  setCurrentView,
+  onFinalize,
+  activeProvider = 'Dynamics 365',
+  setActiveProvider,
+  isConnected = true,
+  setIsConnected,
+  setHubspotStatus,
+  heatmapData = [],
+  onAdjustStaffing
+}) => {
+  const [scheduleData, setScheduleData] = useState<WeeklyScheduleRow[]>(WEEKLY_HEATMAP);
   const [logs, setLogs] = useState<ScheduleLogEntry[]>(MOCK_SCHEDULE_LOGS);
+  const [selectedProvider, setSelectedProvider] = useState<ERPProvider>(activeProvider);
   
   // Loading States
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -36,6 +58,12 @@ const Scheduling: React.FC<SchedulingProps> = () => {
   const [modificationNote, setModificationNote] = useState('');
 
   const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
+  const lowEfficiencySlots = heatmapData.filter(point => point.efficiency < 90).length;
+  const isFinalizeAvailable = Boolean(onFinalize);
+
+  useEffect(() => {
+    setSelectedProvider(activeProvider);
+  }, [activeProvider]);
 
   const getHeatmapColor = (value: number) => {
     if (value >= 10) return 'bg-[#0d9488] text-white hover:bg-[#0f766e] ring-1 ring-white/10'; // Dark Teal
@@ -152,8 +180,9 @@ const Scheduling: React.FC<SchedulingProps> = () => {
       const text = response.text;
       if (text) {
         const data = JSON.parse(text);
-        if (data.heatmap && Array.isArray(data.heatmap)) {
+        if (isWeeklyScheduleRowArray(data.heatmap)) {
           setScheduleData(data.heatmap);
+          setHubspotStatus?.('connected');
           
           const newLog: ScheduleLogEntry = {
             id: `SL-AI-${Date.now()}`,
@@ -168,6 +197,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
       }
     } catch (error) {
       console.error("Forecast Error:", error);
+      setHubspotStatus?.('disconnected');
       // Fallback/Error handling could go here, but logs warn user
     } finally {
       setIsForecasting(false);
@@ -179,8 +209,25 @@ const Scheduling: React.FC<SchedulingProps> = () => {
     setTimeout(() => {
       setIsExporting(false);
       setShowExportSuccess(true);
+      setHubspotStatus?.('connected');
       setTimeout(() => setShowExportSuccess(false), 3000);
     }, 1200);
+  };
+
+  const handleProviderChange = (provider: ERPProvider) => {
+    setSelectedProvider(provider);
+    setActiveProvider?.(provider);
+  };
+
+  const handleConnectionToggle = () => {
+    const nextStatus = !isConnected;
+    setIsConnected?.(nextStatus);
+    setHubspotStatus?.(nextStatus ? 'connected' : 'disconnected');
+  };
+
+  const handleFinalizeWorkflow = () => {
+    onAdjustStaffing?.();
+    onFinalize?.();
   };
 
   return (
@@ -287,8 +334,49 @@ const Scheduling: React.FC<SchedulingProps> = () => {
       )}
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5">
+            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">ERP Control Plane</p>
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <select
+                value={selectedProvider}
+                onChange={(e) => handleProviderChange(e.target.value as ERPProvider)}
+                className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-bold text-white uppercase tracking-wide outline-none focus:border-teal-500"
+              >
+                {ERP_PROVIDER_OPTIONS.map(provider => (
+                  <option key={provider} value={provider}>{provider}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleConnectionToggle}
+                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-colors ${isConnected ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10' : 'border-red-500/40 text-red-400 bg-red-500/10'}`}
+              >
+                {isConnected ? 'Connected' : 'Disconnected'}
+              </button>
+              <button
+                onClick={() => setCurrentView?.(View.OPERATIONS)}
+                className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-colors"
+              >
+                Open Operations
+              </button>
+            </div>
+          </div>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Risk Signal</p>
+            <p className="mt-2 text-3xl font-black text-white">{lowEfficiencySlots}</p>
+            <p className="text-[10px] text-slate-400 font-mono uppercase">Low-efficiency slots from live heatmap</p>
+          </div>
+        </div>
         
         <div className="flex justify-end gap-3">
+          <button
+            onClick={handleFinalizeWorkflow}
+            disabled={!isFinalizeAvailable}
+            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircle className="w-3 h-3" />
+            Finalize & Route
+          </button>
           <button 
             onClick={handleOptimize}
             disabled={isOptimizing}
