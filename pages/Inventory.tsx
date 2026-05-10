@@ -9,6 +9,18 @@ import { createProcurementOrder, createReplenishmentBatch, getInventory, getInve
 const isDevMode = Boolean((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV);
 const delay = (milliseconds: number) => new Promise(resolve => window.setTimeout(resolve, milliseconds));
 
+const formatSyncTime = (isoTimestamp: string) =>
+  new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short'
+  }).format(new Date(isoTimestamp));
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
 const Inventory: React.FC = () => {
   const [items, setItems] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +110,16 @@ const Inventory: React.FC = () => {
       setSuccessMessage('Order Dispatched to Authorized Supply Chain Backend');
       setShowSuccess(true);
       setOrderForm({ sku: '', quantity: '1', priority: 'Standard' });
+      
+      // Update item planning fields locally if matched
+      const orderedQuantity = Number(orderForm.quantity) || 0;
+      setItems(prev => prev.map(i => i.sku === orderForm.sku ? {
+        ...i,
+        status: 'Good',
+        onOrderQuantity: i.onOrderQuantity + orderedQuantity,
+        lastSyncedAt: new Date().toISOString()
+      } : i)); // Optimistic update simulation
+
       setItems(prev => prev.map(i => i.sku === orderForm.sku ? { ...i, status: 'Good' } : i));
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
@@ -129,6 +151,29 @@ const Inventory: React.FC = () => {
       "Awaiting backend procurement confirmation..."
     ];
 
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step < sequence.length) {
+        setReplenishmentStep(sequence[step]);
+        setD365Logs(prev => [sequence[step], ...prev]);
+        step++;
+      } else {
+        clearInterval(interval);
+        setIsReplenishing(false);
+        setPendingOrdersCount(prev => prev + targetItems.length);
+        setItems(prev => prev.map(item => {
+          if (item.status === 'Good') return item;
+
+          const replenishmentCases = Math.max(1, Math.ceil((item.reorderPoint - item.availableQuantity) / item.casePackSize));
+          return {
+            ...item,
+            onOrderQuantity: item.onOrderQuantity + (replenishmentCases * item.casePackSize),
+            lastSyncedAt: new Date().toISOString()
+          };
+        }));
+        setSuccessMessage(`Auto-Replenished ${targetItems.length} Items via Dynamics 365`);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 4000);
     try {
       for (const entry of sequence) {
         setReplenishmentStep(entry);
@@ -458,8 +503,12 @@ const Inventory: React.FC = () => {
                    <th className="px-6 py-4">Product Name</th>
                    <th className="px-6 py-4">SKU</th>
                    <th className="px-6 py-4">Category</th>
-                   <th className="px-6 py-4 text-center">Stock</th>
-                   <th className="px-6 py-4 text-center">Reorder Pt</th>
+                   <th className="px-6 py-4 text-center">On Hand</th>
+                   <th className="px-6 py-4 text-center">Available</th>
+                   <th className="px-6 py-4 text-center">On Order</th>
+                   <th className="px-6 py-4 text-center">Reserved</th>
+                   <th className="px-6 py-4 text-center">Planning</th>
+                   <th className="px-6 py-4">Server Sync</th>
                    <th className="px-6 py-4">Status</th>
                    <th className="px-6 py-4 text-right">Actions</th>
                  </tr>
@@ -503,7 +552,27 @@ const Inventory: React.FC = () => {
                        <span className="px-2 py-1 rounded-lg bg-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-widest">{item.category}</span>
                      </td>
                      <td className={`px-6 py-4 font-black text-center ${item.stock === 0 ? 'text-red-600' : 'text-gray-900'}`}>{item.stock}</td>
-                     <td className="px-6 py-4 font-mono text-center text-gray-400 text-xs">{item.reorderPoint}</td>
+                     <td className={`px-6 py-4 font-black text-center ${item.availableQuantity <= item.reorderPoint ? 'text-orange-600' : 'text-emerald-700'}`}>{item.availableQuantity}</td>
+                     <td className="px-6 py-4 font-mono text-center text-blue-600 text-xs font-bold">{item.onOrderQuantity}</td>
+                     <td className="px-6 py-4 font-mono text-center text-slate-500 text-xs font-bold">{item.reservedQuantity}</td>
+                     <td className="px-6 py-4 text-center">
+                       <div className="space-y-1 font-mono text-[10px] text-gray-500">
+                         <p>ROP {item.reorderPoint} • Pack {item.casePackSize}</p>
+                         <p>{item.averageDailyDemand}/day • {item.leadTimeDays}d lead</p>
+                         <p>{formatCurrency(item.unitCost)} ea • Cap {item.maxCapacity}</p>
+                       </div>
+                     </td>
+                     <td className="px-6 py-4">
+                       <div className="space-y-1">
+                         <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-blue-700">
+                           <Database className="w-3.5 h-3.5" />
+                           {item.sourceSystem}
+                         </div>
+                         <p className="font-mono text-[10px] text-gray-500">{item.serverId}</p>
+                         <p className="font-mono text-[10px] text-gray-400">{item.warehouseId ?? item.supplierId}</p>
+                         <p className="font-mono text-[10px] text-gray-400">Synced {formatSyncTime(item.lastSyncedAt)}</p>
+                       </div>
+                     </td>
                      <td className="px-6 py-4">
                        <div className="flex items-center gap-1.5">
                          {item.status === 'Good' && <CheckCircle className="w-4 h-4 text-green-500" />}
