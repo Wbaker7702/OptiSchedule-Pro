@@ -11,13 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.*
-!.env.example
-
-# Local Firebase app credentials (never commit real values)
-firebase-applet-config.json
-firebase-blueprint.json
 
 # Editor directories and files
 .vscode/*

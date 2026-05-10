@@ -1,57 +1,16 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import Header from '../components/Header';
 import { AUDIT_LOGS_MOCK } from '../constants';
-import { CheckCircle2, AlertTriangle, XCircle, Activity } from 'lucide-react';
-import { OperationsTab } from '../types';
+import { CheckCircle2, AlertTriangle, XCircle, ShieldCheck, Activity } from 'lucide-react';
 
 interface OperationsProps {
-  defaultTab?: OperationsTab;
-  externalTrigger?: string | null;
-  onClearTrigger?: () => void;
+  defaultTab?: any;
+  externalTrigger?: any;
+  onClearTrigger?: any;
 }
 
-const TAB_LABELS: Record<OperationsTab, string> = {
-  metrics: 'Metrics',
-  audit: 'Audit',
-  vision: 'Vision',
-  scanner: 'Scanner',
-  variance: 'Variance',
-  compliance: 'Compliance'
-};
-
-const Operations: React.FC<OperationsProps> = ({
-  defaultTab = 'metrics',
-  externalTrigger = null,
-  onClearTrigger
-}) => {
-  const [activeTab, setActiveTab] = useState<OperationsTab>(defaultTab);
-  const [flashTrigger, setFlashTrigger] = useState<string | null>(null);
-
-  useEffect(() => {
-    setActiveTab(defaultTab);
-  }, [defaultTab]);
-
-  useEffect(() => {
-    if (!externalTrigger) return;
-    setActiveTab('audit');
-    setFlashTrigger(externalTrigger);
-    onClearTrigger?.();
-  }, [externalTrigger, onClearTrigger]);
-
-  useEffect(() => {
-    if (!flashTrigger) return;
-    const timeout = setTimeout(() => setFlashTrigger(null), 3500);
-    return () => clearTimeout(timeout);
-  }, [flashTrigger]);
-
-  const visibleLogs = useMemo(() => {
-    if (activeTab === 'audit') {
-      return AUDIT_LOGS_MOCK;
-    }
-    return AUDIT_LOGS_MOCK.slice(0, 5);
-  }, [activeTab]);
-
+const Operations: React.FC<OperationsProps> = () => {
   const passedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Passed').length;
   const warningCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Warning').length;
   const failedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Failed').length;
@@ -61,31 +20,6 @@ const Operations: React.FC<OperationsProps> = ({
       <Header title="Operations" subtitle="Audit tracking & compliance management" />
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
-        {flashTrigger && (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl px-5 py-4">
-            <p className="text-[10px] text-blue-200 font-black uppercase tracking-widest">
-              External trigger received: {flashTrigger.replace(/_/g, ' ')}
-            </p>
-          </div>
-        )}
-
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(TAB_LABELS).map(([tab, label]) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as OperationsTab)}
-                className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors ${
-                  activeTab === tab
-                    ? 'bg-teal-500/15 text-teal-300 border border-teal-500/40'
-                    : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white hover:border-slate-700'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
         
         {/* Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -147,7 +81,7 @@ const Operations: React.FC<OperationsProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800 text-sm font-mono text-slate-300">
-                {visibleLogs.map((log) => (
+                {AUDIT_LOGS_MOCK.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-800/50 transition-colors group">
                     <td className="px-6 py-4 text-slate-500 text-xs">
                       {log.id}

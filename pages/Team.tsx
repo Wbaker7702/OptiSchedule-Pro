@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { EMPLOYEES as INITIAL_EMPLOYEES, LABOR_REGULATIONS, CURRENT_STATE } from '../constants';
-import { Mail, MoreHorizontal, Star, ChevronLeft, ChevronRight, UserPlus, X, ShieldCheck, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe } from 'lucide-react';
+import { Mail, MoreHorizontal, Star, ChevronLeft, ChevronRight, UserPlus, X, ShieldCheck, Loader2, CheckCircle, Clock, AlertTriangle, Shield, MapPin, Scale, Lock, Globe, TrendingUp, TrendingDown } from 'lucide-react';
 import { Employee } from '../types';
 
 const ITEMS_PER_PAGE = 8;
@@ -33,6 +33,18 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
   const totalPages = Math.ceil(employees.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentEmployees = employees.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const activeEmployees = employees.filter(emp => emp.status === 'Active');
+  const averagePerformance = activeEmployees.length > 0 
+    ? (activeEmployees.reduce((sum, emp) => sum + emp.performance, 0) / activeEmployees.length).toFixed(1)
+    : '0.0';
+
+  const previousAverage = 3.8; // Mock previous period average
+  const currentAverageNum = parseFloat(averagePerformance);
+  const trend = currentAverageNum > previousAverage ? 'increase' : currentAverageNum < previousAverage ? 'decrease' : 'neutral';
+  const trendPercentage = previousAverage > 0 
+    ? ((Math.abs(currentAverageNum - previousAverage) / previousAverage) * 100).toFixed(1)
+    : '0.0';
 
   const handleAddEmployee = (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,6 +204,23 @@ const Team: React.FC<TeamProps> = ({ onEmployeeAdded }) => {
                     <Lock className="w-3 h-3" /> {state}
                  </button>
               ))}
+           </div>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Avg Performance</span>
+                 <Star className="w-4 h-4 text-blue-500" />
+              </div>
+              <div className="flex items-end gap-3">
+                 <h2 className="text-3xl font-black text-slate-900">{averagePerformance}</h2>
+                 <div className={`flex items-center gap-1 text-[10px] font-black mb-1 ${trend === 'increase' ? 'text-emerald-500' : trend === 'decrease' ? 'text-red-500' : 'text-slate-500'}`}>
+                    {trend === 'increase' ? <TrendingUp className="w-3 h-3" /> : trend === 'decrease' ? <TrendingDown className="w-3 h-3" /> : null}
+                    <span>{trendPercentage}% vs last period</span>
+                 </div>
+              </div>
            </div>
         </div>
 

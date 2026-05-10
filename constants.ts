@@ -57,6 +57,16 @@ export const WEEKLY_HEATMAP = [
   { day: 'Sun', hours: [7, 7, 5, 6, 5, 11, 12, 11] },
 ];
 
+export const WEEKLY_SALES_HEATMAP = [
+  { day: 'Mon', sales: [1200, 1500, 800, 2200, 3100, 4500, 4800, 4200] },
+  { day: 'Tue', sales: [1100, 1400, 900, 2100, 3000, 4400, 4700, 4100] },
+  { day: 'Wed', sales: [1300, 1600, 1000, 2300, 3200, 4600, 4900, 4300] },
+  { day: 'Thu', sales: [1400, 1700, 1100, 2400, 3300, 4700, 5000, 4400] },
+  { day: 'Fri', sales: [1800, 2200, 1500, 3500, 4500, 6200, 6800, 7200] },
+  { day: 'Sat', sales: [2500, 3000, 2000, 4500, 5500, 7500, 8200, 8500] },
+  { day: 'Sun', sales: [2200, 2800, 1800, 4000, 5000, 7000, 7800, 8000] },
+];
+
 export const AUDIT_LOGS_MOCK = [
   { id: 'AUD-001', date: '2026-02-14', store: 'Store #12 - Downtown', type: 'Safety', status: 'Passed' },
   { id: 'AUD-002', date: '2026-02-13', store: 'Store #7 - Westfield', type: 'Compliance', status: 'Warning' },

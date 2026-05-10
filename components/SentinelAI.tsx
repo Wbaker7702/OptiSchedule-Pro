@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Minimize2, Maximize2, Terminal, Loader2, Zap, Cloud, Database } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Bot, Send, X, Minimize2, Maximize2, Terminal, Sparkles, Loader2, ExternalLink, Zap, Cloud, Database, ShieldCheck, Cpu } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
 import { IntegrationStatus } from '../types';
 
 interface SentinelAIProps {
@@ -54,11 +54,10 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
         setIsLoading(true);
 
         try {
-            const conversationHistory = [...messages, userMessage];
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
             const chat = ai.chats.create({
                 model: 'gemini-3-flash-preview',
-                history: conversationHistory.map(m => ({
+                history: messages.map(m => ({
                     role: m.role === 'ai' ? 'model' : 'user',
                     parts: [{ text: m.content }],
                 })),
@@ -92,16 +91,9 @@ const SentinelAI: React.FC<SentinelAIProps> = ({ hubspotStatus }) => {
                 if (text) {
                     fullResponse += text;
                     setMessages(prev => {
-                        if (prev.length === 0) {
-                            return prev;
-                        }
-                        const lastIndex = prev.length - 1;
-                        const lastMessage = prev[lastIndex];
-                        const updatedLastMessage: Message = {
-                            ...lastMessage,
-                            content: fullResponse
-                        };
-                        return [...prev.slice(0, lastIndex), updatedLastMessage];
+                        const newMessages = [...prev];
+                        newMessages[newMessages.length - 1].content = fullResponse;
+                        return newMessages;
                     });
                 }
             }

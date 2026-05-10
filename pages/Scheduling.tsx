@@ -1,49 +1,32 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
-import { RefreshCw, Download, Zap, Edit2, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2 } from 'lucide-react';
-import { WEEKLY_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
-import { ERPProvider, HeatmapDataPoint, IntegrationStatus, ScheduleLogEntry, View, WeeklyScheduleRow } from '../types';
+import { RefreshCw, Download, Zap, Edit2, AlertCircle, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2, BarChart3, Info, TrendingUp, TrendingDown, Target } from 'lucide-react';
+import { WEEKLY_HEATMAP, WEEKLY_SALES_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
+import { ScheduleLogEntry } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
 
 interface SchedulingProps {
-  setCurrentView?: (view: View) => void;
-  onFinalize?: () => void;
-  activeProvider?: ERPProvider;
-  setActiveProvider?: (provider: ERPProvider) => void;
-  isConnected?: boolean;
-  setIsConnected?: (isConnected: boolean) => void;
-  setHubspotStatus?: (status: IntegrationStatus) => void;
-  heatmapData?: HeatmapDataPoint[];
-  onAdjustStaffing?: () => void;
+  setCurrentView?: any;
+  onFinalize?: any;
+  activeProvider?: any;
+  setActiveProvider?: any;
+  isConnected?: any;
+  setIsConnected?: any;
+  setHubspotStatus?: any;
+  heatmapData?: any;
+  onAdjustStaffing?: any;
 }
 
-const ERP_PROVIDER_OPTIONS: ERPProvider[] = ['Dynamics 365', 'SAP S/4HANA', 'FDE', 'HubSpot', 'Azure'];
-const isWeeklyScheduleRowArray = (value: unknown): value is WeeklyScheduleRow[] =>
-  Array.isArray(value) &&
-  value.every(item =>
-    typeof item === 'object' &&
-    item !== null &&
-    typeof (item as WeeklyScheduleRow).day === 'string' &&
-    Array.isArray((item as WeeklyScheduleRow).hours) &&
-    (item as WeeklyScheduleRow).hours.every(hour => typeof hour === 'number')
-  );
-
-const Scheduling: React.FC<SchedulingProps> = ({
-  setCurrentView,
-  onFinalize,
-  activeProvider = 'Dynamics 365',
-  setActiveProvider,
-  isConnected = true,
-  setIsConnected,
-  setHubspotStatus,
-  heatmapData = [],
-  onAdjustStaffing
-}) => {
-  const [scheduleData, setScheduleData] = useState<WeeklyScheduleRow[]>(WEEKLY_HEATMAP);
+const Scheduling: React.FC<SchedulingProps> = () => {
+  const [scheduleData, setScheduleData] = useState(WEEKLY_HEATMAP);
+  const [salesData] = useState(WEEKLY_SALES_HEATMAP);
   const [logs, setLogs] = useState<ScheduleLogEntry[]>(MOCK_SCHEDULE_LOGS);
-  const [selectedProvider, setSelectedProvider] = useState<ERPProvider>(activeProvider);
   
+  // View States
+  const [viewMode, setViewMode] = useState<'staffing' | 'variance'>('staffing');
+  const [hoveredSlot, setHoveredSlot] = useState<{day: string, hourIndex: number} | null>(null);
+
   // Loading States
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isForecasting, setIsForecasting] = useState(false);
@@ -58,12 +41,6 @@ const Scheduling: React.FC<SchedulingProps> = ({
   const [modificationNote, setModificationNote] = useState('');
 
   const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
-  const lowEfficiencySlots = heatmapData.filter(point => point.efficiency < 90).length;
-  const isFinalizeAvailable = Boolean(onFinalize);
-
-  useEffect(() => {
-    setSelectedProvider(activeProvider);
-  }, [activeProvider]);
 
   const getHeatmapColor = (value: number) => {
     if (value >= 10) return 'bg-[#0d9488] text-white hover:bg-[#0f766e] ring-1 ring-white/10'; // Dark Teal
@@ -71,6 +48,23 @@ const Scheduling: React.FC<SchedulingProps> = ({
     if (value >= 6) return 'bg-[#2dd4bf] text-teal-950 hover:bg-[#14b8a6]'; // Light Teal
     if (value >= 4) return 'bg-[#99f6e4] text-teal-900 hover:bg-[#5eead4]'; // Very Light Teal
     return 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30'; // Understaffed
+  };
+
+  const getSalesColor = (value: number) => {
+    if (value >= 7000) return 'bg-red-600 text-white'; // Peak Sales
+    if (value >= 5000) return 'bg-orange-500 text-white';
+    if (value >= 3000) return 'bg-yellow-500 text-slate-900';
+    if (value >= 1500) return 'bg-blue-400 text-white';
+    return 'bg-blue-200 text-blue-900'; // Low Sales
+  };
+
+  const getGapMetric = (staff: number, sales: number) => {
+    const demand = Math.ceil(sales / 500);
+    const diff = staff - demand;
+    if (diff < -2) return { label: 'CRITICAL UNDERSTAFFED', color: 'text-red-500', score: 20, icon: <TrendingUp className="w-3 h-3" /> };
+    if (diff < 0) return { label: 'UNDERSTAFFED', color: 'text-orange-400', score: 60, icon: <TrendingUp className="w-3 h-3" /> };
+    if (diff > 3) return { label: 'OVERSTAFFED', color: 'text-blue-400', score: 40, icon: <TrendingDown className="w-3 h-3" /> };
+    return { label: 'OPTIMIZED', color: 'text-emerald-400', score: 95, icon: <CheckCircle className="w-3 h-3" /> };
   };
 
   const handleCellClick = (day: string, hourIndex: number, currentValue: number) => {
@@ -89,7 +83,6 @@ const Scheduling: React.FC<SchedulingProps> = ({
   const handleSaveModification = () => {
     if (!selectedSlot) return;
 
-    // 1. Update Schedule Data
     const newValue = modificationType === 'increase' ? selectedSlot.currentValue + 1 : Math.max(0, selectedSlot.currentValue - 1);
     
     setScheduleData(prev => prev.map(row => {
@@ -101,7 +94,6 @@ const Scheduling: React.FC<SchedulingProps> = ({
       return row;
     }));
 
-    // 2. Add Audit Log
     const newLog: ScheduleLogEntry = {
       id: `SL-${Date.now()}`,
       timestamp: new Date().toLocaleString(),
@@ -117,11 +109,8 @@ const Scheduling: React.FC<SchedulingProps> = ({
 
   const handleOptimize = () => {
     setIsOptimizing(true);
-    // Simulate local optimization logic
     setTimeout(() => {
       setScheduleData(prev => prev.map(row => {
-        // Simple logic: Ensure minimum of 5 staff during core hours (indices 2-6: 8am-12pm)
-        // and minimum 3 elsewhere.
         const optimizedHours = row.hours.map((h, i) => {
           if (i >= 2 && i <= 6 && h < 5) return 5;
           if (h < 3) return 3;
@@ -180,9 +169,8 @@ const Scheduling: React.FC<SchedulingProps> = ({
       const text = response.text;
       if (text) {
         const data = JSON.parse(text);
-        if (isWeeklyScheduleRowArray(data.heatmap)) {
+        if (data.heatmap && Array.isArray(data.heatmap)) {
           setScheduleData(data.heatmap);
-          setHubspotStatus?.('connected');
           
           const newLog: ScheduleLogEntry = {
             id: `SL-AI-${Date.now()}`,
@@ -197,8 +185,6 @@ const Scheduling: React.FC<SchedulingProps> = ({
       }
     } catch (error) {
       console.error("Forecast Error:", error);
-      setHubspotStatus?.('disconnected');
-      // Fallback/Error handling could go here, but logs warn user
     } finally {
       setIsForecasting(false);
     }
@@ -209,25 +195,8 @@ const Scheduling: React.FC<SchedulingProps> = ({
     setTimeout(() => {
       setIsExporting(false);
       setShowExportSuccess(true);
-      setHubspotStatus?.('connected');
       setTimeout(() => setShowExportSuccess(false), 3000);
     }, 1200);
-  };
-
-  const handleProviderChange = (provider: ERPProvider) => {
-    setSelectedProvider(provider);
-    setActiveProvider?.(provider);
-  };
-
-  const handleConnectionToggle = () => {
-    const nextStatus = !isConnected;
-    setIsConnected?.(nextStatus);
-    setHubspotStatus?.(nextStatus ? 'connected' : 'disconnected');
-  };
-
-  const handleFinalizeWorkflow = () => {
-    onAdjustStaffing?.();
-    onFinalize?.();
   };
 
   return (
@@ -334,73 +303,49 @@ const Scheduling: React.FC<SchedulingProps> = ({
       )}
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5">
-            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">ERP Control Plane</p>
-            <div className="flex flex-col md:flex-row md:items-center gap-3">
-              <select
-                value={selectedProvider}
-                onChange={(e) => handleProviderChange(e.target.value as ERPProvider)}
-                className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-bold text-white uppercase tracking-wide outline-none focus:border-teal-500"
-              >
-                {ERP_PROVIDER_OPTIONS.map(provider => (
-                  <option key={provider} value={provider}>{provider}</option>
-                ))}
-              </select>
-              <button
-                onClick={handleConnectionToggle}
-                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-colors ${isConnected ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10' : 'border-red-500/40 text-red-400 bg-red-500/10'}`}
-              >
-                {isConnected ? 'Connected' : 'Disconnected'}
-              </button>
-              <button
-                onClick={() => setCurrentView?.(View.OPERATIONS)}
-                className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-colors"
-              >
-                Open Operations
-              </button>
-            </div>
-          </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Risk Signal</p>
-            <p className="mt-2 text-3xl font-black text-white">{lowEfficiencySlots}</p>
-            <p className="text-[10px] text-slate-400 font-mono uppercase">Low-efficiency slots from live heatmap</p>
-          </div>
-        </div>
         
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={handleFinalizeWorkflow}
-            disabled={!isFinalizeAvailable}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <CheckCircle className="w-3 h-3" />
-            Finalize & Route
-          </button>
-          <button 
-            onClick={handleOptimize}
-            disabled={isOptimizing}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:border-slate-600 transition-all disabled:opacity-50"
-          >
-            {isOptimizing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} 
-            {isOptimizing ? 'Optimizing...' : 'Optimize'}
-          </button>
-          <button 
-            onClick={handleExport}
-            disabled={isExporting}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:border-slate-600 transition-all disabled:opacity-50"
-          >
-             {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-             Export
-          </button>
-          <button 
-            onClick={handleAIForecast}
-            disabled={isForecasting}
-            className="flex items-center gap-2 px-6 py-2 bg-[#0d9488] text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-[#0f766e] shadow-lg shadow-teal-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-             {isForecasting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3 fill-white" />}
-             {isForecasting ? 'Forecasting...' : 'AI Forecast'}
-          </button>
+        <div className="flex justify-between items-center">
+          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
+            <button 
+              onClick={() => setViewMode('staffing')}
+              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'staffing' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              Staffing View
+            </button>
+            <button 
+              onClick={() => setViewMode('variance')}
+              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'variance' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              Variance Analysis
+            </button>
+          </div>
+
+          <div className="flex gap-3">
+            <button 
+              onClick={handleOptimize}
+              disabled={isOptimizing}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:border-slate-600 transition-all disabled:opacity-50"
+            >
+              {isOptimizing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} 
+              {isOptimizing ? 'Optimizing...' : 'Optimize'}
+            </button>
+            <button 
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:border-slate-600 transition-all disabled:opacity-50"
+            >
+               {isExporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+               Export
+            </button>
+            <button 
+              onClick={handleAIForecast}
+              disabled={isForecasting}
+              className="flex items-center gap-2 px-6 py-2 bg-[#0d9488] text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-[#0f766e] shadow-lg shadow-teal-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+               {isForecasting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3 fill-white" />}
+               {isForecasting ? 'Forecasting...' : 'AI Forecast'}
+            </button>
+          </div>
         </div>
 
         {/* Heatmap Section */}
@@ -408,21 +353,34 @@ const Scheduling: React.FC<SchedulingProps> = ({
            <div className="mb-8 flex justify-between items-end">
               <div>
                 <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3">
-                   <CalendarDays className="w-4 h-4 text-teal-400" />
-                   Staffing Heatmap
+                   {viewMode === 'staffing' ? <CalendarDays className="w-4 h-4 text-teal-400" /> : <BarChart3 className="w-4 h-4 text-blue-400" />}
+                   {viewMode === 'staffing' ? 'Staffing Heatmap' : 'Variance Analysis: Staff vs. Sales'}
                 </h3>
-                <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase">Staff coverage vs. projected demand. Click any cell to adjust.</p>
+                <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase">
+                  {viewMode === 'staffing' 
+                    ? 'Staff coverage vs. projected demand. Click any cell to adjust.' 
+                    : 'Overlaying labor allocation against peak revenue periods to identify leakage.'}
+                </p>
               </div>
               <div className="flex gap-4">
-                 <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-red-500/50 border border-red-500"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Under</span></div>
-                 <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-[#99f6e4]"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Light</span></div>
-                 <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-[#2dd4bf]"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Balanced</span></div>
-                 <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-[#0d9488] border border-white/20"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Heavy</span></div>
+                 {viewMode === 'staffing' ? (
+                   <>
+                     <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-red-500/50 border border-red-500"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Under</span></div>
+                     <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-[#99f6e4]"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Light</span></div>
+                     <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-[#2dd4bf]"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Balanced</span></div>
+                     <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-[#0d9488] border border-white/20"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Heavy</span></div>
+                   </>
+                 ) : (
+                   <>
+                     <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-blue-200"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Low Sales</span></div>
+                     <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-sm bg-red-600"></div> <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Peak Sales</span></div>
+                   </>
+                 )}
               </div>
            </div>
 
            <div className="overflow-x-auto">
-             <div className="min-w-[600px]">
+             <div className="min-w-[800px]">
                <div className="flex mb-3">
                  <div className="w-20"></div>
                  {hourLabels.map(h => (
@@ -430,21 +388,80 @@ const Scheduling: React.FC<SchedulingProps> = ({
                  ))}
                </div>
                
-               <div className="space-y-2">
-                  {scheduleData.map((row) => (
-                    <div key={row.day} className="flex items-center gap-3">
-                       <div className="w-20 text-[10px] font-black text-slate-400 uppercase tracking-widest">{row.day}</div>
-                       {row.hours.map((h, i) => (
-                          <button 
-                            key={i} 
-                            onClick={() => handleCellClick(row.day, i, h)}
-                            className={`flex-1 h-10 rounded-lg flex items-center justify-center text-xs font-black transition-all active:scale-95 cursor-pointer shadow-sm ${getHeatmapColor(h)}`}
-                          >
-                             {h}
-                          </button>
-                       ))}
-                    </div>
-                  ))}
+               <div className="space-y-4">
+                  {scheduleData.map((row, rowIndex) => {
+                    const salesRow = salesData[rowIndex];
+                    return (
+                      <div key={row.day} className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <div className="w-20 text-[10px] font-black text-slate-400 uppercase tracking-widest">{row.day}</div>
+                          {row.hours.map((h, i) => {
+                            const isHovered = hoveredSlot?.day === row.day && hoveredSlot?.hourIndex === i;
+                            const salesValue = salesRow.sales[i];
+                            const gap = getGapMetric(h, salesValue);
+
+                            return (
+                              <div 
+                                key={i} 
+                                className="flex-1 relative"
+                                onMouseEnter={() => setHoveredSlot({day: row.day, hourIndex: i})}
+                                onMouseLeave={() => setHoveredSlot(null)}
+                              >
+                                {viewMode === 'staffing' ? (
+                                  <button 
+                                    onClick={() => handleCellClick(row.day, i, h)}
+                                    className={`w-full h-10 rounded-lg flex items-center justify-center text-xs font-black transition-all active:scale-95 cursor-pointer shadow-sm ${getHeatmapColor(h)} ${isHovered ? 'ring-2 ring-white z-10 scale-105' : ''}`}
+                                  >
+                                    {h}
+                                  </button>
+                                ) : (
+                                  <div className="flex flex-col gap-1">
+                                    <div className={`w-full h-6 rounded-t-lg flex items-center justify-center text-[9px] font-black transition-all ${getHeatmapColor(h)} ${isHovered ? 'ring-x-2 ring-t-2 ring-white z-10' : ''}`}>
+                                      {h}
+                                    </div>
+                                    <div className={`w-full h-6 rounded-b-lg flex items-center justify-center text-[9px] font-black transition-all ${getSalesColor(salesValue)} ${isHovered ? 'ring-x-2 ring-b-2 ring-white z-10' : ''}`}>
+                                      ${(salesValue/1000).toFixed(1)}k
+                                    </div>
+                                  </div>
+                                )}
+
+                                {isHovered && (
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-950 border border-slate-800 rounded-xl p-3 shadow-2xl z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{row.day} @ {hourLabels[i]}</span>
+                                      <div className={`flex items-center gap-1 text-[8px] font-black uppercase ${gap.color}`}>
+                                        {gap.icon}
+                                        {gap.label}
+                                      </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-[10px] text-slate-400">Staffing Level</span>
+                                        <span className="text-xs font-black text-white">{h} Workers</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-[10px] text-slate-400">Peak Sales</span>
+                                        <span className="text-xs font-black text-emerald-400">${salesValue.toLocaleString()}/hr</span>
+                                      </div>
+                                      <div className="pt-2 border-t border-slate-800">
+                                        <div className="flex justify-between items-center mb-1">
+                                          <span className="text-[9px] font-black text-slate-500 uppercase">Optimization Score</span>
+                                          <span className={`text-[10px] font-black ${gap.color}`}>{gap.score}%</span>
+                                        </div>
+                                        <div className="h-1 w-full bg-slate-900 rounded-full overflow-hidden">
+                                          <div className={`h-full transition-all duration-500 ${gap.score > 80 ? 'bg-emerald-500' : gap.score > 50 ? 'bg-orange-500' : 'bg-red-500'}`} style={{width: `${gap.score}%`}}></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
                </div>
              </div>
            </div>
@@ -501,7 +518,7 @@ const Scheduling: React.FC<SchedulingProps> = ({
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
            <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Scheduled Hours</p>
               <h2 className="text-3xl font-black text-white">2,847</h2>
@@ -510,14 +527,23 @@ const Scheduling: React.FC<SchedulingProps> = ({
            
            <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Coverage Gaps</p>
-              <h2 className="text-3xl font-black text-white">12</h2>
-              <p className="text-[10px] text-slate-600 font-mono mt-1 uppercase">Slots below threshold</p>
+              <h2 className="text-3xl font-black text-red-400">12</h2>
+              <p className="text-[10px] text-slate-600 font-mono mt-1 uppercase">Critical understaffed slots</p>
            </div>
 
            <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Overtime Projected</p>
-              <h2 className="text-3xl font-black text-white">68 hrs</h2>
-              <p className="text-[10px] text-slate-600 font-mono mt-1 uppercase">Across 14 employees</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Wasted Labor Hours</p>
+              <h2 className="text-3xl font-black text-orange-400">42 hrs</h2>
+              <p className="text-[10px] text-slate-600 font-mono mt-1 uppercase">Overstaffed periods</p>
+           </div>
+
+           <div className="bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-800 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-2 opacity-10">
+                <Target className="w-12 h-12 text-emerald-500" />
+              </div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Efficiency Ratio</p>
+              <h2 className="text-3xl font-black text-emerald-400">92.4%</h2>
+              <p className="text-[10px] text-slate-600 font-mono mt-1 uppercase">Labor vs. Revenue alignment</p>
            </div>
         </div>
 
