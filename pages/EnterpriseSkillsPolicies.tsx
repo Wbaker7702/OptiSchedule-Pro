@@ -70,8 +70,8 @@ const getAuditOutcomeIcon = (outcome: SkillAuditOutcome) => {
 
 const EnterpriseSkillsPolicies: React.FC = () => {
   const [activeStatus, setActiveStatus] = useState<SkillStatusFilter>('All');
-  const [selectedSkillId, setSelectedSkillId] = useState(ENTERPRISE_SKILL_CATALOG[0].id);
-  const [selectedPolicyId, setSelectedPolicyId] = useState(ENTERPRISE_SKILL_POLICIES[0].id);
+  const [selectedSkillId, setSelectedSkillId] = useState(ENTERPRISE_SKILL_CATALOG[0]?.id ?? '');
+  const [selectedPolicyId, setSelectedPolicyId] = useState(ENTERPRISE_SKILL_POLICIES[0]?.id ?? '');
 
   const filteredSkills = useMemo(() => {
     if (activeStatus === 'All') {
