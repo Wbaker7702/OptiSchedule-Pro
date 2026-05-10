@@ -21,10 +21,6 @@ const Logistics = React.lazy(() => import('./pages/Logistics'));
 const GhostInventory = React.lazy(() => import('./pages/GhostInventory'));
 const SentinelAI = React.lazy(() => import('./components/SentinelAI'));
 
-const assertNever = (value: never): never => {
-  throw new Error(`Unhandled view: ${value}`);
-};
-
 const LoadingView: React.FC = () => (
   <div className="flex-1 bg-slate-950 text-slate-400 flex items-center justify-center font-mono text-xs uppercase tracking-widest">
     Loading operations module...
@@ -85,24 +81,24 @@ const App: React.FC = () => {
   }, []);
 
   const renderView = () => {
-    switch (currentView) {
-      case View.DASHBOARD: return <Dashboard setCurrentView={setCurrentView} />;
-      case View.LOGISTICS: return <Logistics />;
-      case View.GHOST_INVENTORY: return <GhostInventory />;
-      case View.METRICS_REPORT: return <MetricsReport />;
-      case View.ROYALTY_DASHBOARD: return <RoyaltyDashboard />;
-      case View.STORE_RATINGS: return <StoreRatings />;
-      case View.COMPARISON: return <Comparison />;
-      case View.SCHEDULING: return <Scheduling setCurrentView={setCurrentView} onFinalize={handleFinalizeSchedule} activeProvider={activeERPProvider} setActiveProvider={setActiveERPProvider} isConnected={isERPConnected} setIsConnected={setIsERPConnected} setHubspotStatus={setHubspotStatus} heatmapData={heatmapData} onAdjustStaffing={handleStaffingAdjustment} />;
-      case View.OPERATIONS: return <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={handleClearLinterTrigger} />;
-      case View.INVENTORY: return <Inventory />;
-      case View.ANALYTICS: return <Analytics hubspotStatus={hubspotStatus} />;
-      case View.TEAM: return <Team onEmployeeAdded={handleEmployeeAdded} />;
-      case View.PLAYBOOK: return <Playbook />;
-      case View.SETTINGS: return <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />;
-      default:
-        return assertNever(currentView);
-    }
+    const viewRenderers: Record<View, () => React.ReactNode> = {
+      [View.DASHBOARD]: () => <Dashboard setCurrentView={setCurrentView} />,
+      [View.LOGISTICS]: () => <Logistics />,
+      [View.GHOST_INVENTORY]: () => <GhostInventory />,
+      [View.METRICS_REPORT]: () => <MetricsReport />,
+      [View.ROYALTY_DASHBOARD]: () => <RoyaltyDashboard />,
+      [View.STORE_RATINGS]: () => <StoreRatings />,
+      [View.COMPARISON]: () => <Comparison />,
+      [View.SCHEDULING]: () => <Scheduling setCurrentView={setCurrentView} onFinalize={handleFinalizeSchedule} activeProvider={activeERPProvider} setActiveProvider={setActiveERPProvider} isConnected={isERPConnected} setIsConnected={setIsERPConnected} setHubspotStatus={setHubspotStatus} heatmapData={heatmapData} onAdjustStaffing={handleStaffingAdjustment} />,
+      [View.OPERATIONS]: () => <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={handleClearLinterTrigger} />,
+      [View.INVENTORY]: () => <Inventory />,
+      [View.ANALYTICS]: () => <Analytics hubspotStatus={hubspotStatus} />,
+      [View.TEAM]: () => <Team onEmployeeAdded={handleEmployeeAdded} />,
+      [View.PLAYBOOK]: () => <Playbook />,
+      [View.SETTINGS]: () => <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />
+    };
+
+    return viewRenderers[currentView]();
   };
 
   if (!isAuthenticated) return <Login onLogin={handleLogin} />;
