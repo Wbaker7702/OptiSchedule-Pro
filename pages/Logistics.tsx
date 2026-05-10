@@ -253,7 +253,7 @@ RECONCILIATION:
                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Failsafe Requirements</p>
                    <div className="flex flex-wrap gap-2">
                      {item.failsafes.map((failsafe) => (
-                       <span key={failsafe} className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-[9px] font-bold text-emerald-200 uppercase">
+                       <span key={`${item.id}-${failsafe}`} className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-[9px] font-bold text-emerald-200 uppercase">
                          {failsafe}
                        </span>
                      ))}
