@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import { RefreshCw, Download, Zap, Edit2, AlertCircle, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2, BarChart3, Info, TrendingUp, TrendingDown, Target } from 'lucide-react';
-import { WEEKLY_HEATMAP, WEEKLY_SALES_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER } from '../constants';
-import { ScheduleLogEntry } from '../types';
+import { WEEKLY_HEATMAP, WEEKLY_SALES_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER, WEEKLY_STAFFING_REVIEWS } from '../constants';
+import { ScheduleLogEntry, StaffingReviewItem } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
 
 interface SchedulingProps {
@@ -17,6 +17,12 @@ interface SchedulingProps {
   heatmapData?: any;
   onAdjustStaffing?: any;
 }
+
+const REVIEW_STATUS_CLASS: Record<StaffingReviewItem['status'], string> = {
+  'Queued': 'bg-slate-800 text-slate-400 border-slate-700',
+  'In Review': 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+  'Rule Updated': 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+};
 
 const Scheduling: React.FC<SchedulingProps> = () => {
   const [scheduleData, setScheduleData] = useState(WEEKLY_HEATMAP);
@@ -464,6 +470,73 @@ const Scheduling: React.FC<SchedulingProps> = () => {
                   })}
                </div>
              </div>
+           </div>
+        </div>
+
+        {/* Weekly Feedback Loop */}
+        <div className="bg-slate-900 rounded-2xl shadow-lg border border-blue-500/20 overflow-hidden">
+           <div className="p-6 border-b border-slate-800 bg-blue-500/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-600/10 border border-blue-500/20 rounded-xl">
+                  <RefreshCw className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">Weekly System vs. Actual Review</h3>
+                  <p className="text-[10px] text-slate-500 font-mono mt-1 uppercase">
+                    Compares generated schedules to final staffing, isolates manual adjustments, and feeds approved deltas back into automation rules.
+                  </p>
+                </div>
+              </div>
+              <div className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest text-blue-300">
+                Review cadence: Monday closeout
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-800">
+             {WEEKLY_STAFFING_REVIEWS.map((review) => (
+               <div key={review.id} className="p-6 space-y-5">
+                 <div className="flex items-start justify-between gap-4">
+                   <div>
+                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{review.id}</p>
+                     <h4 className="text-sm font-black text-white mt-1">{review.week}</h4>
+                   </div>
+                   <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest whitespace-nowrap ${REVIEW_STATUS_CLASS[review.status]}`}>
+                     {review.status}
+                   </span>
+                 </div>
+
+                 <div className="space-y-3 text-[10px] font-mono">
+                   <div className="p-3 bg-slate-950/70 border border-slate-800 rounded-xl">
+                     <p className="text-slate-500 uppercase font-black mb-1">System vs. Actual</p>
+                     <p className="text-slate-300 leading-relaxed">{review.varianceSummary}</p>
+                   </div>
+                   <div className="grid grid-cols-2 gap-3">
+                     <div className="p-3 bg-slate-950/70 border border-slate-800 rounded-xl">
+                       <p className="text-slate-500 uppercase font-black mb-1">Overrides</p>
+                       <p className="text-xl font-black text-white">{review.manualAdjustments}</p>
+                     </div>
+                     <div className="p-3 bg-slate-950/70 border border-slate-800 rounded-xl">
+                       <p className="text-slate-500 uppercase font-black mb-1">Owner</p>
+                       <p className="text-slate-300 font-bold">{review.owner}</p>
+                     </div>
+                   </div>
+                   <div className="flex items-start gap-3">
+                     <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                     <div>
+                       <p className="text-slate-500 uppercase font-black">Manual Adjustment Driver</p>
+                       <p className="text-slate-300 leading-relaxed mt-1">{review.primaryDriver}</p>
+                     </div>
+                   </div>
+                   <div className="flex items-start gap-3">
+                     <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                     <div>
+                       <p className="text-slate-500 uppercase font-black">Rule Refinement Candidate</p>
+                       <p className="text-slate-300 leading-relaxed mt-1">{review.automationRefinement}</p>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             ))}
            </div>
         </div>
 
