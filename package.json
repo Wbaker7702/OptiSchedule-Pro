@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "esbuild services/replenishmentPlanner.test.ts --bundle --platform=node --format=esm --outfile=.tmp/replenishmentPlanner.test.mjs && node --test .tmp/replenishmentPlanner.test.mjs"
   },
   "dependencies": {
     "react": "^19.2.3",

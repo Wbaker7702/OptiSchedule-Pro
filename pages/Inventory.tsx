@@ -11,6 +11,8 @@ import Header from '../components/Header';
 import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
 import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Package, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, ShieldCheck, Zap, Terminal } from 'lucide-react';
 import { Product } from '../types';
+import { calculateReplenishmentPlan, ReplenishmentPlan } from '../services/replenishmentPlanner';
+import { submitProcurementBatch } from '../services/procurementClient';
 import { createProcurementOrder, createReplenishmentBatch, getInventory, getInventoryErrorMessage, isInventoryBackendUnavailable } from '../services/inventoryClient';
 
 const isDevMode = Boolean((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV);
@@ -50,6 +52,7 @@ const Inventory: React.FC = () => {
   const [isReplenishing, setIsReplenishing] = useState(false);
   const [replenishmentStep, setReplenishmentStep] = useState<string>('');
   const [d365Logs, setD365Logs] = useState<string[]>([]);
+  const [lastReplenishmentPlan, setLastReplenishmentPlan] = useState<ReplenishmentPlan | null>(null);
 
   // Form State
   const [orderForm, setOrderForm] = useState({
@@ -220,6 +223,22 @@ const Inventory: React.FC = () => {
 
   const criticalCount = items.filter(i => i.status === 'Critical').length;
   const lowCount = items.filter(i => i.status === 'Low').length;
+  const replenishmentEligibleCount = items.filter(i => i.stock <= i.reorderPoint).length;
+
+  const appendD365Log = (message: string) => {
+    setReplenishmentStep(message);
+    setD365Logs(prev => [message, ...prev]);
+  };
+
+  const resolveStockStatus = (stock: number, reorderPoint: number): Product['status'] => {
+    if (stock === 0 || stock <= reorderPoint / 2) return 'Critical';
+    if (stock <= reorderPoint) return 'Low';
+    return 'Good';
+  };
+
+  const triggerActiveProcurement = async () => {
+    const plan = calculateReplenishmentPlan(items, { budget: 12500 });
+    if (plan.items.length === 0) return;
   const isEmpty = !isLoading && items.length === 0 && !serverError;
   const dataFreshnessLabel = lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : 'Not loaded';
 
@@ -230,6 +249,40 @@ const Inventory: React.FC = () => {
     setIsReplenishing(true);
     setServerError(null);
     setD365Logs([]);
+    setLastReplenishmentPlan(plan);
+
+    appendD365Log("Initializing Dynamics 365 Supply Chain Handshake...");
+    appendD365Log("Authenticating Secure Node #5065...");
+    appendD365Log(`Detected ${plan.items.length} numerically eligible SKUs at or below reorder point.`);
+    appendD365Log(`Calculated ${plan.totalRecommendedQuantity} total replenishment units ($${plan.estimatedTotalCost.toFixed(2)} estimated).`);
+    plan.items.forEach(item => {
+      const availability = item.blocked ? 'BLOCKED' : item.partialFill ? 'PARTIAL' : 'READY';
+      appendD365Log(`${availability} ${item.sku}: order ${item.recommendedQuantity} units, priority ${item.priority}, reasons ${item.reasonCodes.join('/')}`);
+    });
+
+    try {
+      appendD365Log("Submitting calculated purchase order batch through server client...");
+      const response = await submitProcurementBatch(plan);
+      appendD365Log(`Server confirmed ${response.batchId}; ${response.acceptedItems.length} lines accepted, ${response.blockedItems.length} blocked.`);
+
+      setItems(prev => prev.map(item => {
+        const accepted = response.acceptedItems.find(order => order.sku === item.sku);
+        if (!accepted) return item;
+        const nextStock = item.stock + accepted.recommendedQuantity;
+        return { ...item, stock: nextStock, status: resolveStockStatus(nextStock, item.reorderPoint) };
+      }));
+
+      setPendingOrdersCount(prev => prev + response.acceptedItems.length);
+      setSuccessMessage(`Auto-Replenished ${response.acceptedItems.length} SKUs via Dynamics 365`);
+      setShowSuccess(true);
+      appendD365Log("Sync Complete. Stock and status updated after server success.");
+    } catch (error) {
+      appendD365Log("Server submission failed. Inventory remained unchanged.");
+      setSuccessMessage('Auto-Replenishment Failed: Inventory Unchanged');
+      setShowSuccess(true);
+    } finally {
+      setIsReplenishing(false);
+      setTimeout(() => setShowSuccess(false), 4000);
     
     const sequence = [
       "Initializing authorized supply-chain request...",
@@ -468,7 +521,7 @@ const Inventory: React.FC = () => {
                     <span className="px-2 py-0.5 bg-blue-600 rounded text-[9px] font-black text-white uppercase tracking-widest border border-blue-400/30">D365 Linked</span>
                  </div>
                  <p className="text-xs text-blue-200 leading-relaxed font-mono uppercase tracking-widest">
-                    Automated Supply Chain Logic. Triggering this node will scan current inventory levels against the Dynamics 365 replenishment algorithm and instantly place orders for Critical/Low stock.
+                    Automated Supply Chain Logic. Triggering this node will scan current inventory levels against the Dynamics 365 replenishment algorithm and instantly place orders for SKUs whose numeric stock is at or below reorder point.
                  </p>
               </div>
            </div>
@@ -476,7 +529,7 @@ const Inventory: React.FC = () => {
            <div className="relative z-10 w-full md:w-auto flex flex-col gap-4">
               <button 
                 onClick={triggerActiveProcurement}
-                disabled={isReplenishing || (criticalCount === 0 && lowCount === 0)}
+                disabled={isReplenishing || replenishmentEligibleCount === 0}
                 className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
                    isReplenishing ? 'bg-slate-800 text-white cursor-wait' : 'bg-white text-[#002050] hover:bg-blue-50'
                 }`}
@@ -489,7 +542,7 @@ const Inventory: React.FC = () => {
                  ) : (
                     <>
                        <Zap className="w-4 h-4 fill-[#002050]" />
-                       Auto-Replenish ({criticalCount + lowCount})
+                       Auto-Replenish ({replenishmentEligibleCount})
                     </>
                  )}
               </button>
@@ -512,6 +565,47 @@ const Inventory: React.FC = () => {
                  ))}
               </div>
            </div>
+        )}
+
+        {/* Calculated Replenishment Plan */}
+        {lastReplenishmentPlan && (
+          <div className="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-2">
+            <div className="p-4 border-b border-blue-100 flex flex-col md:flex-row md:items-center justify-between gap-2 bg-blue-50/50">
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-widest text-[#002050]">Calculated Replenishment Plan</h3>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mt-1">
+                  {lastReplenishmentPlan.totalRecommendedQuantity} units • ${lastReplenishmentPlan.estimatedTotalCost.toFixed(2)} estimated • {lastReplenishmentPlan.blockedItems.length} blocked • {lastReplenishmentPlan.partialFillItems.length} partial
+                </p>
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Budget Gate: $12,500</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="text-[9px] uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                  <tr>
+                    <th className="px-4 py-3">SKU</th>
+                    <th className="px-4 py-3 text-center">Stock</th>
+                    <th className="px-4 py-3 text-center">Reorder</th>
+                    <th className="px-4 py-3 text-center">Recommended</th>
+                    <th className="px-4 py-3">Priority</th>
+                    <th className="px-4 py-3">Codes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {lastReplenishmentPlan.items.map(item => (
+                    <tr key={item.sku} className={item.blocked ? 'bg-red-50/60' : item.partialFill ? 'bg-amber-50/60' : ''}>
+                      <td className="px-4 py-3 font-mono text-[10px] font-black text-slate-600">{item.sku}</td>
+                      <td className="px-4 py-3 text-center text-xs font-bold">{item.currentStock}</td>
+                      <td className="px-4 py-3 text-center text-xs font-bold text-slate-400">{item.reorderPoint}</td>
+                      <td className="px-4 py-3 text-center text-xs font-black text-[#002050]">{item.recommendedQuantity}</td>
+                      <td className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-blue-600">{item.priority}</td>
+                      <td className="px-4 py-3 text-[9px] font-black uppercase tracking-wider text-slate-500">{item.reasonCodes.join(' • ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
         {/* Alerts Section */}

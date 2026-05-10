@@ -139,6 +139,14 @@ export interface Product {
   reservedQuantity: number;
   reorderPoint: number;
   status: 'Good' | 'Low' | 'Critical';
+  averageDailyDemand: number;
+  leadTimeDays: number;
+  safetyStock: number;
+  casePackSize: number;
+  maxShelfCapacity: number;
+  warehouseAvailable: number;
+  supplierAvailable: boolean;
+  unitCost: number;
   lastSyncedAt: string;
   sourceSystem: InventorySourceSystem;
   supplierId?: string;
