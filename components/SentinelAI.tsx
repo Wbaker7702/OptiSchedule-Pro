@@ -20,7 +20,7 @@ interface Message {
 
 let messageIdCounter = 0;
 
-const createMessageId = (role: Message['role']) => `${role}-${Date.now()}-${messageIdCounter++}`;
+const createMessageId = (role: Message['role']) => `${role}-${crypto.randomUUID()}`;
 const formatMessageTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const createInitialMessage = (): Message => ({
