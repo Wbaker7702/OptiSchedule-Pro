@@ -2,25 +2,90 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, Mail, ArrowRight, Activity, ShieldAlert } from 'lucide-react';
 import { APP_VERSION } from '../constants';
+import { validateEmail, validatePassword, sanitizeInput } from '../validators';
 
 interface LoginProps {
   onLogin: () => void;
 }
 
+/** ISSUE #2 FIX: Real backend authentication with validation */
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    setError(null);
+    
+    // ISSUE #8 FIX: Validate email format
+    if (!validateEmail(email)) {
+      setError('Invalid email format. Please enter a valid corporate email address.');
+      return;
+    }
+    
+    // ISSUE #8 FIX: Validate password meets security requirements
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(`Password requirements not met: ${passwordValidation.errors[0]}`);
+      return;
+    }
+    
     setIsLoading(true);
     
-    // Simulate API authentication delay
-    setTimeout(() => {
+    try {
+      // ISSUE #2 & #4 FIX: Call backend authentication endpoint
+      // Backend validates credentials and returns HTTP-only cookie with session token
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest' // CSRF protection
+        },
+        credentials: 'include', // Include cookies in request
+        body: JSON.stringify({
+          email: sanitizeInput(email),
+          password: password // Password sent to backend for bcrypt comparison
+        })
+      });
+      
+      if (response.status === 429) {
+        // ISSUE #5 FIX: Handle rate limiting (brute force protection)
+        setError('Too many login attempts. Please try again later.');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (response.status === 401) {
+        setError('Invalid credentials. Please check your email and password.');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (response.status === 403) {
+        setError('Your account is locked or disabled. Contact support.');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!response.ok) {
+        // ISSUE #9 FIX: Specific error messages for debugging
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        setError(`Authentication failed: ${errorData.message || 'Please try again'}`);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Authentication successful - session cookie now set by backend
       setIsLoading(false);
       onLogin();
-    }, 1200);
+    } catch (error) {
+      // ISSUE #9 FIX: Log security errors but don't expose details to user
+      console.error('[SECURITY] Login error:', error);
+      setError('Authentication service unavailable. Please try again later.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,6 +115,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <h2 className="text-lg font-bold text-white uppercase tracking-wider">Authentication Required</h2>
             <p className="text-xs text-slate-500 mt-2 font-mono uppercase tracking-widest">Microsoft Defender security enforcement</p>
           </div>
+          
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-xs text-red-400 font-semibold">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -62,9 +133,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
+                  className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
                   placeholder="user@contoso.com"
                   required
+                  autoComplete="email"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -79,17 +152,20 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
+                  className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
                   placeholder="••••••••"
                   required
+                  autoComplete="current-password"
+                  disabled={isLoading}
                 />
               </div>
+              <p className="text-[9px] text-slate-500 mt-2">Min 12 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char</p>
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
-              className={`w-full flex items-center justify-center py-4 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-500/10 text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${
+              disabled={isLoading || !email || !password}
+              className={`w-full flex items-center justify-center py-4 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-500/10 text-xs font-black uppercase tracking-wider transition-all ${
                 isLoading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >

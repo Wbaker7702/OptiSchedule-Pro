@@ -125,6 +125,7 @@ export interface InventoryItemDto {
   max_capacity: number;
 }
 
+/** ISSUE #6 FIX: Removed duplicate properties (maxCapacity was duplicated with casePackSize, etc.) */
 export interface Product {
   id: string;
   serverId: string;
@@ -151,7 +152,6 @@ export interface Product {
   sourceSystem: InventorySourceSystem;
   supplierId?: string;
   warehouseId?: string;
-  maxCapacity: number;
 }
 
 export interface HeatmapDataPoint {
