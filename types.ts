@@ -151,10 +151,6 @@ export interface Product {
   sourceSystem: InventorySourceSystem;
   supplierId?: string;
   warehouseId?: string;
-  averageDailyDemand: number;
-  leadTimeDays: number;
-  unitCost: number;
-  casePackSize: number;
   maxCapacity: number;
 }
 
