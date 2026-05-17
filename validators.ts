@@ -82,7 +82,7 @@ export function sanitizeInput(text: string): string {
   do {
     previous = cleaned;
     cleaned = cleaned
-      .replace(/on\w+\s*=/gi, '')
+      .replace(/\bon([a-z0-9_:-]*)\s*=/gi, 'on$1')
       .replace(/javascript:/gi, '')
       .replace(/\bdata\s*:/gi, '')
       .replace(/vbscript:/gi, '');
