@@ -84,7 +84,7 @@ export function sanitizeInput(text: string): string {
     previous = cleaned;
     cleaned = cleaned
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      .replace(/on\w+\s*=/gi, '')
+      .replace(/\bon\w+\s*=/gi, (match) => match.replace(/=/g, '&#x3D;'))
       .replace(/javascript:/gi, '')
       .replace(/vbscript:/gi, '');
   } while (cleaned !== previous);
