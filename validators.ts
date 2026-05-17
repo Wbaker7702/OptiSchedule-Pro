@@ -75,21 +75,8 @@ export function sanitizeInput(text: string): string {
     allowedAttributes: {},
     allowedSchemes: []
   });
-  
-  // Additional protocol/event-handler hardening on plain text output
-  let cleaned = sanitized;
-  let previous: string;
-  do {
-    previous = cleaned;
-    cleaned = cleaned
-      .replace(/\bon([a-z0-9_:-]*)\s*=/gi, 'on$1')
-      .replace(/javascript:/gi, '')
-      .replace(/\bdata\s*:/gi, '')
-      .replace(/vbscript:/gi, '');
-  } while (cleaned !== previous);
-
   // Escape HTML special characters for safe display as text
-  const escaped = cleaned
+  const escaped = sanitized
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
