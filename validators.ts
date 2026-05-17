@@ -101,6 +101,16 @@ export function sanitizeInput(text: string): string {
   
   return escaped.trim();
   // Remove potentially dangerous patterns
+  let cleaned = escaped;
+  let previous: string;
+  do {
+    previous = cleaned;
+    cleaned = cleaned
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/\bon\w+\s*=/gi, (match) => match.replace(/=/g, '&#x3D;'))
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '');
+  } while (cleaned !== previous);
   const cleaned = escaped
     .replace(/<script[^>]*>.*?<\/script>/gi, '')
     .replace(/on\w+\s*=/gi, '')
