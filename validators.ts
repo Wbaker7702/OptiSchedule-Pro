@@ -67,9 +67,15 @@ export function validatePassword(password: string): { isValid: boolean; errors: 
  */
 export function sanitizeInput(text: string): string {
   if (typeof text !== 'string') return '';
+
+  // Remove potentially dangerous patterns from raw input before escaping
+  const cleanedRaw = text
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '');
   
   // Escape HTML special characters
-  const escaped = text
+  const escaped = cleanedRaw
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -77,14 +83,7 @@ export function sanitizeInput(text: string): string {
     .replace(/'/g, '&#x27;')
     .replace(/\//g, '&#x2F;');
   
-  // Remove potentially dangerous patterns
-  const cleaned = escaped
-    .replace(/<script[^>]*>.*?<\/script>/gi, '')
-    .replace(/on\w+\s*=/gi, '')
-    .replace(/javascript:/gi, '')
-    .replace(/vbscript:/gi, '');
-  
-  return cleaned.trim();
+  return escaped.trim();
 }
 
 /**
