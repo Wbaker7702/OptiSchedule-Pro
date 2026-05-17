@@ -69,27 +69,14 @@ export function validatePassword(password: string): { isValid: boolean; errors: 
 export function sanitizeInput(text: string): string {
   if (typeof text !== 'string') return '';
 
-  // Remove potentially dangerous patterns from raw input before escaping.
-  // Apply repeatedly until stable to avoid incomplete multi-character sanitization.
-  let cleanedRaw = text;
-  let previous: string;
-  do {
-    previous = cleanedRaw;
-    cleanedRaw = cleanedRaw
-      .replace(/on\w+\s*=/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/vbscript:/gi, '');
-  } while (cleanedRaw !== previous);
-  
-  // Escape HTML special characters
-  const escaped = cleanedRaw
-  // Sanitize HTML using a well-tested parser-based library
+  // Sanitize HTML using a well-tested parser-based library.
+  // This avoids brittle regex-based multi-character sanitization.
   const sanitized = sanitizeHtml(text, {
     allowedTags: [],
     allowedAttributes: {},
     allowedSchemes: []
   });
-  
+
   // Escape HTML special characters for safe display as text
   const escaped = sanitized
     .replace(/&/g, '&amp;')
@@ -98,27 +85,8 @@ export function sanitizeInput(text: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
     .replace(/\//g, '&#x2F;');
-  
+
   return escaped.trim();
-  // Remove potentially dangerous patterns
-  let cleaned = escaped;
-  let previous: string;
-  do {
-    previous = cleaned;
-    cleaned = cleaned
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      .replace(/\bon\w+\s*=/gi, (match) => match.replace(/=/g, '&#x3D;'))
-      .replace(/javascript:/gi, '')
-      .replace(/vbscript:/gi, '');
-  } while (cleaned !== previous);
-  const cleaned = escaped
-    .replace(/<script[^>]*>.*?<\/script>/gi, '')
-    .replace(/on\w+\s*=/gi, '')
-    .replace(/javascript:/gi, '')
-    .replace(/\bdata\s*:/gi, '')
-    .replace(/vbscript:/gi, '');
-  
-  return cleaned.trim();
 }
 
 /**
