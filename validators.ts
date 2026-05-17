@@ -1,5 +1,6 @@
 
 import { LABOR_REGULATIONS, CURRENT_STATE } from './constants';
+import sanitizeHtml from 'sanitize-html';
 
 /**
  * ISSUE #8 & #9 FIX: Added comprehensive input validation and sanitization functions
@@ -67,9 +68,16 @@ export function validatePassword(password: string): { isValid: boolean; errors: 
  */
 export function sanitizeInput(text: string): string {
   if (typeof text !== 'string') return '';
+
+  // Sanitize HTML using a well-tested parser-based library
+  const sanitized = sanitizeHtml(text, {
+    allowedTags: [],
+    allowedAttributes: {},
+    allowedSchemes: []
+  });
   
-  // Escape HTML special characters
-  const escaped = text
+  // Escape HTML special characters for safe display as text
+  const escaped = sanitized
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -77,6 +85,7 @@ export function sanitizeInput(text: string): string {
     .replace(/'/g, '&#x27;')
     .replace(/\//g, '&#x2F;');
   
+  return escaped.trim();
   // Remove potentially dangerous patterns
   const cleaned = escaped
     .replace(/<script[^>]*>.*?<\/script>/gi, '')
