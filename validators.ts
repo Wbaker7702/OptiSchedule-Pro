@@ -86,6 +86,15 @@ export function sanitizeInput(text: string): string {
     .replace(/\//g, '&#x2F;');
   
   return escaped.trim();
+  // Remove potentially dangerous patterns
+  const cleaned = escaped
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/\bdata\s*:/gi, '')
+    .replace(/vbscript:/gi, '');
+  
+  return cleaned.trim();
 }
 
 /**
