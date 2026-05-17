@@ -82,6 +82,7 @@ export function sanitizeInput(text: string): string {
     .replace(/<script[^>]*>.*?<\/script>/gi, '')
     .replace(/on\w+\s*=/gi, '')
     .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
     .replace(/vbscript:/gi, '');
   
   return cleaned.trim();
