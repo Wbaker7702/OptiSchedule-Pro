@@ -69,6 +69,20 @@ export function validatePassword(password: string): { isValid: boolean; errors: 
 export function sanitizeInput(text: string): string {
   if (typeof text !== 'string') return '';
 
+  // Remove potentially dangerous patterns from raw input before escaping.
+  // Apply repeatedly until stable to avoid incomplete multi-character sanitization.
+  let cleanedRaw = text;
+  let previous: string;
+  do {
+    previous = cleanedRaw;
+    cleanedRaw = cleanedRaw
+      .replace(/on\w+\s*=/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '');
+  } while (cleanedRaw !== previous);
+  
+  // Escape HTML special characters
+  const escaped = cleanedRaw
   // Sanitize HTML using a well-tested parser-based library
   const sanitized = sanitizeHtml(text, {
     allowedTags: [],
