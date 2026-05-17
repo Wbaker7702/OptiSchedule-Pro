@@ -71,6 +71,7 @@ export function sanitizeInput(text: string): string {
 
   // Sanitize HTML using a well-tested parser-based library.
   // This avoids brittle regex-based multi-character sanitization.
+  // Sanitize HTML using a well-tested parser-based library
   const sanitized = sanitizeHtml(text, {
     allowedTags: [],
     allowedAttributes: {},
