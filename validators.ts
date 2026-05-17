@@ -69,6 +69,8 @@ export function validatePassword(password: string): { isValid: boolean; errors: 
 export function sanitizeInput(text: string): string {
   if (typeof text !== 'string') return '';
 
+  // Sanitize HTML using a well-tested parser-based library.
+  // This avoids brittle regex-based multi-character sanitization.
   // Sanitize HTML using a well-tested parser-based library
   const sanitized = sanitizeHtml(text, {
     allowedTags: [],
