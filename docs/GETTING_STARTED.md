@@ -45,9 +45,9 @@ Edit `.env.local` and add your credentials:
 
 ```env
 VITE_GEMINI_API_KEY=your_actual_gemini_api_key_here
-VITE_API_BASE_URL=http://localhost:3000
 VITE_ENVIRONMENT=development
 VITE_LOG_LEVEL=info
+GOOGLE_GENAI_API_KEY=your_actual_gemini_api_key_here
 ```
 
 ### Step 4: Start Development Server
@@ -120,7 +120,8 @@ npm run test:watch       # Run tests in watch mode
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `VITE_GEMINI_API_KEY` | Google Gemini API key | `sk-...` |
+| `VITE_GEMINI_API_KEY` | Browser-exposed Gemini API key for frontend AI features | `AIza...` |
+| `GOOGLE_GENAI_API_KEY` | Server-only Gemini API key for backend AI proxy endpoints | `AIza...` |
 | `VITE_API_BASE_URL` | Backend API URL | `http://localhost:3000` |
 | `VITE_ENVIRONMENT` | Environment (development/production) | `development` |
 | `VITE_LOG_LEVEL` | Logging level (debug/info/warn/error) | `info` |
