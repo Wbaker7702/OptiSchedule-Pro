@@ -51,7 +51,7 @@ app.use(session({
   name: 'csrf.sid',
   secret: COOKIE_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     httpOnly: true,
     secure: NODE_ENV === 'production',
