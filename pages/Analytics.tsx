@@ -66,7 +66,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ hubspotStatus }) => {
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ROI Multiplier</p>
                 <h3 className="text-2xl font-black text-gray-900">{FISCAL_METRICS.currentROI}x</h3>
-                <p className="text-xs text-emerald-500 font-bold mt-1">Sentinel Efficiency</p>
+                <p className="text-xs text-emerald-500 font-bold mt-1">Defender Efficiency</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Annual Recovery</p>

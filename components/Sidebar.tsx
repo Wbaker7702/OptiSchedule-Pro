@@ -46,6 +46,7 @@ const NAVIGATION_SECTIONS: NavigationSection[] = [
       { id: View.SCHEDULING, label: 'Scheduling', icon: CalendarDays },
       { id: View.OPERATIONS, label: 'Operations', icon: Activity },
       { id: View.ANALYTICS, label: 'Analytics', icon: BarChart3 },
+      { id: View.ENTERPRISE_SKILLS, label: 'Skill Policies', icon: ShieldCheck },
       { id: View.SETTINGS, label: 'Settings', icon: SettingsIcon }
     ]
   },
@@ -81,8 +82,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, onLogout
              <Activity className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-sm leading-tight text-white">OptiSchedule</h1>
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider">Enterprise</p>
+            <h1 className="font-bold text-sm leading-tight text-white">Microsoft Defender</h1>
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider">Portal</p>
           </div>
         </div>
       </div>

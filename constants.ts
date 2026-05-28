@@ -1,11 +1,29 @@
 
-import { Employee, Product, HeatmapDataPoint, DepartmentMetric, IngressDataPoint, Vulnerability, AuditLog, LaborLawConfig, SystemPlugin, StoreRatingData, ScheduleLogEntry } from './types';
+import type {
+  AuditLog,
+  DepartmentMetric,
+  Employee,
+  EnterpriseSkill,
+  HardwareFailsafeItem,
+  HeatmapDataPoint,
+  InventoryItemDto,
+  LaborLawConfig,
+  Product,
+  ScheduleLogEntry,
+  SkillAuditEvent,
+  SkillPolicy,
+  StaffingReviewItem,
+  StoreRatingData,
+  SystemPlugin,
+  TrainingBriefingItem,
+  Vulnerability
+} from './types';
 
 export const CURRENT_USER = "Wesley Baker";
 export const STORE_NUMBER = "5065";
 export const COMPARISON_STORE = "2080";
 export const APP_VERSION = "v4.2.0"; 
-export const SENTINEL_VERSION = "v3.1";
+export const DEFENDER_PORTAL_VERSION = "v3.1";
 export const CURRENT_STATE = "MI";
 
 export const WEEKLY_REVENUE_TARGET = 90000;
@@ -55,6 +73,16 @@ export const WEEKLY_HEATMAP = [
   { day: 'Fri', hours: [4, 6, 4, 4, 6, 9, 9, 11] },
   { day: 'Sat', hours: [8, 7, 5, 7, 7, 11, 12, 11] },
   { day: 'Sun', hours: [7, 7, 5, 6, 5, 11, 12, 11] },
+];
+
+export const WEEKLY_SALES_HEATMAP = [
+  { day: 'Mon', sales: [1200, 1500, 800, 2200, 3100, 4500, 4800, 4200] },
+  { day: 'Tue', sales: [1100, 1400, 900, 2100, 3000, 4400, 4700, 4100] },
+  { day: 'Wed', sales: [1300, 1600, 1000, 2300, 3200, 4600, 4900, 4300] },
+  { day: 'Thu', sales: [1400, 1700, 1100, 2400, 3300, 4700, 5000, 4400] },
+  { day: 'Fri', sales: [1800, 2200, 1500, 3500, 4500, 6200, 6800, 7200] },
+  { day: 'Sat', sales: [2500, 3000, 2000, 4500, 5500, 7500, 8200, 8500] },
+  { day: 'Sun', sales: [2200, 2800, 1800, 4000, 5000, 7000, 7800, 8000] },
 ];
 
 export const AUDIT_LOGS_MOCK = [
@@ -140,7 +168,7 @@ export const PLUGIN_REGISTRY: SystemPlugin[] = [
     id: 'plg-lab-mi',
     name: 'Michigan Labor Frame',
     category: 'Jurisdiction',
-    provider: 'Sentinel Legal',
+    provider: 'Microsoft Defender',
     description: 'MI P.A. 90 Compliance (Minors & Mandatory Breaks).',
     version: '1.0.4',
     status: 'Mounted',
@@ -155,6 +183,160 @@ export const PLUGIN_REGISTRY: SystemPlugin[] = [
     version: '3.1.0',
     status: 'Mounted',
     iconName: 'Eye'
+  }
+];
+
+export const ENTERPRISE_SKILL_CATALOG: EnterpriseSkill[] = [
+  {
+    id: 'skill-labor-forecast',
+    name: 'Labor Forecast Optimizer',
+    owner: 'Workforce Systems',
+    category: 'Labor',
+    description: 'Projects demand curves and recommends weekly coverage changes before publishing schedules.',
+    status: 'Approved',
+    risk: 'Medium',
+    dataScopes: ['labor.hours', 'sales.forecast', 'employee.availability'],
+    approvalGroup: 'Regional Operations Council',
+    usageCount: 1840,
+    lastReviewed: '2026-05-01'
+  },
+  {
+    id: 'skill-minor-compliance',
+    name: 'Minor Labor Compliance Guard',
+    owner: 'People Compliance',
+    category: 'Compliance',
+    description: 'Blocks schedule drafts that violate jurisdictional curfew, shift-length, or break thresholds.',
+    status: 'Approved',
+    risk: 'High',
+    dataScopes: ['employee.age_band', 'schedule.shift', 'jurisdiction.rules'],
+    approvalGroup: 'Legal + HR Policy',
+    usageCount: 926,
+    lastReviewed: '2026-04-28'
+  },
+  {
+    id: 'skill-inventory-variance',
+    name: 'Inventory Variance Explainer',
+    owner: 'Asset Protection',
+    category: 'Inventory',
+    description: 'Summarizes shrink anomalies and suggests reconciliation steps using POS and receiving deltas.',
+    status: 'Review Required',
+    risk: 'Medium',
+    dataScopes: ['inventory.counts', 'pos.voids', 'receiving.manifest'],
+    approvalGroup: 'Asset Protection Review',
+    usageCount: 311,
+    lastReviewed: '2026-03-19'
+  },
+  {
+    id: 'skill-revenue-recovery',
+    name: 'Revenue Recovery Coach',
+    owner: 'Finance Operations',
+    category: 'Revenue',
+    description: 'Generates manager playbooks for recovering labor leakage and missed sales velocity.',
+    status: 'Approved',
+    risk: 'Low',
+    dataScopes: ['sales.summary', 'labor.cost', 'store.performance'],
+    approvalGroup: 'Store Finance',
+    usageCount: 1404,
+    lastReviewed: '2026-04-24'
+  },
+  {
+    id: 'skill-open-web-agent',
+    name: 'Open Web Procurement Agent',
+    owner: 'Pilot Programs',
+    category: 'Security',
+    description: 'Autonomously researches external vendors and drafts purchase recommendations.',
+    status: 'Blocked',
+    risk: 'High',
+    dataScopes: ['vendor.search', 'budget.requests', 'external.web'],
+    approvalGroup: 'Security Architecture Board',
+    usageCount: 0,
+    lastReviewed: '2026-05-03'
+  }
+];
+
+export const ENTERPRISE_SKILL_POLICIES: SkillPolicy[] = [
+  {
+    id: 'policy-data-minimization',
+    name: 'Data Minimization Boundary',
+    scope: 'All AI-assisted skills',
+    description: 'Restricts each skill to approved data scopes and prevents free-form access to personnel, POS, or vendor systems.',
+    enforcement: 'Block',
+    coverage: 98,
+    controls: ['Scope allowlist required', 'PII fields masked by default', 'Cross-system joins require approval'],
+    exceptions: 1,
+    lastUpdated: '2026-05-06'
+  },
+  {
+    id: 'policy-human-approval',
+    name: 'High-Risk Human Approval',
+    scope: 'High-risk labor, finance, and security skills',
+    description: 'Requires named approvers before a skill can publish schedules, modify budgets, or trigger external actions.',
+    enforcement: 'Block',
+    coverage: 94,
+    controls: ['Two-person approval', 'Justification capture', 'Manager override audit trail'],
+    exceptions: 2,
+    lastUpdated: '2026-05-04'
+  },
+  {
+    id: 'policy-model-provenance',
+    name: 'Model and Prompt Provenance',
+    scope: 'Mounted and marketplace skills',
+    description: 'Tracks model versions, prompt bundles, and policy hashes for every enterprise skill execution.',
+    enforcement: 'Warn',
+    coverage: 89,
+    controls: ['Prompt hash logged', 'Model version pinned', 'Skill release notes required'],
+    exceptions: 3,
+    lastUpdated: '2026-04-30'
+  },
+  {
+    id: 'policy-jurisdiction-lock',
+    name: 'Jurisdiction Policy Lock',
+    scope: 'Labor and compliance skills',
+    description: 'Prevents skills from applying labor rules outside the selected state and flags stale regulatory packs.',
+    enforcement: 'Monitor',
+    coverage: 100,
+    controls: ['State pack checksum', 'Effective date validation', 'Curfew rule regression checks'],
+    exceptions: 0,
+    lastUpdated: '2026-05-07'
+  }
+];
+
+export const ENTERPRISE_SKILL_AUDIT_EVENTS: SkillAuditEvent[] = [
+  {
+    id: 'SKA-1042',
+    timestamp: '2026-05-10 08:12',
+    actor: 'Wesley Baker',
+    skill: 'Labor Forecast Optimizer',
+    policy: 'High-Risk Human Approval',
+    outcome: 'Approved',
+    detail: 'Schedule recommendation sent to manager queue after council approval.'
+  },
+  {
+    id: 'SKA-1041',
+    timestamp: '2026-05-10 07:54',
+    actor: 'Defender Policy Engine',
+    skill: 'Open Web Procurement Agent',
+    policy: 'Data Minimization Boundary',
+    outcome: 'Blocked',
+    detail: 'External web action denied until vendor data scope is reviewed.'
+  },
+  {
+    id: 'SKA-1038',
+    timestamp: '2026-05-09 18:33',
+    actor: 'Asset Protection Lead',
+    skill: 'Inventory Variance Explainer',
+    policy: 'Model and Prompt Provenance',
+    outcome: 'Warned',
+    detail: 'Prompt bundle v2.1 lacks reviewer notes for the latest shrink workflow.'
+  },
+  {
+    id: 'SKA-1035',
+    timestamp: '2026-05-09 15:10',
+    actor: 'People Compliance',
+    skill: 'Minor Labor Compliance Guard',
+    policy: 'Jurisdiction Policy Lock',
+    outcome: 'Approved',
+    detail: 'Michigan rule pack checksum verified before schedule validation.'
   }
 ];
 
@@ -230,15 +412,198 @@ export const DEPARTMENT_METRICS: DepartmentMetric[] = [
   { name: 'Grocery', activeStaff: '8/10', sales: '$31,680', extraMetricLabel: 'Freshness Index', extraMetricValue: '88%', waitTime: '1m 30s' },
 ];
 
-export const INVENTORY_DATA: Product[] = [
-  { id: '1', name: 'Mobile Comms Unit', sku: 'ELEC-001', category: 'Electronics', stock: 45, reorderPoint: 20, status: 'Good' },
-  { id: '2', name: 'Premium ANC Headphones', sku: 'AUD-550', category: 'Electronics', stock: 2, reorderPoint: 15, status: 'Critical' },
-  { id: '3', name: 'Organic Avocado Mesh', sku: 'GRO-102', category: 'Grocery', stock: 0, reorderPoint: 50, status: 'Critical' },
-  { id: '4', name: 'Winter Fleece Jacket', sku: 'APR-880', category: 'Apparel', stock: 12, reorderPoint: 30, status: 'Low' },
-  { id: '5', name: '4K OLED Display 55"', sku: 'TV-4K-55', category: 'Electronics', stock: 5, reorderPoint: 8, status: 'Low' },
-  { id: '6', name: 'Isotonic Energy Drink', sku: 'bev-ISO', category: 'Grocery', stock: 140, reorderPoint: 40, status: 'Good' },
-  { id: '7', name: 'Smart Home Hub v2', sku: 'IOT-HUB', category: 'Electronics', stock: 18, reorderPoint: 25, status: 'Low' },
+export const INVENTORY_ITEM_DTOS: InventoryItemDto[] = [
+  {
+    item_id: '1',
+    server_id: 'd365-inv-5065-0001',
+    external_system_id: 'D365-US-MI-5065-ELEC-001',
+    item_name: 'Mobile Comms Unit',
+    sku_code: 'ELEC-001',
+    category_name: 'Electronics',
+    source_system: 'Dynamics 365',
+    last_synced_at: '2026-05-10T13:42:00Z',
+    on_hand_quantity: 45,
+    available_quantity: 39,
+    on_order_quantity: 24,
+    reserved_quantity: 6,
+    reorder_point: 20,
+    inventory_status: 'Good',
+    supplier_id: 'SUP-MOB-118',
+    warehouse_id: 'WH-MI-DET-02',
+    average_daily_demand: 6.5,
+    lead_time_days: 4,
+    unit_cost_cents: 18450,
+    case_pack_size: 6,
+    max_capacity: 120
+  },
+  {
+    item_id: '2',
+    server_id: 'd365-inv-5065-0002',
+    external_system_id: 'D365-US-MI-5065-AUD-550',
+    item_name: 'Premium ANC Headphones',
+    sku_code: 'AUD-550',
+    category_name: 'Electronics',
+    source_system: 'Dynamics 365',
+    last_synced_at: '2026-05-10T13:38:00Z',
+    on_hand_quantity: 2,
+    available_quantity: 1,
+    on_order_quantity: 36,
+    reserved_quantity: 1,
+    reorder_point: 15,
+    inventory_status: 'Critical',
+    supplier_id: 'SUP-AUD-442',
+    warehouse_id: 'WH-MI-DET-02',
+    average_daily_demand: 8.2,
+    lead_time_days: 6,
+    unit_cost_cents: 7250,
+    case_pack_size: 12,
+    max_capacity: 90
+  },
+  {
+    item_id: '3',
+    server_id: 'd365-inv-5065-0003',
+    external_system_id: 'D365-US-MI-5065-GRO-102',
+    item_name: 'Organic Avocado Mesh',
+    sku_code: 'GRO-102',
+    category_name: 'Grocery',
+    source_system: 'Dynamics 365',
+    last_synced_at: '2026-05-10T13:35:00Z',
+    on_hand_quantity: 0,
+    available_quantity: 0,
+    on_order_quantity: 96,
+    reserved_quantity: 0,
+    reorder_point: 50,
+    inventory_status: 'Critical',
+    supplier_id: 'SUP-FRESH-021',
+    warehouse_id: 'WH-MI-FRESH-01',
+    average_daily_demand: 22.4,
+    lead_time_days: 2,
+    unit_cost_cents: 425,
+    case_pack_size: 24,
+    max_capacity: 180
+  },
+  {
+    item_id: '4',
+    server_id: 'd365-inv-5065-0004',
+    external_system_id: 'D365-US-MI-5065-APR-880',
+    item_name: 'Winter Fleece Jacket',
+    sku_code: 'APR-880',
+    category_name: 'Apparel',
+    source_system: 'Dynamics 365',
+    last_synced_at: '2026-05-10T13:29:00Z',
+    on_hand_quantity: 12,
+    available_quantity: 9,
+    on_order_quantity: 48,
+    reserved_quantity: 3,
+    reorder_point: 30,
+    inventory_status: 'Low',
+    supplier_id: 'SUP-APP-340',
+    warehouse_id: 'WH-MI-GRN-04',
+    average_daily_demand: 5.1,
+    lead_time_days: 8,
+    unit_cost_cents: 1425,
+    case_pack_size: 12,
+    max_capacity: 144
+  },
+  {
+    item_id: '5',
+    server_id: 'd365-inv-5065-0005',
+    external_system_id: 'D365-US-MI-5065-TV-4K-55',
+    item_name: '4K OLED Display 55"',
+    sku_code: 'TV-4K-55',
+    category_name: 'Electronics',
+    source_system: 'Dynamics 365',
+    last_synced_at: '2026-05-10T13:31:00Z',
+    on_hand_quantity: 5,
+    available_quantity: 4,
+    on_order_quantity: 10,
+    reserved_quantity: 1,
+    reorder_point: 8,
+    inventory_status: 'Low',
+    supplier_id: 'SUP-HOME-910',
+    warehouse_id: 'WH-MI-DET-02',
+    average_daily_demand: 1.4,
+    lead_time_days: 5,
+    unit_cost_cents: 31800,
+    case_pack_size: 2,
+    max_capacity: 30
+  },
+  {
+    item_id: '6',
+    server_id: 'd365-inv-5065-0006',
+    external_system_id: 'D365-US-MI-5065-BEV-ISO',
+    item_name: 'Isotonic Energy Drink',
+    sku_code: 'BEV-ISO',
+    category_name: 'Grocery',
+    source_system: 'Dynamics 365',
+    last_synced_at: '2026-05-10T13:40:00Z',
+    on_hand_quantity: 140,
+    available_quantity: 126,
+    on_order_quantity: 72,
+    reserved_quantity: 14,
+    reorder_point: 40,
+    inventory_status: 'Good',
+    supplier_id: 'SUP-BEV-602',
+    warehouse_id: 'WH-MI-FRESH-01',
+    average_daily_demand: 18.6,
+    lead_time_days: 3,
+    unit_cost_cents: 118,
+    case_pack_size: 24,
+    max_capacity: 260
+  },
+  {
+    item_id: '7',
+    server_id: 'd365-inv-5065-0007',
+    external_system_id: 'D365-US-MI-5065-IOT-HUB',
+    item_name: 'Smart Home Hub v2',
+    sku_code: 'IOT-HUB',
+    category_name: 'Electronics',
+    source_system: 'Dynamics 365',
+    last_synced_at: '2026-05-10T13:33:00Z',
+    on_hand_quantity: 18,
+    available_quantity: 15,
+    on_order_quantity: 24,
+    reserved_quantity: 3,
+    reorder_point: 25,
+    inventory_status: 'Low',
+    supplier_id: 'SUP-IOT-778',
+    warehouse_id: 'WH-MI-DET-02',
+    average_daily_demand: 4.6,
+    lead_time_days: 7,
+    unit_cost_cents: 3895,
+    case_pack_size: 6,
+    max_capacity: 72
+  }
 ];
+
+const mapInventoryItemDtoToProduct = (dto: InventoryItemDto): Product => ({
+  id: dto.item_id,
+  serverId: dto.server_id,
+  externalSystemId: dto.external_system_id,
+  name: dto.item_name,
+  sku: dto.sku_code,
+  category: dto.category_name,
+  stock: dto.on_hand_quantity,
+  availableQuantity: dto.available_quantity,
+  onOrderQuantity: dto.on_order_quantity,
+  reservedQuantity: dto.reserved_quantity,
+  reorderPoint: dto.reorder_point,
+  status: dto.inventory_status,
+  lastSyncedAt: dto.last_synced_at,
+  sourceSystem: dto.source_system,
+  supplierId: dto.supplier_id,
+  warehouseId: dto.warehouse_id,
+  averageDailyDemand: dto.average_daily_demand,
+  leadTimeDays: dto.lead_time_days,
+  safetyStock: Math.ceil(dto.reorder_point / 2),
+  unitCost: dto.unit_cost_cents / 100,
+  casePackSize: dto.case_pack_size,
+  maxShelfCapacity: dto.max_capacity,
+  warehouseAvailable: Math.max(0, dto.max_capacity - dto.on_hand_quantity),
+  supplierAvailable: true
+});
+
+export const INVENTORY_DATA: Product[] = INVENTORY_ITEM_DTOS.map(mapInventoryItemDtoToProduct);
 
 export const OPERATIONAL_AUDITS: AuditLog[] = [
   { id: 'aud-101', severity: 'info', code: 'POL-01', message: 'Labor Variance: Front End within tolerance', file: 'Dept: Front End', file_path: '', fix: 'No action' },
@@ -262,4 +627,97 @@ export const MOCK_STORES: StoreRatingData[] = [
 export const MOCK_SCHEDULE_LOGS: ScheduleLogEntry[] = [
   { id: 'SL-001', timestamp: '2026-02-15 08:32', manager: 'Wesley Baker', action: 'Increased 9:00 AM Front End Staffing', reason: 'Unplanned High Traffic', impact: 'Efficiency +4%' },
   { id: 'SL-002', timestamp: '2026-02-15 07:15', manager: 'System (Auto)', action: 'Reduced 7:00 AM Grocery Staffing', reason: 'Low Ingress Volume', impact: 'Labor Cost -0.2%' },
+];
+
+export const WEEKLY_STAFFING_REVIEWS: StaffingReviewItem[] = [
+  {
+    id: 'WR-2026-07',
+    week: 'Feb 9 - Feb 15',
+    varianceSummary: 'System planned 2,811 hours; actual landed at 2,847 hours.',
+    manualAdjustments: 14,
+    primaryDriver: 'Weekend front-end demand and same-day call-outs',
+    automationRefinement: 'Increase Saturday cashier buffer by 1.5 FTE from 10:00-13:00.',
+    owner: 'Store Ops + People Lead',
+    status: 'In Review',
+  },
+  {
+    id: 'WR-2026-06',
+    week: 'Feb 2 - Feb 8',
+    varianceSummary: 'Actual stocking hours exceeded the system plan by 22 hours.',
+    manualAdjustments: 9,
+    primaryDriver: 'Late inbound freight created overnight recovery work.',
+    automationRefinement: 'Tie dock delay signals to grocery stocking reserve hours.',
+    owner: 'Automation Steward',
+    status: 'Rule Updated',
+  },
+  {
+    id: 'WR-2026-08',
+    week: 'Feb 16 - Feb 22',
+    varianceSummary: 'Pending closeout after Sunday labor reconciliation.',
+    manualAdjustments: 0,
+    primaryDriver: 'Collecting override reason codes',
+    automationRefinement: 'Review manager-discretion overrides before publishing next forecast.',
+    owner: 'Shift Lead Council',
+    status: 'Queued',
+  },
+];
+
+export const MONITORING_FAILSAFES: HardwareFailsafeItem[] = [
+  {
+    id: 'EDGE-FE-01',
+    location: 'Front End Queue Monitor',
+    monitor: 'Localized traffic camera + counter node',
+    failsafes: ['Passive heat sink', '45-minute UPS', 'Local buffer storage'],
+    coverageWindow: '09:00-14:00 critical checkout window',
+    risk: 'Low',
+    lastChecked: '2026-02-15 06:45',
+  },
+  {
+    id: 'EDGE-DOCK-02',
+    location: 'Receiving Dock Sensor',
+    monitor: 'Dock ingress scanner gateway',
+    failsafes: ['Ventilated enclosure', '30-minute UPS', 'Offline replay queue'],
+    coverageWindow: '08:00-15:00 freight intake window',
+    risk: 'Medium',
+    lastChecked: '2026-02-15 07:05',
+  },
+  {
+    id: 'EDGE-GROC-03',
+    location: 'Grocery Demand Beacon',
+    monitor: 'Aisle traffic telemetry hub',
+    failsafes: ['Heat spreader plate', 'Spare battery pack', 'Nightly health ping'],
+    coverageWindow: '10:00-13:00 replenishment window',
+    risk: 'Low',
+    lastChecked: '2026-02-15 06:50',
+  },
+];
+
+export const SHIFT_LEAD_BRIEFINGS: TrainingBriefingItem[] = [
+  {
+    id: 'BRF-101',
+    audience: 'Front End Shift Leads',
+    topic: 'Why forecasted checkout buffers appear before peak traffic',
+    schedule: 'Monday huddle, 08:45',
+    outcome: 'Manual cuts require a demand-gap note and coach approval.',
+    owner: 'People Lead',
+    status: 'Ready',
+  },
+  {
+    id: 'BRF-102',
+    audience: 'Stocking and Grocery Leads',
+    topic: 'How freight signals convert into reserve stocking hours',
+    schedule: 'Wednesday pre-shift, 13:30',
+    outcome: 'Leads can explain protected recovery hours without technical terms.',
+    owner: 'Operations Coach',
+    status: 'Scheduled',
+  },
+  {
+    id: 'BRF-103',
+    audience: 'Closing Shift Leads',
+    topic: 'When a manual override improves the automation model',
+    schedule: 'Friday closeout, 16:00',
+    outcome: 'Every override includes a reason code that feeds weekly rule review.',
+    owner: 'Automation Steward',
+    status: 'Scheduled',
+  },
 ];

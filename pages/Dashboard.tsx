@@ -1,12 +1,12 @@
 
 import React, { useMemo } from 'react';
 import Header from '../components/Header';
-import { Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart } from 'recharts';
-import { TrendingUp, TrendingDown, AlertTriangle, Store, Activity, Target, ShieldCheck, DollarSign, AlertOctagon } from 'lucide-react';
-import { STORE_PERFORMANCE_DATA, REVENUE_RECOVERY_DATA, TARGET_LABOR_PCT, TARGET_SPLH } from '../constants';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line, ComposedChart, Bar } from 'recharts';
+import { TrendingUp, TrendingDown, Users, AlertTriangle, Clock, Store, Activity, Target, ShieldCheck, DollarSign, AlertOctagon } from 'lucide-react';
+import { STORE_PERFORMANCE_DATA, REVENUE_RECOVERY_DATA, WEEKLY_REVENUE_TARGET, TARGET_LABOR_PCT, TARGET_SPLH } from '../constants';
 import { View } from '../types';
 
-const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = ({ setCurrentView }) => {
+const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = () => {
   
   // Logic Implementation from User Prompt
   const calculateRevenueImpact = (weeklySales: number, actualLaborPct: number, totalHours: number) => {
@@ -37,7 +37,7 @@ const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = ({ setCur
 
   return (
     <div className="flex-1 bg-[#020617] overflow-auto custom-scrollbar font-sans text-slate-200">
-      <Header title="Dashboard" subtitle="Workforce optimization overview — Feb 15, 2026" />
+      <Header title="Dashboard" subtitle="Microsoft Defender portal operational overview - Feb 15, 2026" />
       
       <div className="p-8 max-w-7xl mx-auto space-y-8 pb-24">
         
@@ -193,10 +193,7 @@ const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = ({ setCur
                       <p className="text-[10px] text-red-200 font-medium leading-relaxed">
                          Revenue gap exceeds $1,000 threshold. Immediate schedule optimization recommended to recapture velocity.
                       </p>
-                      <button
-                        onClick={() => setCurrentView?.(View.SCHEDULING)}
-                        className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20"
-                      >
+                      <button className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20">
                          Trigger Auto-Fix
                       </button>
                    </div>
@@ -214,12 +211,7 @@ const Dashboard: React.FC<{ setCurrentView?: (view: View) => void }> = ({ setCur
                     Store Performance
                 </h3>
              </div>
-             <button
-               onClick={() => setCurrentView?.(View.STORE_RATINGS)}
-               className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-white transition-colors"
-             >
-               View All Nodes
-             </button>
+             <button className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-white transition-colors">View All Nodes</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">

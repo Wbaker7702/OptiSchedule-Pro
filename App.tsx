@@ -2,8 +2,10 @@
 import React, { Suspense, useCallback, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Login from './components/Login';
-import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint, OperationsTab } from './types';
+import { View, ERPProvider, IntegrationStatus, HeatmapDataPoint } from './types';
 import { HEATMAP_DATA } from './constants';
+
+type OperationsTab = 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance';
 
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Scheduling = React.lazy(() => import('./pages/Scheduling'));
@@ -11,6 +13,7 @@ const Operations = React.lazy(() => import('./pages/Operations'));
 const Inventory = React.lazy(() => import('./pages/Inventory'));
 const Team = React.lazy(() => import('./pages/Team'));
 const Analytics = React.lazy(() => import('./pages/Analytics'));
+const EnterpriseSkillsPolicies = React.lazy(() => import('./pages/EnterpriseSkillsPolicies'));
 const Playbook = React.lazy(() => import('./pages/Playbook'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const Comparison = React.lazy(() => import('./pages/Comparison'));
@@ -19,11 +22,11 @@ const RoyaltyDashboard = React.lazy(() => import('./pages/RoyaltyDashboard'));
 const StoreRatings = React.lazy(() => import('./pages/StoreRatings'));
 const Logistics = React.lazy(() => import('./pages/Logistics'));
 const GhostInventory = React.lazy(() => import('./pages/GhostInventory'));
-const SentinelAI = React.lazy(() => import('./components/SentinelAI'));
+const DefenderAssistant = React.lazy(() => import('./components/DefenderAssistant'));
 
 const LoadingView: React.FC = () => (
   <div className="flex-1 bg-slate-950 text-slate-400 flex items-center justify-center font-mono text-xs uppercase tracking-widest">
-    Loading operations module...
+    Loading Defender module...
   </div>
 );
 
@@ -93,9 +96,10 @@ const App: React.FC = () => {
       [View.OPERATIONS]: () => <Operations defaultTab={operationsTab} externalTrigger={linterTrigger} onClearTrigger={handleClearLinterTrigger} />,
       [View.INVENTORY]: () => <Inventory />,
       [View.ANALYTICS]: () => <Analytics hubspotStatus={hubspotStatus} />,
+      [View.ENTERPRISE_SKILLS]: () => <EnterpriseSkillsPolicies />,
       [View.TEAM]: () => <Team onEmployeeAdded={handleEmployeeAdded} />,
       [View.PLAYBOOK]: () => <Playbook />,
-      [View.SETTINGS]: () => <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />
+      [View.SETTINGS]: () => <Settings hubspotStatus={hubspotStatus} setHubspotStatus={setHubspotStatus} />,
     };
 
     return viewRenderers[currentView]();
@@ -113,7 +117,7 @@ const App: React.FC = () => {
       <main className="flex-1 ml-64 flex flex-col h-screen relative">
         <Suspense fallback={<LoadingView />}>
           {renderView()}
-          <SentinelAI hubspotStatus={hubspotStatus} />
+          <DefenderAssistant hubspotStatus={hubspotStatus} />
         </Suspense>
       </main>
     </div>
