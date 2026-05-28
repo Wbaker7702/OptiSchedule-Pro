@@ -139,6 +139,7 @@ kubectl create secret generic optischedule-secrets \
   --from-literal=DB_PASSWORD=your_secure_password \
   --from-literal=JWT_SECRET=your_jwt_secret \
   --from-literal=GOOGLE_GENAI_API_KEY=your_api_key \
+  --from-literal=VITE_GEMINI_API_KEY=your_frontend_api_key \
   -n optischedule-prod
 
 # Deploy using provided manifests
