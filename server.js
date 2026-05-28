@@ -7,7 +7,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const csurf = require("csurf");
+const Tokens = require("csrf");
 const aiRouter = require("./routes/ai");
 const shiftsRouter = require("./routes/shifts");
 
@@ -36,6 +36,8 @@ if (!configuredJwtSecret || configuredJwtSecret.length < 32) {
 }
 
 const COOKIE_NAME = "opti_session";
+const CSRF_COOKIE_NAME = "opti_csrf_secret";
+const CSRF_FIELD_NAME = "_csrf";
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: IS_PROD,
@@ -43,6 +45,11 @@ const COOKIE_OPTIONS = {
   maxAge: 8 * 60 * 60 * 1000,
   path: "/",
 };
+const CSRF_COOKIE_OPTIONS = {
+  ...COOKIE_OPTIONS,
+  httpOnly: true,
+};
+const csrfTokens = new Tokens();
 
 const DEMO_USERNAME = (process.env.DEMO_USERNAME || "").trim();
 const DEMO_PASSWORD = process.env.DEMO_PASSWORD || "";
@@ -64,7 +71,6 @@ const simulationState = {
 app.use(express.urlencoded({ extended: false, limit: "10kb" }));
 app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
-const csrfProtection = csurf({ cookie: true });
 
 // Security headers
 app.use(
@@ -118,6 +124,46 @@ function setSessionCookie(res, token) {
 function clearSessionCookie(res) {
   const { maxAge, ...options } = COOKIE_OPTIONS;
   res.clearCookie(COOKIE_NAME, options);
+}
+
+function clearCsrfCookie(res) {
+  const { maxAge, ...options } = CSRF_COOKIE_OPTIONS;
+  res.clearCookie(CSRF_COOKIE_NAME, options);
+}
+
+function getCsrfSecret(req, res) {
+  const existingSecret = req.cookies[CSRF_COOKIE_NAME];
+  if (typeof existingSecret === "string" && existingSecret.length > 0) {
+    return existingSecret;
+  }
+
+  const secret = csrfTokens.secretSync();
+  res.cookie(CSRF_COOKIE_NAME, secret, CSRF_COOKIE_OPTIONS);
+  return secret;
+}
+
+function createCsrfToken(req, res) {
+  return csrfTokens.create(getCsrfSecret(req, res));
+}
+
+function requireCsrfToken(req, res, next) {
+  const secret = req.cookies[CSRF_COOKIE_NAME];
+  const submittedToken = String(req.body?.[CSRF_FIELD_NAME] || req.get("x-csrf-token") || "");
+  let isValidToken = false;
+
+  if (typeof secret === "string") {
+    try {
+      isValidToken = csrfTokens.verify(secret, submittedToken);
+    } catch (_) {
+      isValidToken = false;
+    }
+  }
+
+  if (!isValidToken) {
+    return res.status(403).send("Invalid CSRF token.");
+  }
+
+  return next();
 }
 
 function requireAuth(req, res, next) {
@@ -505,8 +551,9 @@ app.post("/login", loginLimiter, async (req, res) => {
   return res.redirect("/dashboard");
 });
 
-app.post("/logout", requireSameOrigin, (req, res) => {
+app.post("/logout", requireSameOrigin, requireCsrfToken, (req, res) => {
   clearSessionCookie(res);
+  clearCsrfCookie(res);
   res.redirect("/");
 });
 
@@ -516,6 +563,7 @@ app.get("/dashboard", requireAuth, (req, res) => {
   const notice = typeof req.query.notice === "string" ? req.query.notice.slice(0, 140) : "";
   const currentMode = simulationState.mode === "BLACK_FRIDAY" ? "Black Friday Surge" : "Normal Operations";
   const modeClass = simulationState.mode === "BLACK_FRIDAY" ? "toneDanger" : "toneOk";
+  const csrfToken = createCsrfToken(req, res);
   const noticeMarkup = notice
     ? `<div class="notice" role="status" aria-live="polite">${escapeHtml(notice)}</div>`
     : "";
@@ -574,6 +622,7 @@ app.get("/dashboard", requireAuth, (req, res) => {
         ${noticeMarkup}
       </div>
       <form method="POST" action="/logout">
+        <input type="hidden" name="${CSRF_FIELD_NAME}" value="${escapeHtml(csrfToken)}">
         <button class="logout" type="submit">Log out</button>
       </form>
     </div>
@@ -601,9 +650,11 @@ app.get("/dashboard", requireAuth, (req, res) => {
         <a class="inlineLink" href="/api/sim/status">View simulation status (JSON)</a>
         <div class="row" style="margin-top:14px;">
           <form method="POST" action="/api/sim/black-friday">
+            <input type="hidden" name="${CSRF_FIELD_NAME}" value="${escapeHtml(csrfToken)}">
             <button class="btn btnPrimary" type="submit">Activate Black Friday Mode</button>
           </form>
           <form method="POST" action="/api/sim/reset">
+            <input type="hidden" name="${CSRF_FIELD_NAME}" value="${escapeHtml(csrfToken)}">
             <button class="btn" type="submit">Reset Simulation</button>
           </form>
         </div>
@@ -631,7 +682,7 @@ app.get("/api/sim/status", requireAuth, (req, res) => {
   });
 });
 
-app.post("/api/sim/black-friday", requireAuth, csrfProtection, requireSameOrigin, (req, res) => {
+app.post("/api/sim/black-friday", requireAuth, requireSameOrigin, requireCsrfToken, (req, res) => {
   setSimulationMode("BLACK_FRIDAY");
   return respondSimulationResult(
     req,
@@ -641,7 +692,7 @@ app.post("/api/sim/black-friday", requireAuth, csrfProtection, requireSameOrigin
   );
 });
 
-app.post("/api/sim/reset", requireAuth, csrfProtection, requireSameOrigin, (req, res) => {
+app.post("/api/sim/reset", requireAuth, requireSameOrigin, requireCsrfToken, (req, res) => {
   setSimulationMode("NORMAL");
   return respondSimulationResult(
     req,
