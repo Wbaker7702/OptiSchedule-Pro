@@ -1,30 +1,44 @@
-module.exports = function applyFloridaRules({ employee, shift }) {
+module.exports = function applyFloridaRules(employeeOrPayload, maybeShift) {
+  const employee = maybeShift ? employeeOrPayload : employeeOrPayload?.employee;
+  const shift = maybeShift || employeeOrPayload?.shift;
+
   if (!employee || !shift) {
-    return { valid: false, reason: "Invalid compliance payload" };
+    return {
+      approved: false,
+      valid: false,
+      reason: "Invalid compliance payload",
+      violations: ["Invalid compliance payload"],
+    };
   }
 
   if (employee.isMinor) {
-    const endHour = new Date(shift.endTime).getHours();
     const start = new Date(shift.startTime);
     const end = new Date(shift.endTime);
     const totalHours = (end - start) / (1000 * 60 * 60);
+    const endHour = end.getHours();
+    const violations = [];
 
     // Florida demo rule: minor cannot work past 11PM
-    if (endHour > 23) {
-      return {
-        valid: false,
-        reason: "FL minor labor violation – cannot work past 11PM"
-      };
+    if (endHour >= 23) {
+      violations.push("FL minor labor violation - cannot work past 11PM");
     }
 
     // Florida demo rule: stricter school-night limit (6 hours)
     if (totalHours > 6) {
+      violations.push(
+        "FL minor labor violation - exceeds 6 hour school-night limit"
+      );
+    }
+
+    if (violations.length > 0) {
       return {
+        approved: false,
         valid: false,
-        reason: "FL minor labor violation – exceeds 6 hour school-night limit"
+        reason: violations[0],
+        violations,
       };
     }
   }
 
-  return { valid: true };
+  return { approved: true, valid: true, violations: [] };
 };
