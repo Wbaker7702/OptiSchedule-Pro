@@ -1,11 +1,20 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
 import { Truck, Box, Clock, Activity, ArrowUpRight, ShieldCheck, MapPin, Package, AlertTriangle, CheckCircle2, Loader2, Zap, Database, Cloud, FileDown, Download, Brain, Sparkles, Command, MessageSquareText, Terminal, Cpu, Radio, Shield } from 'lucide-react';
 import { HOURLY_LOGISTICS, STORE_NUMBER, MONITORING_FAILSAFES } from '../constants';
 import { HardwareFailsafeItem } from '../types';
-import { GoogleGenAI } from "@google/genai";
+import { createGeminiClient } from '../services/geminiClient';
+
+const DOCKS = [
+  { id: 1, status: 'Occupied', truck: 'WAL-9942', eta: 'Unloading' },
+  { id: 2, status: 'Awaiting', truck: 'FED-2201', eta: '14:00' },
+  { id: 3, status: 'Clear', truck: '-', eta: '-' },
+  { id: 4, status: 'Occupied', truck: 'UPS-8840', eta: 'Staging' },
+];
+
+const logisticsDataPrompt = JSON.stringify(HOURLY_LOGISTICS);
 
 const FAILSAFE_RISK_CLASS: Record<HardwareFailsafeItem['risk'], string> = {
   Low: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
@@ -50,12 +59,12 @@ const Logistics: React.FC = () => {
     }, 400);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const ai = createGeminiClient();
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Analyze the following logistics data for Store #5065 and provide 3 high-impact management directives in a narrative, "cyber-ops" terminal style.
         
-        Logistics Data: ${JSON.stringify(HOURLY_LOGISTICS)}
+        Logistics Data: ${logisticsDataPrompt}
         Docks Context: Dock 1 (Occupied - Unloading), Dock 2 (Awaiting - FED-2201), Dock 4 (Occupied - Staging).
         
         Requirements:
@@ -133,13 +142,6 @@ RECONCILIATION:
       }
     }, 1500);
   };
-
-  const docks = [
-    { id: 1, status: 'Occupied', truck: 'WAL-9942', eta: 'Unloading' },
-    { id: 2, status: 'Awaiting', truck: 'FED-2201', eta: '14:00' },
-    { id: 3, status: 'Clear', truck: '-', eta: '-' },
-    { id: 4, status: 'Occupied', truck: 'UPS-8840', eta: 'Staging' },
-  ];
 
   return (
     <div className="flex-1 bg-slate-950 overflow-auto custom-scrollbar font-mono">
@@ -320,7 +322,7 @@ RECONCILIATION:
                  </h3>
                  
                  <div className="grid grid-cols-1 gap-4">
-                    {docks.map((dock) => (
+                    {DOCKS.map((dock) => (
                        <div 
                          key={dock.id}
                          className={`p-5 rounded-2xl border transition-all cursor-pointer group ${

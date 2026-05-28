@@ -1,19 +1,31 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Header from '../components/Header';
 import { AUDIT_LOGS_MOCK } from '../constants';
-import { CheckCircle2, AlertTriangle, XCircle, ShieldCheck, Activity } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, Activity } from 'lucide-react';
+import { OperationsTab } from '../types';
 
 interface OperationsProps {
-  defaultTab?: any;
-  externalTrigger?: any;
-  onClearTrigger?: any;
+  defaultTab?: OperationsTab;
+  externalTrigger?: string | null;
+  onClearTrigger?: () => void;
 }
 
 const Operations: React.FC<OperationsProps> = () => {
-  const passedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Passed').length;
-  const warningCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Warning').length;
-  const failedCount = AUDIT_LOGS_MOCK.filter(l => l.status === 'Failed').length;
+  const auditCounts = useMemo(() => AUDIT_LOGS_MOCK.reduce(
+    (counts, log) => {
+      if (log.status === 'Passed') {
+        counts.passed += 1;
+      } else if (log.status === 'Warning') {
+        counts.warning += 1;
+      } else if (log.status === 'Failed') {
+        counts.failed += 1;
+      }
+      return counts;
+    },
+    { passed: 0, warning: 0, failed: 0 }
+  ), []);
+  const { passed: passedCount, warning: warningCount, failed: failedCount } = auditCounts;
 
   return (
     <div className="flex-1 bg-[#020617] overflow-auto custom-scrollbar font-sans text-slate-200">

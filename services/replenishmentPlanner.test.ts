@@ -4,10 +4,15 @@ import { calculateReplenishmentPlan, ReplenishmentProduct } from './replenishmen
 
 const product = (overrides: Partial<ReplenishmentProduct>): ReplenishmentProduct => ({
   id: 'test-1',
+  serverId: 'server-test-1',
+  externalSystemId: 'external-test-1',
   name: 'Test SKU',
   sku: 'TEST-001',
   category: 'Test',
   stock: 10,
+  availableQuantity: 10,
+  onOrderQuantity: 0,
+  reservedQuantity: 0,
   reorderPoint: 10,
   status: 'Good',
   averageDailyDemand: 5,
@@ -18,6 +23,8 @@ const product = (overrides: Partial<ReplenishmentProduct>): ReplenishmentProduct
   warehouseAvailable: 100,
   supplierAvailable: true,
   unitCost: 10,
+  lastSyncedAt: '2026-05-10T00:00:00Z',
+  sourceSystem: 'Dynamics 365',
   ...overrides,
 });
 

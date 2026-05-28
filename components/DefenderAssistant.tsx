@@ -1,40 +1,48 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Bot, Send, X, Minimize2, Maximize2, Terminal, Loader2, Zap, Database, ShieldCheck } from 'lucide-react';
 import { IntegrationStatus } from '../types';
 import { sanitizeInput } from '../validators';
+import { getCsrfHeaders } from '../services/csrf';
 
 interface DefenderAssistantProps {
     hubspotStatus: IntegrationStatus;
 }
 
 interface Message {
+    id: string;
     role: 'user' | 'ai';
     content: string;
     timestamp: string;
 }
 
+const createMessageId = (role: Message['role']) => `${role}-${crypto.randomUUID()}`;
+const formatMessageTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+const createAiMessage = (content: string): Message => ({
+    id: createMessageId('ai'),
+    role: 'ai',
+    content,
+    timestamp: formatMessageTime()
+});
+
 const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [isMinimized, setIsMinimized] = useState<boolean>(false);
     const [input, setInput] = useState<string>('');
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            role: 'ai',
-            content: "Microsoft Defender portal #5065 online. Security operations stack (Azure, Defender XDR, Dynamics 365) detected. How can I assist with your operational theater today?",
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
+    const [messages, setMessages] = useState<Message[]>(() => [
+        createAiMessage("Microsoft Defender portal #5065 online. Security operations stack (Azure, Defender XDR, Dynamics 365) detected. How can I assist with your operational theater today?")
     ]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const scrollToBottom = (): void => {
+    const scrollToBottom = useCallback((): void => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    }, []);
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, scrollToBottom]);
 
     const handleSendMessage = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
@@ -44,9 +52,10 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
         const sanitizedInput = sanitizeInput(input);
         
         const userMessage: Message = {
+            id: createMessageId('user'),
             role: 'user',
             content: sanitizedInput,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            timestamp: formatMessageTime()
         };
 
         setMessages(prev => [...prev, userMessage]);
@@ -61,7 +70,8 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...await getCsrfHeaders()
                 },
                 credentials: 'include', // Session validation via HTTP-only cookie
                 body: JSON.stringify({
@@ -77,11 +87,7 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
             // ISSUE #5 FIX: Handle rate limiting errors
             if (response.status === 429) {
                 setError('Rate limit exceeded. Please wait before sending another message.');
-                setMessages(prev => [...prev, {
-                    role: 'ai',
-                    content: "RATE LIMIT: Too many requests. Please wait a moment before sending another message.",
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }]);
+                setMessages(prev => [...prev, createAiMessage("RATE LIMIT: Too many requests. Please wait a moment before sending another message.")]);
                 setIsLoading(false);
                 return;
             }
@@ -89,22 +95,14 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
             // ISSUE #9 FIX: Specific error handling for different status codes
             if (response.status === 401) {
                 setError('Session expired. Please log in again.');
-                setMessages(prev => [...prev, {
-                    role: 'ai',
-                    content: "SECURITY: Session authentication failed. Please refresh and log in again.",
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }]);
+                setMessages(prev => [...prev, createAiMessage("SECURITY: Session authentication failed. Please refresh and log in again.")]);
                 setIsLoading(false);
                 return;
             }
             
             if (response.status === 403) {
                 setError('You do not have permission to use this feature.');
-                setMessages(prev => [...prev, {
-                    role: 'ai',
-                    content: "SECURITY: Insufficient permissions to access this feature.",
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }]);
+                setMessages(prev => [...prev, createAiMessage("SECURITY: Insufficient permissions to access this feature.")]);
                 setIsLoading(false);
                 return;
             }
@@ -112,11 +110,7 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ message: 'Service temporarily unavailable' }));
                 setError(errorData.message || 'Failed to get response from Defender portal');
-                setMessages(prev => [...prev, {
-                    role: 'ai',
-                    content: `CRITICAL: Defender portal error (${response.status}). ${errorData.message || 'Please contact support.'}`,
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }]);
+                setMessages(prev => [...prev, createAiMessage(`CRITICAL: Defender portal error (${response.status}). ${errorData.message || 'Please contact support.'}`)]);
                 setIsLoading(false);
                 return;
             }
@@ -126,21 +120,12 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
             // ISSUE #3 FIX: Sanitize AI response before displaying
             const sanitizedResponse = sanitizeInput(data.response || '');
             
-            setMessages(prev => [...prev, {
-                role: 'ai',
-                content: sanitizedResponse,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }]);
+            setMessages(prev => [...prev, createAiMessage(sanitizedResponse)]);
         } catch (error) {
             // ISSUE #9 FIX: Log security errors for monitoring but show generic message to user
             console.error("[SECURITY] Defender portal error:", error);
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             setError('Connection error. Please check your network and try again.');
-            setMessages(prev => [...prev, {
-                role: 'ai',
-                content: `CRITICAL: Defender portal connection failed. System log: ${errorMessage.substring(0, 50)}...`,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }]);
+            setMessages(prev => [...prev, createAiMessage('CRITICAL: Defender portal connection failed. Please check your network and try again.')]);
         } finally {
             setIsLoading(false);
         }
@@ -197,8 +182,8 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
                 {!isMinimized && (
                     <>
                         <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-950/50">
-                            {messages.map((msg, i) => (
-                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
+                            {messages.map((msg) => (
+                                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
                                     <div className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${
                                         msg.role === 'user'
                                             ? 'bg-blue-600 text-white rounded-tr-none'

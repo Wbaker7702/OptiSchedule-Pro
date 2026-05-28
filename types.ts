@@ -74,6 +74,12 @@ export interface SkillAuditEvent {
 
 export type ERPProvider = 'Dynamics 365' | 'SAP S/4HANA' | 'FDE' | 'HubSpot' | 'Azure';
 export type IntegrationStatus = 'connected' | 'disconnected';
+export type OperationsTab = 'metrics' | 'audit' | 'vision' | 'scanner' | 'variance' | 'compliance';
+
+export interface WeeklyScheduleRow {
+  day: string;
+  hours: number[];
+}
 
 export interface Employee {
   id: string;

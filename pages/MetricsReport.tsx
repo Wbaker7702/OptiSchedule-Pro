@@ -383,7 +383,7 @@ DEFENDER STATUS: NOMINAL
                                 </thead>
                                 <tbody className="divide-y divide-slate-900">
                                    {savingsByDept.map((dept, i) => (
-                                      <tr key={i} className="hover:bg-white/5 transition-colors">
+                                      <tr key={dept.name} className="hover:bg-white/5 transition-colors">
                                          <td className="px-6 py-4 text-white font-bold">{dept.name}</td>
                                          <td className="px-6 py-4 text-slate-400">12/15 Staff</td>
                                          <td className="px-6 py-4 text-emerald-400">-{((i+1)*2.4).toFixed(1)}%</td>

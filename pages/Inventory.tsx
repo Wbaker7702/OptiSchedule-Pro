@@ -1,22 +1,16 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Header from '../components/Header';
 import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
 import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Package, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, ShieldCheck, Zap, Terminal } from 'lucide-react';
 import type { Product } from '../types';
-import { createProcurementOrder } from '../services/procurementOrders';
-import type { ProcurementOrderResponse } from '../services/procurementOrders';
-import React, { useCallback, useEffect, useState } from 'react';
-import Header from '../components/Header';
-import { INVENTORY_DATA, STORE_NUMBER } from '../constants';
-import { Plus, Search, Filter, AlertTriangle, CheckCircle, X, Package, Loader2, ShoppingCart, ArrowRight, TrendingDown, Activity, AlertOctagon, Database, RefreshCw, Truck, ShieldCheck, Zap, Terminal } from 'lucide-react';
-import { Product } from '../types';
 import { calculateReplenishmentPlan, ReplenishmentPlan } from '../services/replenishmentPlanner';
 import { submitProcurementBatch } from '../services/procurementClient';
-import { createProcurementOrder, createReplenishmentBatch, getInventory, getInventoryErrorMessage, isInventoryBackendUnavailable } from '../services/inventoryClient';
+import { getInventory, getInventoryErrorMessage, isInventoryBackendUnavailable } from '../services/inventoryClient';
+import { createProcurementOrder } from '../services/procurementOrders';
+import type { ProcurementOrderResponse } from '../services/procurementOrders';
 
 const isDevMode = Boolean((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV);
-const delay = (milliseconds: number) => new Promise(resolve => window.setTimeout(resolve, milliseconds));
 
 const formatSyncTime = (isoTimestamp: string) =>
   new Intl.DateTimeFormat('en-US', {
@@ -29,6 +23,12 @@ const formatSyncTime = (isoTimestamp: string) =>
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
+interface ProcurementLogEntry {
+  id: string;
+  timestamp: string;
+  message: string;
+}
 
 const Inventory: React.FC = () => {
   const [items, setItems] = useState<Product[]>([]);
@@ -51,7 +51,7 @@ const Inventory: React.FC = () => {
   // Active Procurement State
   const [isReplenishing, setIsReplenishing] = useState(false);
   const [replenishmentStep, setReplenishmentStep] = useState<string>('');
-  const [d365Logs, setD365Logs] = useState<string[]>([]);
+  const [d365Logs, setD365Logs] = useState<ProcurementLogEntry[]>([]);
   const [lastReplenishmentPlan, setLastReplenishmentPlan] = useState<ReplenishmentPlan | null>(null);
 
   // Form State
@@ -72,6 +72,7 @@ const Inventory: React.FC = () => {
     const arrivalMessage = result.expectedArrivalDate ? ` ETA ${result.expectedArrivalDate}.` : '';
     return `${result.orderStatus.toUpperCase()}: accepted ${result.acceptedQuantity}, rejected ${result.rejectedQuantity}.${arrivalMessage}`;
   };
+
   const loadInventory = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
     const isRefresh = mode === 'refresh';
 
@@ -187,47 +188,39 @@ const Inventory: React.FC = () => {
       setIsSubmitting(false);
       pendingOrderKeysRef.current.delete(orderKey);
       setPendingOrderKeys(prev => prev.filter(key => key !== orderKey));
-    setServerError(null);
-
-    try {
-      await createProcurementOrder({
-        storeNumber: STORE_NUMBER,
-        sku: orderForm.sku,
-        quantity: Number(orderForm.quantity),
-        priority: orderForm.priority
-      });
-
-      setPendingOrdersCount(prev => prev + 1);
-      setIsOrderModalOpen(false);
-      setSuccessMessage('Order Dispatched to Authorized Supply Chain Backend');
-      setShowSuccess(true);
-      setOrderForm({ sku: '', quantity: '1', priority: 'Standard' });
-      
-      // Update item planning fields locally if matched
-      const orderedQuantity = Number(orderForm.quantity) || 0;
-      setItems(prev => prev.map(i => i.sku === orderForm.sku ? {
-        ...i,
-        status: 'Good',
-        onOrderQuantity: i.onOrderQuantity + orderedQuantity,
-        lastSyncedAt: new Date().toISOString()
-      } : i)); // Optimistic update simulation
-
-      setItems(prev => prev.map(i => i.sku === orderForm.sku ? { ...i, status: 'Good' } : i));
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error) {
-      setServerError(getInventoryErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const criticalCount = items.filter(i => i.status === 'Critical').length;
-  const lowCount = items.filter(i => i.status === 'Low').length;
-  const replenishmentEligibleCount = items.filter(i => i.stock <= i.reorderPoint).length;
+  const stockCounts = useMemo(() => items.reduce(
+    (counts, item) => {
+      if (item.status === 'Critical') {
+        counts.critical += 1;
+      } else if (item.status === 'Low') {
+        counts.low += 1;
+      }
+      if (item.stock <= item.reorderPoint) {
+        counts.replenishmentEligible += 1;
+      }
+      return counts;
+    },
+    { critical: 0, low: 0, replenishmentEligible: 0 }
+  ), [items]);
+  const criticalCount = stockCounts.critical;
+  const lowCount = stockCounts.low;
+  const replenishmentEligibleCount = stockCounts.replenishmentEligible;
+  const isEmpty = !isLoading && items.length === 0 && !serverError;
+  const dataFreshnessLabel = lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : 'Not loaded';
 
   const appendD365Log = (message: string) => {
     setReplenishmentStep(message);
-    setD365Logs(prev => [message, ...prev]);
+    setD365Logs(prev => [
+      {
+        id: `d365-${Date.now()}-${prev.length}`,
+        timestamp: new Date().toLocaleTimeString(),
+        message
+      },
+      ...prev
+    ]);
   };
 
   const resolveStockStatus = (stock: number, reorderPoint: number): Product['status'] => {
@@ -239,12 +232,6 @@ const Inventory: React.FC = () => {
   const triggerActiveProcurement = async () => {
     const plan = calculateReplenishmentPlan(items, { budget: 12500 });
     if (plan.items.length === 0) return;
-  const isEmpty = !isLoading && items.length === 0 && !serverError;
-  const dataFreshnessLabel = lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : 'Not loaded';
-
-  const triggerActiveProcurement = async () => {
-    const targetItems = items.filter(i => i.status !== 'Good');
-    if (targetItems.length === 0) return;
 
     setIsReplenishing(true);
     setServerError(null);
@@ -269,7 +256,13 @@ const Inventory: React.FC = () => {
         const accepted = response.acceptedItems.find(order => order.sku === item.sku);
         if (!accepted) return item;
         const nextStock = item.stock + accepted.recommendedQuantity;
-        return { ...item, stock: nextStock, status: resolveStockStatus(nextStock, item.reorderPoint) };
+        return {
+          ...item,
+          stock: nextStock,
+          availableQuantity: Math.max(0, item.availableQuantity + accepted.recommendedQuantity),
+          status: resolveStockStatus(nextStock, item.reorderPoint),
+          lastSyncedAt: new Date().toISOString()
+        };
       }));
 
       setPendingOrdersCount(prev => prev + response.acceptedItems.length);
@@ -283,69 +276,7 @@ const Inventory: React.FC = () => {
     } finally {
       setIsReplenishing(false);
       setTimeout(() => setShowSuccess(false), 4000);
-    
-    const sequence = [
-      "Initializing authorized supply-chain request...",
-      "Handing request to backend credential broker...",
-      `Detected ${targetItems.length} SKUs below threshold...`,
-      "Calculating optimal reorder quantities (EOQ model)...",
-      "Submitting replenishment batch through server endpoint...",
-      "Awaiting backend procurement confirmation..."
-    ];
-
-    let step = 0;
-    const interval = setInterval(() => {
-      if (step < sequence.length) {
-        setReplenishmentStep(sequence[step]);
-        setD365Logs(prev => [sequence[step], ...prev]);
-        step++;
-      } else {
-        clearInterval(interval);
-        setIsReplenishing(false);
-        setPendingOrdersCount(prev => prev + targetItems.length);
-        setItems(prev => prev.map(item => {
-          if (item.status === 'Good') return item;
-
-          const replenishmentCases = Math.max(1, Math.ceil((item.reorderPoint - item.availableQuantity) / item.casePackSize));
-          return {
-            ...item,
-            onOrderQuantity: item.onOrderQuantity + (replenishmentCases * item.casePackSize),
-            lastSyncedAt: new Date().toISOString()
-          };
-        }));
-        setSuccessMessage(`Auto-Replenished ${targetItems.length} Items via Dynamics 365`);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 4000);
-    try {
-      for (const entry of sequence) {
-        setReplenishmentStep(entry);
-        setD365Logs(prev => [entry, ...prev]);
-        await delay(500);
-      }
-
-      await createReplenishmentBatch({
-        storeNumber: STORE_NUMBER,
-        items: targetItems.map(item => ({
-          sku: item.sku,
-          currentStock: item.stock,
-          reorderPoint: item.reorderPoint,
-          requestedQuantity: Math.max(item.reorderPoint - item.stock, 1)
-        }))
-      });
-
-      const completeMessage = 'Sync complete. Logistics chain activated.';
-      setReplenishmentStep(completeMessage);
-      setD365Logs(prev => [completeMessage, ...prev]);
-      setPendingOrdersCount(prev => prev + targetItems.length);
-      setSuccessMessage(`Auto-Replenished ${targetItems.length} Items via Authorized Backend`);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 4000);
       void loadInventory('refresh');
-    } catch (error) {
-      setServerError(getInventoryErrorMessage(error));
-      setIsStale(items.length > 0);
-    } finally {
-      setIsReplenishing(false);
     }
   };
 
@@ -557,10 +488,10 @@ const Inventory: React.FC = () => {
                  <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Dynamics 365 Secure Stream</span>
               </div>
               <div className="font-mono text-[10px] text-slate-300 space-y-1 h-24 overflow-y-auto custom-scrollbar">
-                 {d365Logs.map((log, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                       <span className="text-slate-600">[{new Date().toLocaleTimeString()}]</span>
-                       <span>{log}</span>
+                 {d365Logs.map((log) => (
+                    <div key={log.id} className="flex items-center gap-2">
+                       <span className="text-slate-600">[{log.timestamp}]</span>
+                       <span>{log.message}</span>
                     </div>
                  ))}
               </div>
@@ -706,7 +637,7 @@ const Inventory: React.FC = () => {
                <tbody className="divide-y divide-gray-100">
                  {isLoading && (
                    <tr>
-                     <td colSpan={7} className="px-6 py-12 text-center">
+                     <td colSpan={11} className="px-6 py-12 text-center">
                        <div className="flex flex-col items-center gap-3 text-blue-600">
                          <Loader2 className="w-8 h-8 animate-spin" />
                          <span className="text-[10px] font-black uppercase tracking-widest">Loading authorized inventory feed...</span>
@@ -716,7 +647,7 @@ const Inventory: React.FC = () => {
                  )}
                  {!isLoading && serverError && items.length === 0 && (
                    <tr>
-                     <td colSpan={7} className="px-6 py-12 text-center">
+                     <td colSpan={11} className="px-6 py-12 text-center">
                        <div className="flex flex-col items-center gap-3 text-red-600">
                          <AlertTriangle className="w-8 h-8" />
                          <span className="text-[10px] font-black uppercase tracking-widest">{serverError}</span>
@@ -726,7 +657,7 @@ const Inventory: React.FC = () => {
                  )}
                  {isEmpty && (
                    <tr>
-                     <td colSpan={7} className="px-6 py-12 text-center">
+                     <td colSpan={11} className="px-6 py-12 text-center">
                        <div className="flex flex-col items-center gap-3 text-gray-500">
                          <Package className="w-8 h-8" />
                          <span className="text-[10px] font-black uppercase tracking-widest">No inventory assets returned for Store {STORE_NUMBER}</span>
@@ -749,7 +680,7 @@ const Inventory: React.FC = () => {
                        <div className="space-y-1 font-mono text-[10px] text-gray-500">
                          <p>ROP {item.reorderPoint} • Pack {item.casePackSize}</p>
                          <p>{item.averageDailyDemand}/day • {item.leadTimeDays}d lead</p>
-                         <p>{formatCurrency(item.unitCost)} ea • Cap {item.maxCapacity}</p>
+                         <p>{formatCurrency(item.unitCost)} ea • Cap {item.maxShelfCapacity}</p>
                        </div>
                      </td>
                      <td className="px-6 py-4">

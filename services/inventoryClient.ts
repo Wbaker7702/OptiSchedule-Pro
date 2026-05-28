@@ -1,4 +1,5 @@
 import { Product } from '../types';
+import { getCsrfHeaders } from './csrf';
 
 const INVENTORY_API_BASE = '/api/inventory';
 const PRODUCT_STATUSES = new Set<Product['status']>(['Good', 'Low', 'Critical']);
@@ -62,19 +63,36 @@ export const mapInventoryProduct = (dto: unknown): Product => {
     throw new InventoryApiError('Invalid inventory response: product must be an object.');
   }
 
-  const status = dto.status;
+  const status = dto.status ?? dto.inventory_status;
   if (!PRODUCT_STATUSES.has(status as Product['status'])) {
     throw new InventoryApiError('Invalid inventory response: status must be Good, Low, or Critical.');
   }
 
   return {
-    id: requireString(dto.id, 'id'),
-    name: requireString(dto.name, 'name'),
-    sku: requireString(dto.sku, 'sku'),
-    category: requireString(dto.category, 'category'),
-    stock: requireNumber(dto.stock, 'stock'),
-    reorderPoint: requireNumber(dto.reorderPoint, 'reorderPoint'),
-    status: status as Product['status']
+    id: requireString(dto.id ?? dto.item_id, 'id'),
+    serverId: requireString(dto.serverId ?? dto.server_id ?? dto.id ?? dto.item_id, 'serverId'),
+    externalSystemId: requireString(dto.externalSystemId ?? dto.external_system_id ?? dto.sku ?? dto.sku_code, 'externalSystemId'),
+    name: requireString(dto.name ?? dto.item_name, 'name'),
+    sku: requireString(dto.sku ?? dto.sku_code, 'sku'),
+    category: requireString(dto.category ?? dto.category_name, 'category'),
+    stock: requireNumber(dto.stock ?? dto.on_hand_quantity, 'stock'),
+    availableQuantity: requireNumber(dto.availableQuantity ?? dto.available_quantity ?? dto.stock ?? dto.on_hand_quantity, 'availableQuantity'),
+    onOrderQuantity: requireNumber(dto.onOrderQuantity ?? dto.on_order_quantity ?? 0, 'onOrderQuantity'),
+    reservedQuantity: requireNumber(dto.reservedQuantity ?? dto.reserved_quantity ?? 0, 'reservedQuantity'),
+    reorderPoint: requireNumber(dto.reorderPoint ?? dto.reorder_point, 'reorderPoint'),
+    status: status as Product['status'],
+    averageDailyDemand: requireNumber(dto.averageDailyDemand ?? dto.average_daily_demand ?? 0, 'averageDailyDemand'),
+    leadTimeDays: requireNumber(dto.leadTimeDays ?? dto.lead_time_days ?? 0, 'leadTimeDays'),
+    safetyStock: requireNumber(dto.safetyStock ?? dto.safety_stock ?? 0, 'safetyStock'),
+    casePackSize: requireNumber(dto.casePackSize ?? dto.case_pack_size ?? 1, 'casePackSize'),
+    maxShelfCapacity: requireNumber(dto.maxShelfCapacity ?? dto.max_capacity ?? dto.maxCapacity ?? dto.reorderPoint ?? dto.reorder_point, 'maxShelfCapacity'),
+    warehouseAvailable: requireNumber(dto.warehouseAvailable ?? dto.warehouse_available ?? dto.availableQuantity ?? dto.available_quantity ?? 0, 'warehouseAvailable'),
+    supplierAvailable: Boolean(dto.supplierAvailable ?? dto.supplier_available ?? true),
+    unitCost: requireNumber(dto.unitCost ?? (typeof dto.unit_cost_cents === 'number' ? dto.unit_cost_cents / 100 : undefined) ?? 0, 'unitCost'),
+    lastSyncedAt: requireString(dto.lastSyncedAt ?? dto.last_synced_at ?? new Date().toISOString(), 'lastSyncedAt'),
+    sourceSystem: requireString(dto.sourceSystem ?? dto.source_system ?? 'Manual Audit', 'sourceSystem') as Product['sourceSystem'],
+    supplierId: typeof (dto.supplierId ?? dto.supplier_id) === 'string' ? (dto.supplierId ?? dto.supplier_id) as string : undefined,
+    warehouseId: typeof (dto.warehouseId ?? dto.warehouse_id) === 'string' ? (dto.warehouseId ?? dto.warehouse_id) as string : undefined,
   };
 };
 
@@ -104,6 +122,11 @@ const parseJsonResponse = async (response: Response): Promise<unknown> => {
 
 const requestJson = async (url: string, init?: RequestInit): Promise<unknown> => {
   let response: Response;
+  const csrfHeaders = init?.body
+    ? await getCsrfHeaders().catch(() => {
+        throw new InventoryApiError('Inventory backend is unavailable.', { unavailable: true });
+      })
+    : {};
 
   try {
     response = await fetch(url, {
@@ -111,6 +134,7 @@ const requestJson = async (url: string, init?: RequestInit): Promise<unknown> =>
       headers: {
         Accept: 'application/json',
         ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+        ...csrfHeaders,
         ...init?.headers
       },
       credentials: 'same-origin'

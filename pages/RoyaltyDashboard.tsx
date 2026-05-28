@@ -85,7 +85,7 @@ const RoyaltyDashboard: React.FC = () => {
     setIsTriggeringDefender(true);
     setDefenderLogs([]);
     
-    const sequence = [
+    const sequence: Array<{ text: string; status: 'info' | 'success' | 'warn' }> = [
       { text: `Pinging Initiative: ${laborIssueId}...`, status: 'info' },
       { text: `Ping Successful. Status: [IN_PROGRESS] detected.`, status: 'success' },
       { text: `Validating Data Stream for Labor Cost...`, status: 'info' },

@@ -3,20 +3,33 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import { RefreshCw, Download, Zap, Edit2, AlertCircle, CheckCircle, X, History, User, CalendarDays, Loader2, CheckCircle2, BarChart3, Info, TrendingUp, TrendingDown, Target } from 'lucide-react';
 import { WEEKLY_HEATMAP, WEEKLY_SALES_HEATMAP, MOCK_SCHEDULE_LOGS, CURRENT_USER, WEEKLY_STAFFING_REVIEWS } from '../constants';
-import { ScheduleLogEntry, StaffingReviewItem } from '../types';
-import { GoogleGenAI, Type } from "@google/genai";
+import { ERPProvider, HeatmapDataPoint, IntegrationStatus, ScheduleLogEntry, StaffingReviewItem, View, WeeklyScheduleRow } from '../types';
+import { Type } from '@google/genai';
+import { createGeminiClient } from '../services/geminiClient';
 
 interface SchedulingProps {
-  setCurrentView?: any;
-  onFinalize?: any;
-  activeProvider?: any;
-  setActiveProvider?: any;
-  isConnected?: any;
-  setIsConnected?: any;
-  setHubspotStatus?: any;
-  heatmapData?: any;
-  onAdjustStaffing?: any;
+  setCurrentView?: (view: View) => void;
+  onFinalize?: () => void;
+  activeProvider?: ERPProvider;
+  setActiveProvider?: (provider: ERPProvider) => void;
+  isConnected?: boolean;
+  setIsConnected?: (isConnected: boolean) => void;
+  setHubspotStatus?: (status: IntegrationStatus) => void;
+  heatmapData?: HeatmapDataPoint[];
+  onAdjustStaffing?: () => void;
 }
+
+const HOUR_LABELS = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
+
+const isWeeklyScheduleRowArray = (value: unknown): value is WeeklyScheduleRow[] =>
+  Array.isArray(value) &&
+  value.every(item =>
+    typeof item === 'object' &&
+    item !== null &&
+    typeof (item as WeeklyScheduleRow).day === 'string' &&
+    Array.isArray((item as WeeklyScheduleRow).hours) &&
+    (item as WeeklyScheduleRow).hours.every(hour => typeof hour === 'number')
+  );
 
 const REVIEW_STATUS_CLASS: Record<StaffingReviewItem['status'], string> = {
   'Queued': 'bg-slate-800 text-slate-400 border-slate-700',
@@ -45,8 +58,6 @@ const Scheduling: React.FC<SchedulingProps> = () => {
   const [modificationType, setModificationType] = useState<'increase' | 'decrease'>('increase');
   const [modificationReason, setModificationReason] = useState('Call-Out Coverage');
   const [modificationNote, setModificationNote] = useState('');
-
-  const hourLabels = ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00'];
 
   const getHeatmapColor = (value: number) => {
     if (value >= 10) return 'bg-[#0d9488] text-white hover:bg-[#0f766e] ring-1 ring-white/10'; // Dark Teal
@@ -77,7 +88,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
     setSelectedSlot({
       day,
       hourIndex,
-      hourLabel: hourLabels[hourIndex],
+      hourLabel: HOUR_LABELS[hourIndex],
       currentValue
     });
     setModificationType('increase');
@@ -141,7 +152,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
   const handleAIForecast = async () => {
     setIsForecasting(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const ai = createGeminiClient();
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: `Generate a weekly staffing schedule heatmap for a retail store (Mon-Sun, 8 time slots from 6am to 1pm). 
@@ -175,7 +186,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
       const text = response.text;
       if (text) {
         const data = JSON.parse(text);
-        if (data.heatmap && Array.isArray(data.heatmap)) {
+        if (isWeeklyScheduleRowArray(data.heatmap)) {
           setScheduleData(data.heatmap);
           
           const newLog: ScheduleLogEntry = {
@@ -389,7 +400,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
              <div className="min-w-[800px]">
                <div className="flex mb-3">
                  <div className="w-20"></div>
-                 {hourLabels.map(h => (
+                 {HOUR_LABELS.map(h => (
                    <div key={h} className="flex-1 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">{h}</div>
                  ))}
                </div>
@@ -434,7 +445,7 @@ const Scheduling: React.FC<SchedulingProps> = () => {
                                 {isHovered && (
                                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-950 border border-slate-800 rounded-xl p-3 shadow-2xl z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200">
                                     <div className="flex items-center justify-between mb-2">
-                                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{row.day} @ {hourLabels[i]}</span>
+                                      <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{row.day} @ {HOUR_LABELS[i]}</span>
                                       <div className={`flex items-center gap-1 text-[8px] font-black uppercase ${gap.color}`}>
                                         {gap.icon}
                                         {gap.label}
