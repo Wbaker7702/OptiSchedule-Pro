@@ -3,8 +3,10 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import crypto from 'crypto';
 import express, { Express, NextFunction, Request, Response } from 'express';
+import session from 'express-session';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import lusca from 'lusca';
 import { GoogleGenAI } from '@google/genai';
 
 const app: Express = express();
@@ -22,7 +24,7 @@ interface User {
   createdAt: Date;
 }
 
-interface Session {
+interface AuthSession {
   id: string;
   userId: string;
   email: string;
@@ -35,22 +37,44 @@ interface Session {
 }
 
 interface AuthRequest extends Request {
-  session?: Session;
+  authSession?: AuthSession;
 }
 
 const users = new Map<string, User>();
-const sessions = new Map<string, Session>();
+const sessions = new Map<string, AuthSession>();
 
 app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ limit: '1mb', extended: true }));
 app.use(cookieParser(COOKIE_SECRET));
+app.use(session({
+  name: 'csrf.sid',
+  secret: COOKIE_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    secure: NODE_ENV === 'production',
+    sameSite: 'strict'
+  }
+}));
 app.use(cors({
   origin: FRONTEND_URL,
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'X-Requested-With', 'X-CSRF-Token'],
   maxAge: 86400
+}));
+app.use(lusca.csrf({
+  header: 'X-CSRF-Token',
+  cookie: {
+    name: 'XSRF-TOKEN',
+    options: {
+      httpOnly: false,
+      secure: NODE_ENV === 'production',
+      sameSite: 'strict'
+    }
+  }
 }));
 
 const loginLimiter = rateLimit({
@@ -108,9 +132,9 @@ const initializeTestUsers = async () => {
   });
 };
 
-const createSession = (user: User, ipAddress: string, userAgent: string): { token: string; session: Session } => {
+const createSession = (user: User, ipAddress: string, userAgent: string): { token: string; session: AuthSession } => {
   const token = crypto.randomBytes(32).toString('hex');
-  const session: Session = {
+  const session: AuthSession = {
     id: token,
     userId: user.id,
     email: user.email,
@@ -126,7 +150,7 @@ const createSession = (user: User, ipAddress: string, userAgent: string): { toke
   return { token, session };
 };
 
-const validateSession = (sessionToken: string, ipAddress: string, userAgent: string): Session | null => {
+const validateSession = (sessionToken: string, ipAddress: string, userAgent: string): AuthSession | null => {
   const session = sessions.get(sessionToken);
 
   if (!session) {
@@ -165,12 +189,12 @@ const requireAuth = (req: AuthRequest, res: Response, next: NextFunction): void 
     return;
   }
 
-  req.session = session;
+  req.authSession = session;
   next();
 };
 
 const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  if (!req.session || req.session.role !== 'admin') {
+  if (!req.authSession || req.authSession.role !== 'admin') {
     res.status(403).json({ error: 'Admin access required.' });
     return;
   }
@@ -185,6 +209,17 @@ app.get('/api/health', (_req: Request, res: Response) => {
     uptime: process.uptime(),
     environment: NODE_ENV
   });
+});
+
+app.get('/api/csrf-token', (req: Request, res: Response) => {
+  const csrfToken = (req as Request & { csrfToken?: () => string }).csrfToken?.();
+
+  if (!csrfToken) {
+    res.status(500).json({ error: 'CSRF token unavailable.' });
+    return;
+  }
+
+  res.json({ csrfToken });
 });
 
 app.post('/api/auth/login', loginLimiter, async (req: Request, res: Response) => {
@@ -315,6 +350,11 @@ app.get('/api/sessions', requireAuth, requireAdmin, (_req: AuthRequest, res: Res
 });
 
 app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
+  if (error.message === 'CSRF token missing' || error.message === 'CSRF token mismatch') {
+    res.status(403).json({ error: 'Invalid CSRF token.' });
+    return;
+  }
+
   console.error('[ERROR] Unhandled error:', error);
   res.status(500).json({ error: 'Internal server error' });
 });

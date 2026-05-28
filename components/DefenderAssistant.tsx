@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Bot, Send, X, Minimize2, Maximize2, Terminal, Loader2, Zap, Database, ShieldCheck } from 'lucide-react';
 import { IntegrationStatus } from '../types';
 import { sanitizeInput } from '../validators';
+import { getCsrfHeaders } from '../services/csrf';
 
 interface DefenderAssistantProps {
     hubspotStatus: IntegrationStatus;
@@ -69,7 +70,8 @@ const DefenderAssistant: React.FC<DefenderAssistantProps> = ({ hubspotStatus }) 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...await getCsrfHeaders()
                 },
                 credentials: 'include', // Session validation via HTTP-only cookie
                 body: JSON.stringify({

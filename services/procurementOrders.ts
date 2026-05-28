@@ -1,4 +1,5 @@
 import type { Product } from '../types';
+import { getCsrfHeaders } from './csrf';
 
 export type ProcurementOrderStatus = 'accepted' | 'partial' | 'rejected' | 'pending';
 
@@ -99,7 +100,10 @@ export const createProcurementOrder = async (
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      ...await getCsrfHeaders()
     },
+    credentials: 'include',
     body: JSON.stringify(request),
   });
 

@@ -1,4 +1,5 @@
 import { Product } from '../types';
+import { getCsrfHeaders } from './csrf';
 
 const INVENTORY_API_BASE = '/api/inventory';
 const PRODUCT_STATUSES = new Set<Product['status']>(['Good', 'Low', 'Critical']);
@@ -121,6 +122,7 @@ const parseJsonResponse = async (response: Response): Promise<unknown> => {
 
 const requestJson = async (url: string, init?: RequestInit): Promise<unknown> => {
   let response: Response;
+  const csrfHeaders = init?.body ? await getCsrfHeaders() : {};
 
   try {
     response = await fetch(url, {
@@ -128,6 +130,7 @@ const requestJson = async (url: string, init?: RequestInit): Promise<unknown> =>
       headers: {
         Accept: 'application/json',
         ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+        ...csrfHeaders,
         ...init?.headers
       },
       credentials: 'same-origin'

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Lock, Mail, ArrowRight, Activity, ShieldAlert } from 'lucide-react';
 import { APP_VERSION } from '../constants';
 import { validateEmail, validatePassword, sanitizeInput } from '../validators';
+import { getCsrfHeaders } from '../services/csrf';
 
 interface LoginProps {
   onLogin: () => void;
@@ -41,7 +42,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest' // CSRF protection
+          'X-Requested-With': 'XMLHttpRequest',
+          ...await getCsrfHeaders()
         },
         credentials: 'include', // Include cookies in request
         body: JSON.stringify({
