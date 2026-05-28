@@ -62,6 +62,14 @@ const token = jwt.sign(
   { expiresIn: "8h" }
 );
 
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
 
     res.json({ token });
   } catch (error) {

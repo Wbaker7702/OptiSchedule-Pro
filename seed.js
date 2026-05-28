@@ -80,6 +80,12 @@ async function main() {
 
   console.log("📅 Shifts generated");
   console.log("🔥 Seed complete.");
+const { seedDemoStore } = require("./prisma/demoSeed");
+
+const prisma = new PrismaClient();
+
+async function main() {
+  await seedDemoStore(prisma);
 }
 
 main()

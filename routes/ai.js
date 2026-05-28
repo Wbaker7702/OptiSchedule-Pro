@@ -13,6 +13,8 @@ const aiLimiter = rateLimit({
 
 router.use(aiLimiter);
 
+const router = express.Router();
+
 router.post("/generate", async (req, res) => {
   try {
     const prompt = String(req.body?.prompt || "").trim();
@@ -24,6 +26,11 @@ router.post("/generate", async (req, res) => {
       return res
         .status(400)
         .json({ error: "prompt must be 4000 characters or fewer" });
+      return res.status(400).json({ error: "prompt required" });
+    }
+
+    if (prompt.length > 4000) {
+      return res.status(400).json({ error: "prompt too long (max 4000 chars)" });
     }
 
     const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -31,6 +38,7 @@ router.post("/generate", async (req, res) => {
       return res
         .status(503)
         .json({ error: "AI provider is not configured for this environment" });
+      return res.status(503).json({ error: "AI service not configured" });
     }
 
     const model = process.env.GENAI_MODEL || "gemini-2.5-flash";
@@ -62,6 +70,17 @@ router.post("/generate", async (req, res) => {
       return res
         .status(502)
         .json({ error: "AI provider returned an empty response" });
+      return res.status(502).json({ error: "AI provider request failed" });
+    }
+
+    const data = await response.json();
+    const text = (data?.candidates?.[0]?.content?.parts || [])
+      .map((part) => part?.text || "")
+      .join("")
+      .trim();
+
+    if (!text) {
+      return res.status(502).json({ error: "AI provider returned empty response" });
     }
 
     return res.json({

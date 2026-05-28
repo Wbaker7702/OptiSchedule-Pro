@@ -1,0 +1,8 @@
+{
+  "name": "Microsoft Defender portal - Walmart Store 5065, 2080 Pilot",
+  "description": "Interactive Microsoft Defender portal dashboard for Walmart Store 5065, featuring Microsoft Dynamics 365 ERP integration, staffing heatmaps, and operational security analytics.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
