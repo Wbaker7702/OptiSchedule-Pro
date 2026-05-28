@@ -1,4 +1,20 @@
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+
+const BEARER_SCHEME = "Bearer";
+
+function timingSafeStringEquals(value, expected) {
+  const valueBuffer = Buffer.from(String(value || ""));
+  const expectedBuffer = Buffer.from(expected);
+  const comparableValue = Buffer.alloc(expectedBuffer.length);
+
+  valueBuffer.copy(comparableValue, 0, 0, Math.min(valueBuffer.length, expectedBuffer.length));
+
+  const isSameLength = valueBuffer.length === expectedBuffer.length;
+  const isSameValue = crypto.timingSafeEqual(comparableValue, expectedBuffer);
+
+  return isSameLength && isSameValue;
+}
 
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -8,7 +24,7 @@ function authenticate(req, res, next) {
   }
 
   const [scheme, token] = authHeader.split(" ");
-  if (scheme !== "Bearer" || !token) {
+  if (!timingSafeStringEquals(scheme, BEARER_SCHEME) || !token) {
     return res.status(401).json({ message: "Invalid authorization format" });
   }
 
