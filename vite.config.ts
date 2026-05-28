@@ -10,10 +10,8 @@ export default defineConfig(() => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY || ''),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY || ''),
-      'global': '{}',
-      'process.env': '{}'
+        global: '{}',
+        'process.env': '{}'
       },
       resolve: {
         alias: {
