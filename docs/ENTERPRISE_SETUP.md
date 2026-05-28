@@ -81,7 +81,7 @@ services:
       DATABASE_URL: postgresql://optischedule:${DB_PASSWORD}@postgres:5432/optischedule_prod
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY}
       PORT: 3000
     ports:
       - "3000:3000"
@@ -95,7 +95,7 @@ services:
       dockerfile: Dockerfile.frontend
     environment:
       VITE_API_BASE_URL: http://localhost:3000
-      VITE_GEMINI_API_KEY: ${GEMINI_API_KEY}
+      VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
       - "80:80"
     depends_on:
@@ -110,7 +110,8 @@ EOF
 cat > .env << 'EOF'
 DB_PASSWORD=your_secure_password_here
 JWT_SECRET=your_jwt_secret_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
+GOOGLE_GENAI_API_KEY=your_server_gemini_api_key_here
+VITE_GEMINI_API_KEY=your_frontend_gemini_api_key_here
 NODE_ENV=production
 EOF
 
@@ -137,7 +138,7 @@ kubectl create configmap optischedule-config \
 kubectl create secret generic optischedule-secrets \
   --from-literal=DB_PASSWORD=your_secure_password \
   --from-literal=JWT_SECRET=your_jwt_secret \
-  --from-literal=GEMINI_API_KEY=your_api_key \
+  --from-literal=GOOGLE_GENAI_API_KEY=your_api_key \
   -n optischedule-prod
 
 # Deploy using provided manifests
@@ -212,7 +213,7 @@ JWT_EXPIRY=86400
 REFRESH_TOKEN_EXPIRY=2592000
 
 # Gemini AI
-GEMINI_API_KEY=your_gemini_api_key
+GOOGLE_GENAI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-pro
 
 # Server
