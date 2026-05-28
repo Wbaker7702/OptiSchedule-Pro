@@ -56,7 +56,7 @@ async function main() {
     for (let emp of employees) {
       const start = new Date(now);
       start.setDate(now.getDate() - day);
-      start.setHours(8 + (emp.id % 3), 0, 0);
+      start.setHours(8 + (emp.id % 3), 0, 0, 0);
 
       const end = new Date(start);
       end.setHours(start.getHours() + 8);
