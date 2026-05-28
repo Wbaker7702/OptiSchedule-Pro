@@ -1,10 +1,31 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
+
+const router = express.Router();
+
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many AI requests. Please try again later." },
+});
+
+router.use(aiLimiter);
+
 const router = express.Router();
 
 router.post("/generate", async (req, res) => {
   try {
     const prompt = String(req.body?.prompt || "").trim();
     if (!prompt) {
+      return res.status(400).json({ error: "prompt is required" });
+    }
+
+    if (prompt.length > 4000) {
+      return res
+        .status(400)
+        .json({ error: "prompt must be 4000 characters or fewer" });
       return res.status(400).json({ error: "prompt required" });
     }
 
@@ -14,6 +35,9 @@ router.post("/generate", async (req, res) => {
 
     const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY;
     if (!apiKey) {
+      return res
+        .status(503)
+        .json({ error: "AI provider is not configured for this environment" });
       return res.status(503).json({ error: "AI service not configured" });
     }
 
@@ -32,6 +56,20 @@ router.post("/generate", async (req, res) => {
     );
 
     if (!response.ok) {
+      throw new Error(`Gemini request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = (data?.candidates || [])
+      .flatMap((candidate) => candidate?.content?.parts || [])
+      .map((part) => part?.text || "")
+      .join("\n")
+      .trim();
+
+    if (!text) {
+      return res
+        .status(502)
+        .json({ error: "AI provider returned an empty response" });
       return res.status(502).json({ error: "AI provider request failed" });
     }
 
