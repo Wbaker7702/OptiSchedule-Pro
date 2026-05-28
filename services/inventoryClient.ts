@@ -122,7 +122,11 @@ const parseJsonResponse = async (response: Response): Promise<unknown> => {
 
 const requestJson = async (url: string, init?: RequestInit): Promise<unknown> => {
   let response: Response;
-  const csrfHeaders = init?.body ? await getCsrfHeaders() : {};
+  const csrfHeaders = init?.body
+    ? await getCsrfHeaders().catch(() => {
+        throw new InventoryApiError('Inventory backend is unavailable.', { unavailable: true });
+      })
+    : {};
 
   try {
     response = await fetch(url, {
