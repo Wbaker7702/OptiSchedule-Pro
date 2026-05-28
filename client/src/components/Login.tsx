@@ -32,7 +32,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-slate-600 rounded-full opacity-30"></div>
       </div>
 
-      <div className="bg-slate-900 w-full max-md rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden relative z-10 max-w-md">
+      <div className="bg-slate-900 w-full rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden relative z-10 max-w-md">
         <div className="bg-slate-900 p-8 text-center relative border-b border-slate-800">
           <div className="absolute top-4 right-4 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20 flex items-center gap-1">
              <ShieldCheck className="w-3 h-3 text-blue-500" />

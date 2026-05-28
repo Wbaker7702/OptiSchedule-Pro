@@ -15,7 +15,8 @@ function authenticate(req, res, next) {
   try {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      return res.status(500).json({ message: "JWT secret is not configured" });
+      console.error("JWT secret is not configured");
+      return res.status(500).json({ message: "Internal server error" });
     }
     const decoded = jwt.verify(token, secret);
     req.user = decoded;
