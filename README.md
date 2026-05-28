@@ -112,7 +112,7 @@ VITE_LOG_LEVEL=info
 # Backend (see BACKEND_SETUP.md)
 GOOGLE_GENAI_API_KEY=your_key_here
 DATABASE_URL=postgresql://user:password@localhost:5432/optischedule
-JWT_SECRET=your_secret_key
+COOKIE_SECRET=your-min-32-character-random-secret-key-here
 NODE_ENV=development
 PORT=3000
 ```
