@@ -68,9 +68,12 @@ OptiSchedule Pro is a sophisticated workforce scheduling platform designed to op
    ```
    Update `.env.local` with your configuration:
    ```env
+   # Frontend AI features (exposed in browser builds)
    VITE_GEMINI_API_KEY=your_gemini_api_key
-   VITE_API_BASE_URL=http://localhost:3000
    VITE_ENVIRONMENT=development
+
+   # Backend AI proxy (server only)
+   GOOGLE_GENAI_API_KEY=your_gemini_api_key
    ```
 
 4. **Run development server**
@@ -107,6 +110,7 @@ VITE_ENVIRONMENT=development
 VITE_LOG_LEVEL=info
 
 # Backend (see BACKEND_SETUP.md)
+GOOGLE_GENAI_API_KEY=your_key_here
 DATABASE_URL=postgresql://user:password@localhost:5432/optischedule
 JWT_SECRET=your_secret_key
 NODE_ENV=development

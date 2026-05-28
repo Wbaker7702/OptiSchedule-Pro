@@ -61,3 +61,15 @@ The app should keep a restrictive CSP that only allows required script, style,
 font, image, first-party API, and Gemini API endpoints. Review `index.html`
 whenever adding a new third-party script, stylesheet, image host, or API
 connection.
+Tell them where to go, how often they can expect to get an update on a
+reported vulnerability, what to expect if the vulnerability is accepted or
+declined, etc.
+
+## Environment Variable Handling
+
+Use the documented Gemini API key names consistently:
+
+- `VITE_GEMINI_API_KEY` powers frontend-only Gemini features and is exposed in browser builds by Vite.
+- `GOOGLE_GENAI_API_KEY` powers backend proxy endpoints and must remain server-only.
+
+Do not deploy a bare `GEMINI_API_KEY`; the app does not read that name directly.
