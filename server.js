@@ -79,6 +79,16 @@ app.patch('/api/work-orders/:orderId', async (req, res) => {
   const { orderId } = req.params;
   const { optimizedStartDate, optimizedEndDate } = req.body;
 
+  // Validate and constrain user input before using it in outbound URL construction
+  // Adjust pattern if your SAP order IDs support a different fixed format.
+  const isValidOrderId = /^[0-9]{1,20}$/.test(orderId);
+  if (!isValidOrderId) {
+    return res.status(400).json({ error: 'Invalid work order id format.' });
+  }
+
+  // Encode defensively before interpolation into OData entity key path
+  const safeOrderId = encodeURIComponent(orderId);
+
   try {
     // 1. First, we must fetch a fresh CSRF token and session cookies
     const { token, cookies } = await getSapCsrfToken();
@@ -92,7 +102,7 @@ app.patch('/api/work-orders/:orderId', async (req, res) => {
 
     // 3. Send the PATCH request to the specific Work Order entity
     const sapResponse = await sapClient.patch(
-      `/WorkOrderSet('${orderId}')`, 
+      `/WorkOrderSet('${safeOrderId}')`, 
       updatePayload,
       {
         headers: {
