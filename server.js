@@ -118,7 +118,7 @@ app.patch('/api/work-orders/:orderId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error(`SAP Update Error for Order ${orderId}:`, error.response?.data || error.message);
+    console.error('SAP Update Error for Order %s:', orderId, error?.response?.data || error?.message || error);
     res.status(500).json({ error: `Failed to update Work Order ${orderId} in SAP` });
   }
 });
