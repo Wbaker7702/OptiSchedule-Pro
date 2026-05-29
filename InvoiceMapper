@@ -1,0 +1,18 @@
+# Integration logic snippet for your 
+# main engine
+def 
+execute_post_processing(engine_data):
+    # 1. Logic: Engine completes 
+    # scheduling 2. Map & Generate: 
+    # Call the InvoiceMapper
+    mapper = 
+    InvoiceMapper('template.xlsx', 
+    f'invoices/invoice_{engine_data["id"]}.xlsx') 
+    mapper.generate_invoice(engine_data)
+    
+    # 3. Glass Wall Audit Log: Record 
+    # the transaction
+    log_transaction_event(engine_data) 
+    print(f"Invoice and audit trail 
+    generated for ID: 
+    {engine_data['id']}")
