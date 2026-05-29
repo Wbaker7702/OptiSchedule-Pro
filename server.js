@@ -1,76 +1,20 @@
 require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-
 const app = express();
-const PORT = process.env.PORT || 5000;
+app.use(express.json());
 
-// Middleware
-app.use(cors()); // Allows your React app to communicate with this server
-app.use(express.json()); // Parses incoming JSON payloads
-
-// --- SAP Configuration ---
-const SAP_BASE_URL = process.env.SAP_ODATA_URL;
-
-// Create an Axios instance pre-configured with SAP authentication and headers
-const sapClient = axios.create({
-  baseURL: SAP_BASE_URL,
-  headers: {
-    'Authorization': `Basic ${Buffer.from(`${process.env.SAP_USERNAME}:${process.env.SAP_PASSWORD}`).toString('base64')}`,
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
+app.get('/api/work-orders', (req, res) => {
+  res.status(200).json({ 
+    status: "success", 
+    data: [{ WorkOrderID: "WO-9942", Status: "Pending" }] 
+  });
 });
 
-// --- Helper: Fetch CSRF Token ---
-// SAP requires an X-CSRF-Token for any POST/PUT/PATCH requests to prevent cross-site request forgery.
-async function getSapCsrfToken() {
-  try {
-    const response = await sapClient.get('/', {
-      headers: { 'X-CSRF-Token': 'Fetch' }
-    });
-    return {
-      token: response.headers['x-csrf-token'],
-      cookies: response.headers['set-cookie']
-    };
-  } catch (error) {
-    console.error('Failed to fetch CSRF Token from SAP:', error.message);
-    throw error;
-  }
-}
-
-// ==========================================
-// API ENDPOINTS FOR REACT FRONTEND
-// ==========================================
-
-/**
- * 1. GET /api/work-orders
- * Fetches uncompleted Work Orders from SAP to populate the OptiSchedule baseline.
- */
-app.get('/api/work-orders', async (req, res) => {
-  try {
-    // We use OData query parameters to filter for specific statuses (e.g., 'REL' = Released)
-    // and select only the fields OptiSchedule needs to minimize bandwidth.
-    const odataQuery = `/WorkOrderSet?$filter=SystemStatus eq 'REL'&$select=OrderNumber,Description,BasicStartDate,BasicEndDate,WorkCenter,EstimatedLaborHours`;
-    
-    const sapResponse = await sapClient.get(odataQuery);
-    
-    // Extract the raw array of work orders from the SAP OData format
-    const workOrders = sapResponse.data.d.results;
-    
-    res.status(200).json({
-      message: 'Successfully retrieved SAP data',
-      count: workOrders.length,
-      data: workOrders
-    });
-
-  } catch (error) {
-    console.error('SAP Fetch Error:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Failed to retrieve Work Orders from SAP' });
-  }
+app.listen(5000, '127.0.0.1', () => {
+  console.log('OptiSchedule Engine Online on port 5000');
 });
 
+<<<<<<< Updated upstream
 /**
  * 2. PATCH /api/work-orders/:orderId
  * Pushes the AI-Optimized start and end dates back to the SAP system.
@@ -128,3 +72,6 @@ app.listen(PORT, () => {
   console.log(`OptiSchedule Enterprise Middleware running on port ${PORT}`);
   console.log(`Ready to sync with SAP PM OData Services...`);
 });
+=======
+setInterval(() => {}, 1000 * 60 * 60);
+>>>>>>> Stashed changes

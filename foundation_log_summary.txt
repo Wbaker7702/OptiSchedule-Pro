@@ -1,0 +1,266 @@
+[TAILING] Tailing last 1000 lines for [optischedule-engine] process (change the value with --lines option)
+/home/droid/.pm2/logs/optischedule-engine-error.log last 1000 lines:
+4|optische | SAP Fetch Error: <HTML><HEAD>
+4|optische | <TITLE>Access Denied</TITLE>
+4|optische | </HEAD><BODY>
+4|optische | <H1>Access Denied</H1>
+4|optische |  
+4|optische | You don't have permission to access "http&#58;&#47;&#47;www&#46;sap&#46;com&#47;dashboard&#46;gate&#46;html&#47;WorkOrderSet&#63;" on this server.<P>
+4|optische | Reference&#32;&#35;18&#46;ea4c017&#46;1780066364&#46;4b9869f
+4|optische | <P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;ea4c017&#46;1780066364&#46;4b9869f</P>
+4|optische | </BODY>
+4|optische | </HTML>
+4|optische | 
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | ReferenceError: axios is not defined
+4|optische |     at Object.<anonymous> (/home/droid/OptiSchedule-Pro/server.js:2:19)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische |     at Object.<anonymous> (/home/droid/.nvm/versions/node/v24.16.0/lib/node_modules/pm2/lib/ProcessContainerFork.js:32:23)
+4|optische |     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+4|optische |     at Object..js (node:internal/modules/cjs/loader:1985:10)
+4|optische |     at Module.load (node:internal/modules/cjs/loader:1577:32)
+4|optische |     at Module._load (node:internal/modules/cjs/loader:1379:12)
+4|optische | SAP Fetch Error: timeout of 10000ms exceeded
+4|optische | SAP Fetch Error: {}
+4|optische | SAP Fetch Error: {}
+4|optische | SAP Fetch Error: {}
+
+/home/droid/.pm2/logs/optischedule-engine-out.log last 1000 lines:
+4|optische | ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ suppress logs { quiet: true }
+4|optische | ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+4|optische | ◇ injected env (5) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+4|optische | ◇ injected env (5) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+4|optische | ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+4|optische | ◇ injected env (5) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+4|optische | ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+4|optische | ◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+4|optische | ◇ injected env (5) from .env // tip: ⌘ suppress logs { quiet: true }
+4|optische | ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+4|optische | ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+4|optische | ◇ injected env (5) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+4|optische | ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+4|optische | ◇ injected env (5) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+4|optische | ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+4|optische | ◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+4|optische | ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | Initiating S/4HANA Glass Wall sync...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | Initiating S/4HANA Glass Wall sync...
+4|optische | Initiating S/4HANA Glass Wall sync...
+4|optische | Initiating S/4HANA Glass Wall sync...
+4|optische | ◇ injected env (5) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+4|optische | OptiSchedule Enterprise Middleware running on port 5000
+4|optische | Ready to sync with SAP PM OData Services...
+4|optische | ◇ injected env (5) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+4|optische | OptiSchedule Engine Online on port 5000
+4|optische | ◇ injected env (5) from .env // tip: ⌘ suppress logs { quiet: true }
+4|optische | OptiSchedule Engine Online on port 5000
+4|optische | ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+4|optische | OptiSchedule Engine Online on port 5000
+4|optische | ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+4|optische | OptiSchedule Engine Online on port 5000
+4|optische | ◇ injected env (5) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+4|optische | OptiSchedule Engine Online on port 5000
+4|optische | ◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+4|optische | OptiSchedule Engine Online on port 5000
+4|optische | ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+4|optische | OptiSchedule Engine Online on port 5000
+
