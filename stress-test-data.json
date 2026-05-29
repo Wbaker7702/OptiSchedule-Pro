@@ -1,0 +1,23 @@
+{ "manual": { "peakWorkers": 999, 
+    "time": "120 Days", "status": 
+    "Legacy System", "flattening": 
+    "Critical Bottlenecks"
+  },
+  "ai": { "peakWorkers": 350, "time": 
+    "40 Days", "status": "AI 
+    Optimized", "flattening": 
+    "Balanced Workload"
+  },
+  "tasks": [ { "name": "Phase 1: Deep 
+    Excavation", "manual": 45, "ai": 
+    15, "color": "#ef4444" }, { 
+    "name": "Phase 2: Foundation 
+    Pour", "manual": 60, "ai": 20, 
+    "color": "#eab308" }, { "name": 
+    "Phase 3: Structural Steel", 
+    "manual": 120, "ai": 40, "color": 
+    "#3b82f6" }, { "name": "Phase 4: 
+    Interior Fit-out", "manual": 90, 
+    "ai": 30, "color": "#8b5cf6" }
+  ]
+}

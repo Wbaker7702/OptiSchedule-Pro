@@ -1,0 +1,20 @@
+{ "manual": { "peakWorkers": 850, 
+    "time": "45 Days", "status": 
+    "Manual Baseline", "flattening": 
+    "Highly Volatile"
+  },
+  "ai": { "peakWorkers": 180, "time": 
+    "9 Days", "status": "AI 
+    Optimized", "flattening": 
+    "Optimized (Flat)"
+  },
+  "tasks": [ { "name": "Initial 
+    Auditing", "manual": 10, "ai": 2, 
+    "color": "#f59e0b" }, { "name": 
+    "Heavy Machinery Deployment", 
+    "manual": 20, "ai": 5, "color": 
+    "#8b5cf6" }, { "name": "Site QA & 
+    Review", "manual": 15, "ai": 2, 
+    "color": "#10b981" }
+  ]
+}
